@@ -1,0 +1,15 @@
+{
+    "Material": [
+        {"id" :1, "order": 31138923, "sku": "GF MILK UHT FC RP 950 LCL @12", "qty": 25090, "date_start": "2023-07-24T14:00:00.000Z", "date_end": "2023-07-24T22:00:00.000Z", "status": "Active"}, 
+        {"id" :2, "order": 31138934, "sku": "GF MILK UHT WC BA 1000 LCL @12", "qty": 28050, "date_start": "2023-07-24T22:00:00.000Z", "date_end": "2023-07-25T06:00:00.000Z", "status": "New"}, 
+        {"id": 3, "order": 31138949, "sku": "GF MILK UHT FC IP BA 1000 @12", "qty": 27000, "date_start": "2023-07-25T06:00:00.000Z", "date_end": "2023-07-25T14:00:00.000Z", "status": "New"}
+    ], 
+    "Unit": [
+        {"id": 1, "unit": "kg"}, 
+        {"id": 2, "unit": "liters"}
+    ], 
+    "Speed": [
+        {"id": 1, "value": 6500}, 
+        {"id": 2, "value": 7000}
+    ]
+}

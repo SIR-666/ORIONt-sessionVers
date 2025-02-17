@@ -1,0 +1,13 @@
+{
+    "Line A": [
+      { "id": 1, "machine": "Filling", "code": "Hydrogen Peroxide", "startTime": "2023-07-24T06:42:00Z", "endTime": "2023-07-24T06:47:00Z", "duration":5, "comments": "Can nyangkut", "type": "Unplanned Stoppages"},
+      { "id": 2, "machine": "Conveyor", "code": "ROA-Hitung Produk", "startTime": "2023-07-24T09:22:00Z", "endTime": "2023-07-24T09:32:00Z", "duration":10, "comments":"Weekly Maintenance", "type":"Planned Stoppages"}
+    ],
+    "Line B": [
+      { "id": 1, "machine": "Autocase Packer", "code": "ROA-Start", "startTime": "2023-07-25T08:27:00Z", "endTime":"2023-07-25T08:32:00Z", "duration":5, "comments":"Weekly Maintenance", "type":"Planned Stoppages"}
+    ], 
+    "Line C": [
+      { "id": 1, "machine": "Filling", "code": "APV Valve", "startTime": "2023-10-01T07:27:00Z", "endTime":"2023-10-01T07:32:00Z", "duration":5, "comments":"Weekly Maintenance", "type":"Planned Stoppages"}, 
+      { "id": 1, "machine": "Robot", "code": "Gripper", "startTime": "2023-10-01T08:38:00Z", "endTime":"2023-10-01T08:45:00Z", "duration":7, "comments":"Weekly Maintenance", "type":"Planned Stoppages"}
+    ]
+}

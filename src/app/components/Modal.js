@@ -1,0 +1,420 @@
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Draggable from "react-draggable";
+
+const Modal = (props) => {
+  const [selectedLine, setSelectedLine] = useState("");
+  const [selectedPlant, setSelectedPlant] = useState("");
+  const [selectedShift, setSelectedShift] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [data, setData] = useState([]);
+  const [tablePlant, setTablePlantData] = useState([]);
+  const [tableLine, setTableLineData] = useState([]);
+  const [filteredLines, setFilteredLines] = useState([]);
+  const [processingLines, setProcessingLines] = useState([]);
+  const [previousPage, setPreviousPage] = useState(null);
+  const router = useRouter();
+  const handleSelectLine = (event) => {
+    const value = event.target.value;
+    setSelectedLine(value);
+  };
+
+  const handleSelectShift = (event) => {
+    const value = event.target.value;
+    setSelectedShift(value);
+  };
+
+  const handleSelectGroup = (event) => {
+    const value = event.target.value;
+    setSelectedGroup(value);
+  };
+
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setSelectedDate(value);
+    console.log("Selected Date: ", selectedDate);
+  };
+
+  const handleSelectPlant = (event) => {
+    const selectedPlant = event.target.value;
+    setSelectedPlant(selectedPlant);
+    setSelectedLine("");
+    setProcessingLines("");
+
+    if (selectedPlant === "Milk Processing") {
+      const filteredSubGroups = data
+        .filter(
+          (item) =>
+            item.observedArea === selectedPlant && item.line === "Sterilizer"
+        )
+        .map((item) => item.subGroup);
+      setProcessingLines([...new Set(filteredSubGroups)]); // Update filtered subgroups
+      setFilteredLines([]);
+    } else if (selectedPlant === "Milk Filling Packing") {
+      const filteredLines = data
+        .filter(
+          (item) =>
+            item.observedArea === selectedPlant &&
+            !["Utility", "All"].includes(item.line)
+        )
+        .map((item) => item.line);
+      setFilteredLines([...new Set(filteredLines)]);
+      setProcessingLines([]);
+    } else {
+      const filteredLines = data
+        .filter((item) => item.observedArea === selectedPlant)
+        .map((item) => item.line);
+      setFilteredLines([...new Set(filteredLines)]);
+      setProcessingLines([]);
+    }
+  };
+
+  useEffect(() => {
+    // Check if running in the browser
+    if (typeof window !== "undefined") {
+      setPreviousPage(document.referrer);
+    }
+  }, []);
+
+  const handleClose = () => {
+    console.log("Current pathname: ", window.location.pathname);
+
+    if (window.location.pathname === "/order") {
+      if (previousPage.includes("/login")) {
+        // Clear localStorage if the previous page is login
+        localStorage.removeItem("profile");
+        localStorage.removeItem("user");
+        localStorage.removeItem("plant");
+        localStorage.removeItem("line");
+        localStorage.removeItem("selectedMaterial");
+        localStorage.removeItem("materialData");
+        localStorage.removeItem("shift");
+        localStorage.removeItem("date");
+        localStorage.removeItem("group");
+
+        // Redirect to login page
+        router.push("/login");
+      } else {
+        // Redirect to the previous page
+        router.back();
+      }
+    } else if (window.location.pathname === "/order/filling") {
+      props.setShowModal(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`/api/getPlantLine`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const jsonData = await response.json();
+        console.log("Fetched Data: ", jsonData);
+        const filteredData = jsonData.filter(
+          (item) => item.observedArea !== "AM PM"
+        );
+        setData(filteredData); // Set the full data
+        const uniqueObservedAreas = [
+          ...new Set(filteredData.map((item) => item.observedArea)),
+        ];
+        console.log("Unique Observed Areas:", uniqueObservedAreas); // Log unique areas
+        setTablePlantData(uniqueObservedAreas);
+        setTableLineData([...new Set(jsonData.map((item) => item.line))]);
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error getting plant & line data: " + error.message);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      const storedPlant = localStorage.getItem("plant");
+      const storedLine = localStorage.getItem("line");
+      const storedShift = localStorage.getItem("shift");
+      const storedDate = localStorage.getItem("date");
+      const storedGroup = localStorage.getItem("group");
+      if (storedPlant) {
+        setSelectedPlant(storedPlant);
+        handleSelectPlant({ target: { value: storedPlant } });
+      }
+      if (storedLine) setSelectedLine(storedLine);
+      if (storedShift) setSelectedShift(storedShift);
+      if (storedDate) setSelectedDate(storedDate);
+      if (storedGroup) setSelectedGroup(storedGroup);
+    }
+  }, [data]);
+
+  const handleSubmit = () => {
+    let route = "";
+    switch (selectedPlant) {
+      case "Milk Filling Packing":
+        route = `../order/filling?value=${encodeURIComponent(
+          selectedLine
+        )}&shift=${encodeURIComponent(selectedShift)}&date=${encodeURIComponent(
+          selectedDate
+        )}`;
+        const encodedLine = encodeURIComponent(selectedLine);
+        console.log("Line: ", encodedLine);
+        break;
+
+      case "Milk Processing":
+        route = `../order/processing?value=${encodeURIComponent(
+          selectedLine
+        )}&shift=${encodeURIComponent(selectedShift)}&date=${encodeURIComponent(
+          selectedDate
+        )}`;
+        const codedLine = encodeURIComponent(selectedLine);
+        console.log("Line: ", codedLine);
+        break;
+
+      default:
+        alert("Invalid route");
+        return;
+    }
+    console.log("Routing to:", route); // Check the route format
+    console.log("Selected Plant:", selectedPlant);
+    console.log("Selected Line:", selectedLine);
+    console.log("Selected Shift:", selectedShift);
+    console.log("Selected Date: ", selectedDate);
+
+    localStorage.setItem("line", selectedLine);
+    localStorage.setItem("plant", selectedPlant);
+    localStorage.setItem("shift", selectedShift);
+    localStorage.setItem("date", selectedDate);
+    localStorage.setItem("group", selectedGroup);
+
+    router.push(route);
+    router.refresh();
+
+    if (
+      localStorage.getItem("line") &&
+      localStorage.getItem("plant") &&
+      localStorage.getItem("shift") &&
+      localStorage.getItem("date") &&
+      localStorage.getItem("group")
+    ) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+
+    props.setShowModal(false);
+  };
+  return (
+    <>
+      <div className="flex justify-center items-center overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+        <Draggable>
+          <div className="relative w-auto my-6 mx-auto max-w-3xl">
+            <div className="border-0 rounded-2xl shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+              <div
+                className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
+                style={{ backgroundColor: "#A3D9A5" }}
+              >
+                <h3 className="text-black font-semibold text-gray-700">
+                  Set Plant & Production Line
+                </h3>
+                <button
+                  className="bg-transparent border-0 text-black float-right"
+                  onClick={handleClose}
+                >
+                  <span
+                    className="text-black opacity-7 h-6 w-6 text-xl block py-0 rounded-full"
+                    style={{ backgroundColor: "#A3D9A5" }}
+                  >
+                    x
+                  </span>
+                </button>
+              </div>
+              <div className="relative p-6 flex-auto">
+                <form className="bg-gray-200 shadow-md rounded px-8 pt-6 w-full flex flex-col sm:flex-row gap-4">
+                  <div className="flex-2">
+                    <label
+                      htmlFor="plant"
+                      className="block mb-2 text-black font-medium"
+                    >
+                      Plant
+                    </label>
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      value={selectedPlant}
+                      onChange={handleSelectPlant}
+                    >
+                      <option value="">Choose a plant</option>
+                      {tablePlant.length > 0 ? (
+                        tablePlant.map((area, index) => (
+                          <option key={index} value={area}>
+                            {area}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          No plants available
+                        </option>
+                      )}
+                    </select>
+                  </div>
+                  {selectedPlant === "Milk Processing" ? (
+                    <div className="flex-2">
+                      <label
+                        htmlFor="subGroup"
+                        className="block mb-2 text-black font-medium"
+                      >
+                        Production Line
+                      </label>
+                      <select
+                        id="subGroup"
+                        className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        value={selectedLine}
+                        onChange={handleSelectLine}
+                        disabled={processingLines.length === 0} // Disable if no subgroups
+                      >
+                        <option value="">Choose a production line</option>
+                        {processingLines.length > 0 ? (
+                          processingLines.map((subGroup, index) => (
+                            <option key={index} value={subGroup}>
+                              {subGroup}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>
+                            No lines available for this plant
+                          </option>
+                        )}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="flex-2">
+                      <label
+                        htmlFor="line"
+                        className="block mb-2 text-black font-medium"
+                      >
+                        Production Line
+                      </label>
+                      <select
+                        id="line"
+                        className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        value={selectedLine}
+                        onChange={handleSelectLine}
+                        disabled={!selectedPlant} // Disable until an area is selected
+                      >
+                        <option value="">Choose a production line</option>
+                        {filteredLines.length > 0 ? (
+                          filteredLines.map((line, index) => (
+                            <option key={index} value={line}>
+                              {line}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>
+                            No lines available for this plant
+                          </option>
+                        )}
+                      </select>
+                    </div>
+                  )}
+                </form>
+                <form className="bg-gray-200 shadow-md rounded px-8 pt-6 pb-8 w-full flex flex-col sm:flex-row gap-14">
+                  <div className="flex-2">
+                    <label
+                      htmlFor="plant"
+                      className="block mb-2 text-black font-medium"
+                    >
+                      Shift
+                    </label>
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      value={selectedShift}
+                      onChange={handleSelectShift}
+                    >
+                      <option value="">Choose a shift</option>
+                      <option value="I">I</option>
+                      <option value="II">II</option>
+                      <option value="III">III</option>
+                    </select>
+                  </div>
+                  <div className="flex-2">
+                    <label
+                      htmlFor="date"
+                      className="block mb-2 text-black font-medium"
+                    >
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      id="date"
+                      value={selectedDate || ""}
+                      onChange={handleChange}
+                      className="border rounded-md p-2 text-black"
+                    />
+                    ;
+                  </div>
+                  <div className="flex-2">
+                    <label
+                      htmlFor="plant"
+                      className="block mb-2 text-black font-medium"
+                    >
+                      Group
+                    </label>
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      value={selectedGroup}
+                      onChange={handleSelectGroup}
+                    >
+                      <option value="">Choose a group</option>
+                      <option value="BROMO">BROMO</option>
+                      <option value="SEMERU">SEMERU</option>
+                      <option value="KRAKATAU">KRAKATAU</option>
+                    </select>
+                  </div>
+                </form>
+              </div>
+              <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
+                <button
+                  className="text-gray-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1"
+                  type="button"
+                  //add onclick for save default option
+                  hidden
+                >
+                  Save Default
+                </button>
+                {selectedPlant === "" ||
+                selectedLine === "" ||
+                selectedShift === "" ||
+                selectedDate === null ? (
+                  <button
+                    className="text-white bg-gray-500 px-6 py-3 font-bold uppercase text-sm rounded shadow"
+                    type="button"
+                    disabled
+                  >
+                    Submit
+                  </button>
+                ) : (
+                  <button
+                    className="text-white bg-yellow-500 active:bg-yellow-700 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1"
+                    type="button"
+                    onClick={handleSubmit}
+                  >
+                    Submit
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </Draggable>
+      </div>
+    </>
+  );
+};
+
+export default Modal;
