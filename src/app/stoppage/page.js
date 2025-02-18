@@ -102,6 +102,19 @@ function StoppagePage() {
   }
 
   useEffect(() => {
+    const shift = localStorage.getItem("shift");
+    const date = localStorage.getItem("date");
+
+    // Panggil getShift dan simpan hasilnya
+    const shiftData = getShift(shift, date);
+
+    if (!shiftData) {
+      console.error("Invalid shift data");
+      return;
+    }
+
+    const { startTime, endTime } = shiftData;
+
     const fetchData = async () => {
       try {
         const line = localStorage.getItem("line");
@@ -114,8 +127,8 @@ function StoppagePage() {
           },
           body: JSON.stringify({
             line: line,
-            date_start: "2025-02-17T06:00:00Z",
-            date_end: "2025-02-17T13:59:59Z",
+            date_start: toLocalISO(startTime),
+            date_end: toLocalISO(endTime),
           }),
         });
 
