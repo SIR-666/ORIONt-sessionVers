@@ -201,7 +201,7 @@ async function getAllStoppages(line, date_start, date_end) {
       }),
     });
     const data = await response.json();
-    console.log("Retrieved Response: ", data);
+    // console.log("Retrieved Response: ", data);
     return data;
   } catch (error) {
     console.log(error);

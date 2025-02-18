@@ -16,7 +16,7 @@ const FormFill = (props) => {
   });
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [duration, setDuration] = useState("");
+  const [durationData, setDurationData] = useState("");
   const [minuteDifference, setMinutesDifference] = useState(0);
   const params = useSearchParams();
   const value = params.get("value");
@@ -94,7 +94,9 @@ const FormFill = (props) => {
           machine: entry.Mesin || "",
           code: entry.Jenis || "",
           startTime: formatDateForInput(entry.Date),
+          duration: durationData,
           comments: entry.Keterangan || "",
+          shift: localStorage.getItem("shift"),
           line: value,
         });
         setStartTime(formatDateForInput(entry.Date));
@@ -103,6 +105,8 @@ const FormFill = (props) => {
       setNewEntry({
         machine: props.clickedItem.machineName || "",
         code: props.clickedItem.itemData || "",
+        duration: durationData,
+        shift: localStorage.getItem("shift"),
         line: value,
       });
       if (!startTime) setStartTime(dataTime);
@@ -328,14 +332,16 @@ const FormFill = (props) => {
   const handleStartTimeChange = (e) => {
     const newStartTime = e.target.value;
     setStartTime(newStartTime);
-    if (duration) {
-      calculateEndTime(newStartTime, duration);
+    if (durationData) {
+      calculateEndTime(newStartTime, durationData);
     }
   };
 
   const handleDurationChange = (e) => {
-    const newDuration = e.target.value;
-    setDuration(newDuration);
+    const newDuration = parseInt(e.target.value, 10) || 0;
+    setDurationData(newDuration);
+    setNewEntry((prev) => ({ ...prev, duration: newDuration }));
+
     if (startTime) {
       calculateEndTime(startTime, newDuration);
     }
@@ -372,7 +378,9 @@ const FormFill = (props) => {
       const endpoint = props.isEditing
         ? "/api/updateDowntime"
         : "/api/createStoppage";
-      console.log("tesss");
+
+      console.log("newEntry: ", newEntry);
+
       const method = props.isEditing ? "PUT" : "POST";
       const dataToSend = {
         ...newEntry,
@@ -443,7 +451,7 @@ const FormFill = (props) => {
               className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
               style={{ backgroundColor: "#A3D9A5" }}
             >
-              <h3 className="text-black font-semibold text-gray-700">
+              <h3 className="text-black font-semibold">
                 {props.isEditing ? "Edit Downtime" : "Report Downtime"}
               </h3>
               <button
@@ -519,8 +527,8 @@ const FormFill = (props) => {
                   type="number"
                   name="duration"
                   id="duration"
-                  className="mt-1 block w-full text-black appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-gray-60 mt-5"
-                  value={duration || newEntry.duration}
+                  className="block w-full text-black appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-gray-60 mt-5"
+                  value={durationData ?? newEntry.duration ?? 0}
                   onChange={handleDurationChange}
                   required
                 />
