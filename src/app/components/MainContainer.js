@@ -164,6 +164,7 @@ const RectangleContainer = ({
               "Process Failure",
               "Lain",
               "Straw",
+              "Cap",
               "Helix",
             ].includes(entry.Mesin)
           ) {

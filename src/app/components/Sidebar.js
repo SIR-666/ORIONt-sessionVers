@@ -53,8 +53,7 @@ function SidebarContent({ isOpen }) {
     {
       label: "Home",
       href: `../../main?value=${lineValue}&id=${lineId || ident}`,
-      //   show: !!po || !!storedId,
-      show: false,
+      show: !!po || !!storedId,
     },
     {
       label: "Manage Orders",
