@@ -420,7 +420,7 @@ export default function OrderPage({ initialData }) {
                       Material
                     </th>
                     <th scope="col" className="py-3 px-6">
-                      Quantity (pcs)
+                      Quantity (carton)
                     </th>
                     <th scope="col" className="py-3 px-6">
                       Status
@@ -439,21 +439,27 @@ export default function OrderPage({ initialData }) {
                 <tbody>
                   {filteredData.map((row) => (
                     <tr className="bg-white border-b" key={row.id}>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-6 font-medium text-lg">
                         {row.id || row["NO PROCESS ORDER"]}
                       </td>
-                      <td className="py-4 px-6">{row.sku || row.MATERIAL}</td>
-                      <td className="py-4 px-6">
-                        {row.qty || row["TOTAL QUANTITY / GR"]}
+                      <td className="py-4 px-6 font-medium text-lg">
+                        {row.sku || row.MATERIAL}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-6 font-medium text-lg">
+                        {row["TOTAL QUANTITY / GR"]?.replace(
+                          /(?<=,\d+)\.000$/,
+                          ""
+                        ) ??
+                          new Intl.NumberFormat("id-ID").format(row.qty / 1000)}
+                      </td>
+                      <td className="py-4 px-6 font-medium text-lg">
                         {row.status || getStatus(row.STATUS) || row.STATUS}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-6 font-medium text-lg">
                         <p>{formatDateTime3(row.actual_start)}</p>
                         <p>{formatDateTime3(row.actual_end)}</p>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-6 font-medium text-lg">
                         <p>
                           {row.date_start
                             ? formatDateTime3(row.date_start)

@@ -8,6 +8,7 @@ const MainModal = (props) => {
   const [selectedPlant, setSelectedPlant] = useState("");
   const [selectedShift, setSelectedShift] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState("");
   const [data, setData] = useState([]);
   const [tablePlant, setTablePlantData] = useState([]);
   const [tableLine, setTableLineData] = useState([]);
@@ -22,6 +23,11 @@ const MainModal = (props) => {
   const handleSelectShift = (event) => {
     const value = event.target.value;
     setSelectedShift(value);
+  };
+
+  const handleSelectGroup = (event) => {
+    const value = event.target.value;
+    setSelectedGroup(value);
   };
 
   const handleChange = (event) => {
@@ -119,6 +125,7 @@ const MainModal = (props) => {
       const storedLine = localStorage.getItem("line");
       const storedShift = localStorage.getItem("shift");
       const storedDate = localStorage.getItem("date");
+      const storedGroup = localStorage.getItem("group");
       if (storedPlant) {
         setSelectedPlant(storedPlant);
         handleSelectPlant({ target: { value: storedPlant } });
@@ -126,6 +133,7 @@ const MainModal = (props) => {
       if (storedLine) setSelectedLine(storedLine);
       if (storedShift) setSelectedShift(storedShift);
       if (storedDate) setSelectedDate(storedDate);
+      if (storedGroup) setSelectedGroup(storedGroup);
     }
   }, [data]);
 
@@ -145,6 +153,7 @@ const MainModal = (props) => {
       localStorage.setItem("plant", selectedPlant);
       localStorage.setItem("shift", selectedShift);
       localStorage.setItem("date", selectedDate);
+      localStorage.setItem("group", selectedGroup);
       router.push(`/main?value=${selectedLine}&id=${id}`);
       props.setShowModal(false);
       setTimeout(() => {
@@ -359,6 +368,25 @@ const MainModal = (props) => {
                       className="border rounded-md p-2 text-black"
                     />
                     ;
+                  </div>
+                  <div className="flex-2">
+                    <label
+                      htmlFor="plant"
+                      className="block mb-2 text-black font-medium"
+                    >
+                      Group
+                    </label>
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      value={selectedGroup}
+                      onChange={handleSelectGroup}
+                    >
+                      <option value="">Choose a group</option>
+                      <option value="BROMO">BROMO</option>
+                      <option value="SEMERU">SEMERU</option>
+                      <option value="KRAKATAU">KRAKATAU</option>
+                    </select>
                   </div>
                 </form>
                 <table className="w-full border-collapse min-w-full table-auto">

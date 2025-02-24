@@ -1,14 +1,12 @@
 "use client";
-import MainLayout from "../../mainLayout";
-import { useState, useEffect } from "react";
-import Button from "@/app/components/Button";
-import { useRouter } from "next/navigation";
-import Modal from "@/app/components/Modal";
-import ProdType from "@/app/components/AddPOType";
 import ProdFill from "@/app/components/AddPOForm";
+import ProdType from "@/app/components/AddPOType";
+import Button from "@/app/components/Button";
+import Modal from "@/app/components/Modal";
 import Start from "@/app/components/StartPO";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import MainLayout from "../../mainLayout";
 
 function OrderPage() {
   const [formData, setFormData] = useState([]);
@@ -299,7 +297,7 @@ function OrderPage() {
                     Material
                   </th>
                   <th scope="col" class="py-3 px-6">
-                    Quantity (pcs)
+                    Quantity (carton)
                   </th>
                   <th scope="col" class="py-3 px-6">
                     Status
