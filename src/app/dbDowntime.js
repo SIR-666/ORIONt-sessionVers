@@ -32,10 +32,26 @@ async function createStoppage(data) {
     // -- End of Old Code --
 
     // -- New Code --
-    var firstDay = new Date(date_start.getFullYear(), 0, 1); // 1 Januari tahun ini
-    var dayOfYear =
-      Math.floor((date_start - firstDay) / (24 * 60 * 60 * 1000)) + 1;
-    var weekNumber = Math.ceil(dayOfYear / 7);
+    function getWeekNumber(date) {
+      let year = date.getFullYear();
+      let firstSunday = new Date(year, 0, 1); // 1 Januari tahun ini
+
+      // Geser ke hari Minggu pertama dalam tahun ini
+      while (firstSunday.getDay() !== 0) {
+        firstSunday.setDate(firstSunday.getDate() + 1);
+      }
+
+      // Hitung jumlah hari sejak Minggu pertama tahun ini
+      let diffDays = Math.floor((date - firstSunday) / (24 * 60 * 60 * 1000));
+
+      // Hitung minggu ke-berapa (dimulai dari 1)
+      return Math.floor(diffDays / 7) + 1;
+    }
+
+    // Penggunaan:
+    let date = new Date(date_start);
+    var weekNumber = getWeekNumber(date);
+    console.log("Minggu ke:", getWeekNumber(date));
     // -- End of New Code --
 
     const date_week = weekNumber.toString();

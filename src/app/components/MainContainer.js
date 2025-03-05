@@ -593,6 +593,7 @@ const RectangleContainer = ({
   //percentage calculations
   const { plannedStop, percentBreakdown, percentQualLoss, percentSpeedLoss } =
     calculatePercentages(
+      availableTime,
       durationSums,
       production,
       running,
