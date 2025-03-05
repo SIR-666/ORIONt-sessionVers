@@ -62,7 +62,7 @@ export function calculatePercentages(
   speedLoss
 ) {
   const plannedStop =
-    production > 0
+    availableTime > 0
       ? ((durationSums.PlannedStoppages / availableTime) * 100).toFixed(2)
       : 0.0;
   const percentBreakdown =
