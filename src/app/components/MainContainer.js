@@ -41,6 +41,7 @@ const RectangleContainer = ({
     TdStyle11: `${TdBaseStyle} bg-[#D0A842]`,
   };
 
+  console.log("All PO : ",allPO);
   const searchParams = useSearchParams();
   const value = searchParams.get("value");
   const id = searchParams.get("id");
@@ -64,6 +65,11 @@ const RectangleContainer = ({
   const [qualityLossModal, setQualityLossModal] = useState(false);
   const [speedLossModal, setSpeedLossModal] = useState(false);
   const [latestStart, setLatestStart] = useState(null);
+  const [skuSpeeds, setSkuSpeeds] = useState({});
+  const [loading, setLoading] = useState(true);
+  // Variables to hold total net and netDisplay
+  let totalnet = 0;
+  let totalnetDisplay = 0;
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
@@ -87,7 +93,7 @@ const RectangleContainer = ({
         const speeds = results
           .map((skuData, index) => {
             if (skuData && typeof skuData[0]?.speed === "number") {
-              console.log("Speed data: ", skuData[0].speed);
+              // console.log("Speed data: ", skuData[0].speed);
               return skuData[0].speed; // Return valid speed values only
             } else {
               console.warn(`No speed found for SKU ${initialData[index].sku}`);
@@ -105,20 +111,62 @@ const RectangleContainer = ({
       }
     }
 
-    console.log("Final speed returned:", speed);
+    // console.log("Final speed returned:", speed);
     return speed;
+  };
+
+  const handleSpeed2 = async (allPO) => {
+    const speeds = {};
+    if (allPO && allPO.length > 0) {
+      try {
+        const fetchPromises = allPO.map((entry) =>
+          fetch(`/api/getSpeedSKU`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ sku: entry.sku }),
+          }).then((response) => response.json())
+        );
+
+        const results = await Promise.all(fetchPromises);
+
+        results.forEach((skuData, index) => {
+          if (skuData && typeof skuData[0]?.speed === "number") {
+            speeds[allPO[index].sku] = skuData[0].speed; // Store by SKU
+          } else {
+            console.warn(`No speed found for SKU ${allPO[index].sku}`);
+            speeds[allPO[index].sku] = null; // indicate that no speed was found
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching SKU nominal speed:", error);
+      }
+    }
+    return speeds; // Return object with speeds
   };
 
   useEffect(() => {
     const fetchSpeed = async () => {
-      console.log("Fetching speed...");
+      // console.log("Fetching speed...");
       const speed = await handleSpeed();
-      console.log("Setting SKU speed to:", speed);
+      // console.log("Setting SKU speed to:", speed);
       setSKUSpeed(speed);
     };
 
     fetchSpeed();
   }, []);
+
+  useEffect(() => {
+    const fetchSpeeds = async () => {
+      setLoading(true);
+      const speeds = await handleSpeed2(allPO);
+      setSkuSpeeds(speeds);
+      setLoading(false);
+    };
+
+    fetchSpeeds();
+  }, [allPO]);
 
   // Calculate downtime in table
   useEffect(() => {
@@ -141,14 +189,14 @@ const RectangleContainer = ({
         const downtimeEnd = new Date(
           calculateEndTime(entry.Date, entry.Minutes)
         );
-        console.log("Downtime Start: ", downtimeStart);
-        console.log("Downtime End: ", downtimeEnd);
+        // console.log("Downtime Start: ", downtimeStart);
+        // console.log("Downtime End: ", downtimeEnd);
 
         const order = (allPO || []).find((o) => o.id === id);
 
         let downtimeDuration = 0;
         downtimeDuration = (downtimeEnd - downtimeStart) / 60000;
-        console.log("Downtime duration:", downtimeDuration);
+        // console.log("Downtime duration:", downtimeDuration);
 
         if (downtimeDuration > 0) {
           if (entry.Mesin === "Planned Stop") {
@@ -275,7 +323,7 @@ const RectangleContainer = ({
       const shiftTimes = getShift(shift, date);
       const start = new Date(entry.actual_start);
       start.setHours(start.getHours() - 7);
-      console.log("Start: ", start);
+      // console.log("Start: ", start);
       let end;
       if (entry.actual_end) {
         end = new Date(entry.actual_end);
@@ -287,7 +335,7 @@ const RectangleContainer = ({
           end = shiftTimes.endTime;
         }
       }
-      console.log("End: ", end);
+      // console.log("End: ", end);
 
       let startAvailable, endAvailable;
       if (
@@ -335,12 +383,12 @@ const RectangleContainer = ({
         endAvailable = shiftTimes.endTime;
       }
       // endAvailable = end < shiftTimes.endTime ? shiftTimes.endTime : shiftTimes.endTime;
-      console.log("Start time: ", startAvailable);
-      console.log("End time: ", endAvailable);
+      // console.log("Start time: ", startAvailable);
+      // console.log("End time: ", endAvailable);
       return Math.round((endAvailable - startAvailable) / (1000 * 60)); // Duration in minutes
     });
 
-    console.log("Durations: ", activeDurations);
+    // console.log("Durations: ", activeDurations);
 
     // Determine endTime
     initialData?.forEach((entry) => {
@@ -372,7 +420,7 @@ const RectangleContainer = ({
           .toString()
           .padStart(2, "0")}`;
       }
-      console.log("End Time to display: ", endTimeString);
+      // console.log("End Time to display: ", endTimeString);
       setEndTime(endTimeString); // Set endTime in the state
     });
 
@@ -381,7 +429,7 @@ const RectangleContainer = ({
       (sum, duration) => sum + duration,
       0
     );
-    console.log("Total time: ", totalActiveTime);
+    // console.log("Total time: ", totalActiveTime);
     setTimeDifference(totalActiveTime);
 
     const year = currentTime.getFullYear().toString();
@@ -519,12 +567,12 @@ const RectangleContainer = ({
   // Cek array existing atau tidak
   useEffect(() => {
     if (!initialData || !Array.isArray(initialData)) {
-      console.log("Loading initial data...");
+      // console.log("Loading initial data...");
       return; // Skip the effect logic if data is not ready
     }
 
     if (!stoppageData || !Array.isArray(stoppageData)) {
-      console.log("Loading stoppage data...");
+      // console.log("Loading stoppage data...");
       return; // Skip the effect logic if data is not ready
     }
 
@@ -537,6 +585,17 @@ const RectangleContainer = ({
     durationSums.UnavailableTime
   );
   const { net, netDisplay } = calculateNet(qty, rejectQty, skuSpeed || 1);
+  {allPO.map((entry, index) => {
+    let skuSpeed = skuSpeeds[entry.sku] || 1; // Default to 1 if no speed found
+    let { net, netDisplay } = calculateNet(entry.qty, rejectQty, skuSpeed || 1);
+    console.log("totalnetDisplay", netDisplay);
+    // Accumulate totals
+    totalnet += net;
+    totalnetDisplay += netDisplay;
+    })}
+    totalnetDisplay = totalnet.toFixed(2)
+    console.log("totalnetDisplay", totalnetDisplay);
+
   const { production, productionDisplay } = calculateProduction(
     net,
     durationSums,
@@ -682,7 +741,7 @@ const RectangleContainer = ({
         }
 
         const result = await response.json();
-        console.log("Data sent successfully:", result);
+        // console.log("Data sent successfully:", result);
       } catch (error) {
         console.error("Error sending data to backend:", error);
       }
@@ -734,8 +793,9 @@ const RectangleContainer = ({
                     : `Current Time: ${endTime}`}
                 </li>
                 <p className="mt-2 text-black">
-                  Nominal Speed:{" "}
-                  {skuSpeed ? `${skuSpeed} pcs/hr` : "Loading..."}
+                  {/* Nominal Speed:{" "}
+                  {skuSpeed ? `${skuSpeed} pcs/hr` : "Loading..."} */}
+                  Nominal Speed: {loading ? "Loading..." : skuSpeeds[entry.sku] ? `${skuSpeeds[entry.sku]} pcs/hr` : "Not Available"}
                 </p>
               </ul>
             ))}
