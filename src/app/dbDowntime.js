@@ -26,7 +26,34 @@ async function createStoppage(data) {
     var numberOfDays = Math.floor(
       (date_start - oneJan) / (24 * 60 * 60 * 1000)
     );
-    var weekNumber = Math.ceil((date_start.getDay() + 1 + numberOfDays) / 7);
+
+    // -- Old Code --
+    // var weekNumber = Math.ceil((date_start.getDay() + 1 + numberOfDays) / 7);
+    // -- End of Old Code --
+
+    // -- New Code --
+    function getWeekNumber(date) {
+      let year = date.getFullYear();
+      let firstSunday = new Date(year, 0, 1); // 1 Januari tahun ini
+
+      // Geser ke hari Minggu pertama dalam tahun ini
+      while (firstSunday.getDay() !== 0) {
+        firstSunday.setDate(firstSunday.getDate() + 1);
+      }
+
+      // Hitung jumlah hari sejak Minggu pertama tahun ini
+      let diffDays = Math.floor((date - firstSunday) / (24 * 60 * 60 * 1000));
+
+      // Hitung minggu ke-berapa (dimulai dari 1)
+      return Math.floor(diffDays / 7) + 1;
+    }
+
+    // Penggunaan:
+    let date = new Date(date_start);
+    var weekNumber = getWeekNumber(date);
+    console.log("Minggu ke:", getWeekNumber(date));
+    // -- End of New Code --
+
     const date_week = weekNumber.toString();
     console.log("Sending data to createStoppage:", {
       date_start,

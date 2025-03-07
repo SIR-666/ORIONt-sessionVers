@@ -59,6 +59,7 @@ const RectangleContainer = ({
   const [qtyPO, setQtyPO] = useState([]);
   const [calendarMinutes, setCalendarMinutes] = useState(0);
   const [skuSpeed, setSKUSpeed] = useState(null);
+  const [skuSpeeds, setSkuSpeeds] = useState({});
   const [qualityLoss, setQualityLoss] = useState(0);
   const [speedLoss, setSpeedLoss] = useState(0);
   const [qtyModal, setQtyModal] = useState(false);
@@ -147,25 +148,37 @@ const RectangleContainer = ({
   };
 
   useEffect(() => {
-    const fetchSpeed = async () => {
-      // console.log("Fetching speed...");
-      const speed = await handleSpeed();
-      // console.log("Setting SKU speed to:", speed);
-      setSKUSpeed(speed);
+    const fetchData = async () => {
+      try {
+        console.log("Fetching speed...");
+        const speed = await handleSpeed();
+        console.log("Setting SKU speed to:", speed);
+        setSKUSpeed(speed);
+
+        // Ambil semua product_id dari allPO
+        const productIds = allPO.map((entry) => entry.product_id);
+        if (productIds.length > 0) {
+          const response = await fetch(
+            `/api/getProducts?ids=${productIds.join(",")}`
+          );
+          const data = await response.json();
+
+          // Buat objek dengan key = product_id dan value = speed
+          const speedsMap = {};
+          data.forEach((product) => {
+            speedsMap[product.id] =
+              product.speed || nominalSpeeds[formattedLineName];
+          });
+
+          console.log("Setting SKU speeds to:", speedsMap);
+          setSkuSpeeds(speedsMap);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
-    fetchSpeed();
-  }, []);
-
-  useEffect(() => {
-    const fetchSpeeds = async () => {
-      setLoading(true);
-      const speeds = await handleSpeed2(allPO);
-      setSkuSpeeds(speeds);
-      setLoading(false);
-    };
-
-    fetchSpeeds();
+    fetchData();
   }, [allPO]);
 
   // Calculate downtime in table
@@ -652,6 +665,7 @@ const RectangleContainer = ({
   //percentage calculations
   const { plannedStop, percentBreakdown, percentQualLoss, percentSpeedLoss } =
     calculatePercentages(
+      availableTime,
       durationSums,
       production,
       running,
@@ -779,7 +793,7 @@ const RectangleContainer = ({
                   className="mt-2 text-black cursor-pointer bg-green-500"
                   onClick={() => setQtyModal(true)}
                 >
-                  Produced in current Production Order: {qtyPO[index] || 0} pcs
+                  Finish Good: {qtyPO[index] || 0} pcs
                 </li>
                 <li className="mt-2 text-black">
                   Total Produced in Current Shift: {qty} pcs
@@ -793,9 +807,10 @@ const RectangleContainer = ({
                     : `Current Time: ${endTime}`}
                 </li>
                 <p className="mt-2 text-black">
-                  {/* Nominal Speed:{" "}
-                  {skuSpeed ? `${skuSpeed} pcs/hr` : "Loading..."} */}
-                  Nominal Speed: {loading ? "Loading..." : skuSpeeds[entry.sku] ? `${skuSpeeds[entry.sku]} pcs/hr` : "Not Available"}
+                  Nominal Speed:{" "}
+                  {skuSpeeds[entry.product_id]
+                    ? `${skuSpeeds[entry.product_id]} pcs/hr`
+                    : "Loading..."}
                 </p>
               </ul>
             ))}
@@ -847,7 +862,9 @@ const RectangleContainer = ({
                       fontWeight: "normal",
                       textAlign: "left",
                     }}
-                  ></th>
+                  >
+                    {availableTime + unavailableTimeInMinutes}
+                  </th>
                   <th className={TdStyle.TdStyle5}>Planned Stoppages</th>
                   {/* Ambil data dari planned stoppages */}
                   <th
@@ -1103,7 +1120,7 @@ const RectangleContainer = ({
         Current Shift KPI
       </h1>
       <br></br>
-      <div className="flex grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
             {plannedStop || 0.0}%
@@ -1139,7 +1156,7 @@ const RectangleContainer = ({
           <p className="text-gray-500 text-center">Speed Loss</p>
         </div>
       </div>
-      <div className="flex grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
             {pe || 0.0}%

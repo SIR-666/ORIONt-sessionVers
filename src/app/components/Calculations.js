@@ -53,10 +53,18 @@ export function calculateEstimated(unplannedStoppages, speedLoss, nReported) {
   return { estimated, estimatedDisplay: estimated.toFixed(2) };
 }
 
-export function calculatePercentages(durationSums, production, running, qualityLoss, speedLoss) {
-  const plannedStop = production > 0 ? (
-    (durationSums.PlannedStoppages / production) * 100).toFixed(2) 
-    : 0.0;
+export function calculatePercentages(
+  availableTime,
+  durationSums,
+  production,
+  running,
+  qualityLoss,
+  speedLoss
+) {
+  const plannedStop =
+    availableTime > 0
+      ? ((durationSums.PlannedStoppages / availableTime) * 100).toFixed(2)
+      : 0.0;
   const percentBreakdown =
     production > 0
       ? ((durationSums.UnplannedStoppages / production) * 100).toFixed(2)
@@ -72,4 +80,4 @@ export function calculateMtbf(production, unplannedStoppages) {
   return production > 0 && unplannedStoppages > 0
     ? (production / unplannedStoppages).toFixed(2)
     : 0.0;
-}  
+}
