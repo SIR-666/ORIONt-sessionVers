@@ -193,6 +193,13 @@ const Modal = (props) => {
 
     router.push(route);
     router.refresh();
+// Hapus 'id' dari localStorage jika ada
+    if (localStorage.getItem("selectedMaterial")) {
+        localStorage.removeItem("selectedMaterial");
+        console.log("ID removed from localStorage");
+    }
+    else
+    console.log("ID notfound from localStorage");
 
     if (
       localStorage.getItem("line") &&

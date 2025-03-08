@@ -66,7 +66,6 @@ const RectangleContainer = ({
   const [qualityLossModal, setQualityLossModal] = useState(false);
   const [speedLossModal, setSpeedLossModal] = useState(false);
   const [latestStart, setLatestStart] = useState(null);
-  const [skuSpeeds, setSkuSpeeds] = useState({});
   const [loading, setLoading] = useState(true);
   // Variables to hold total net and netDisplay
   let totalnet = 0;
