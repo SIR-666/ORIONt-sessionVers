@@ -193,13 +193,11 @@ const Modal = (props) => {
 
     router.push(route);
     router.refresh();
-// Hapus 'id' dari localStorage jika ada
+    // Hapus 'id' dari localStorage jika ada
     if (localStorage.getItem("selectedMaterial")) {
-        localStorage.removeItem("selectedMaterial");
-        console.log("ID removed from localStorage");
-    }
-    else
-    console.log("ID notfound from localStorage");
+      localStorage.removeItem("selectedMaterial");
+      console.log("ID removed from localStorage");
+    } else console.log("ID notfound from localStorage");
 
     if (
       localStorage.getItem("line") &&
@@ -225,7 +223,7 @@ const Modal = (props) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
+                <h3 className="text-black font-semibold">
                   Set Plant & Production Line
                 </h3>
                 <button
