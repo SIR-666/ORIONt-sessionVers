@@ -139,7 +139,7 @@ export default function OrderPage({ initialData }) {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/getAllPO?value=${value}&shift=${shift}&date=${date}`
+        `/api/getAllPO?value=${value}&shift=${shift}&date=${date}&plant=${plant}`
       ); // Replace with actual endpoint
       if (!response.ok) {
         throw new Error("Failed to fetch production order data");
@@ -347,7 +347,7 @@ export default function OrderPage({ initialData }) {
           <br></br>
           <div className="container grid grid-cols-2 gap-20 mx-auto"></div>
           <br></br>
-          <div className="flex grid grid-cols-4 gap-4 mr-60">
+          <div className="flex grid-cols-4 gap-4 mr-60">
             <Button
               label="New"
               isActive={statusFilter === "Release SAP"}
@@ -370,7 +370,7 @@ export default function OrderPage({ initialData }) {
             />
           </div>
           <br></br>
-          <div className="flex grid grid-cols-3 gap-4 w-full">
+          <div className="flex grid-cols-3 gap-4 w-full">
             <div className="col-span-1 relative flex items-center w-full h-12 rounded-full focus-within:shadow-lg bg-gray-100 overflow-hidden">
               <div className="grid place-items-center h-full w-12 text-gray-300 px-4">
                 <svg
@@ -420,7 +420,8 @@ export default function OrderPage({ initialData }) {
                       Material
                     </th>
                     <th scope="col" className="py-3 px-6">
-                      Quantity (carton)
+                      Quantity{" "}
+                      {plant === "Milk Processing" ? "(liter)" : "(carton)"}
                     </th>
                     <th scope="col" className="py-3 px-6">
                       Status

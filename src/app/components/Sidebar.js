@@ -26,6 +26,7 @@ function SidebarContent({ isOpen }) {
   const line = localStorage.getItem("line");
   const shift = localStorage.getItem("shift");
   const date = localStorage.getItem("date");
+  const plant = localStorage.getItem("plant");
   const po = localStorage.getItem("selectedMaterial");
   const storedId = localStorage.getItem("id");
 
@@ -59,7 +60,11 @@ function SidebarContent({ isOpen }) {
       label: "Manage Orders",
       action: () => {
         if (line && shift && date) {
-          window.location.href = `../../order/filling?value=${line}&shift=${shift}&date=${date}`;
+          if (plant === "Milk Filling Packing") {
+            window.location.href = `../../order/filling?value=${line}&shift=${shift}&date=${date}`;
+          } else if (plant === "Milk Processing") {
+            window.location.href = `../../order/processing?value=${line}&shift=${shift}&date=${date}`;
+          }
         } else {
           window.location.href = "../../order";
         }
@@ -154,7 +159,7 @@ function SidebarContent({ isOpen }) {
             <a
               key={index}
               href={item.href}
-              className=" flex items-center w-full block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+              className=" flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
               onClick={(e) => {
                 if (item.action) {
                   e.preventDefault();

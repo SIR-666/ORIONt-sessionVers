@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 import Logo from "../../app/favicon.png"; // Path:
-import Image from "next/image";
 
 export default function LoginPage() {
   const [loader, setLoader] = useState(false);

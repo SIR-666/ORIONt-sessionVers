@@ -1,11 +1,10 @@
 "use client";
 import OrderPage from "@/app/components/FillingClient";
-import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/app/components/loading";
 
 
-function DataFetcher({ value, shift, date }) {
+function DataFetcher({ value, shift, date, plant }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,7 +12,9 @@ function DataFetcher({ value, shift, date }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedData = await fetch(`/api/getAllPO?value=${value}&shift=${shift}&date=${date}`);
+        const fetchedData = await fetch(
+          `/api/getAllPO?value=${value}&shift=${shift}&date=${date}&plant=${plant}`
+        );
         if (!fetchedData.ok) {
           throw new Error(`HTTP error! Status: ${fetchedData.status}`);
         }
@@ -56,10 +57,11 @@ function SearchParamsWrapper() {
   const value = router.get("value");
   const shift = router.get("shift");
   const date = router.get("date");
+  const plant = localStorage.getItem("plant");
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <DataFetcher value={value} shift={shift} date={date} />
+      <DataFetcher value={value} shift={shift} date={date} plant={plant}/>
     </Suspense>
   );
 }
