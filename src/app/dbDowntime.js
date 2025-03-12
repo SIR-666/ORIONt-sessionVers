@@ -13,6 +13,7 @@ async function createStoppage(data) {
       line,
       type,
       group,
+      plant,
     } = data;
     const date_start = new Date(startTime + "Z"); // Parse startTime to Date
     const date_end = new Date(endTime + "Z"); // Parse startTime to Date
@@ -68,6 +69,7 @@ async function createStoppage(data) {
       line,
       type,
       group,
+      plant,
     });
     const response = await fetch(`${URL.URL}/createStoppage`, {
       method: "POST",
@@ -87,6 +89,7 @@ async function createStoppage(data) {
         comments,
         duration,
         group,
+        plant,
       }),
     });
 
@@ -131,6 +134,7 @@ async function updateStoppage(data) {
       shift,
       line,
       type,
+      plant,
     } = data;
     const date_start = new Date(startTime + "Z"); // Parse startTime to Date
     const date_end = new Date(endTime + "Z"); // Parse startTime to Date
@@ -159,6 +163,7 @@ async function updateStoppage(data) {
       shift,
       line,
       type,
+      plant,
     });
     const response = await fetch(`${URL.URL}/updateStoppage`, {
       method: "PUT",
@@ -178,6 +183,7 @@ async function updateStoppage(data) {
         code,
         comments,
         duration,
+        plant,
       }),
     });
 
@@ -202,6 +208,7 @@ async function updateStoppage(data) {
       type: type,
       shift: shift,
       id: result.id,
+      plant: plant,
     }; // Return the response object, e.g., { message, id }
   } catch (err) {
     console.log(err);
@@ -209,12 +216,13 @@ async function updateStoppage(data) {
   }
 }
 
-async function getAllStoppages(line, date_start, date_end) {
+async function getAllStoppages(line, date_start, date_end, plant) {
   try {
     console.log("Sending data to getAllStoppages:", {
       line,
       date_start,
       date_end,
+      plant,
     });
     const response = await fetch(`${URL.URL}/getAllStoppages`, {
       method: "POST",
@@ -225,6 +233,7 @@ async function getAllStoppages(line, date_start, date_end) {
         line,
         date_start,
         date_end,
+        plant,
       }),
     });
     const data = await response.json();
@@ -300,14 +309,14 @@ async function getDowntimeId(id) {
   }
 }
 
-async function deleteDowntime(id) {
+async function deleteDowntime(id, plant) {
   try {
     const response = await fetch(`${URL.URL}/deleteStoppage`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, plant }),
     });
 
     if (!response.ok) {

@@ -1,8 +1,6 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
-import { useRouter } from "next/navigation";
 
 const Start = (props) => {
   const [time, setTime] = useState("");
@@ -45,8 +43,8 @@ const Start = (props) => {
   //   if (!time) setTime(current);
   // }, []);
 
-  const currentShift = localStorage.getItem('shift');
-  const currentDate = localStorage.getItem('date');
+  const currentShift = localStorage.getItem("shift");
+  const currentDate = localStorage.getItem("date");
 
   const getShift = (shift, date) => {
     if (!date || isNaN(new Date(date))) {
@@ -54,20 +52,20 @@ const Start = (props) => {
       return null;
     }
     let startTime, endTime;
-      switch (shift) {
-        case 'I':
+    switch (shift) {
+      case "I":
         startTime = new Date(date);
         startTime.setHours(6, 0, 0, 0);
         endTime = new Date(date);
         endTime.setHours(14, 0, 0, 0);
         break;
-      case 'II': 
+      case "II":
         startTime = new Date(date);
         startTime.setHours(14, 0, 0, 0);
         endTime = new Date(date);
         endTime.setHours(22, 0, 0, 0);
         break;
-      case 'III': 
+      case "III":
         startTime = new Date(date);
         startTime.setHours(22, 0, 0, 0);
         endTime = new Date(date);
@@ -77,23 +75,23 @@ const Start = (props) => {
       default:
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
-      }
-      // console.log("Shift start time: ", startTime);
-      // console.log("Shift end time: ", endTime);
+    }
+    // console.log("Shift start time: ", startTime);
+    // console.log("Shift end time: ", endTime);
 
-      return { startTime, endTime };
-  }
+    return { startTime, endTime };
+  };
 
   function toLocalISO(date) {
     const localDate = new Date(date);
     localDate.setHours(localDate.getHours() - 7);
 
     const year = localDate.getFullYear();
-    const month = String(localDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(localDate.getDate()).padStart(2, '0');
-    const hours = String(localDate.getHours()).padStart(2, '0');
-    const minutes = String(localDate.getMinutes()).padStart(2, '0');
-    const seconds = String(localDate.getSeconds()).padStart(2, '0');
+    const month = String(localDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(localDate.getDate()).padStart(2, "0");
+    const hours = String(localDate.getHours()).padStart(2, "0");
+    const minutes = String(localDate.getMinutes()).padStart(2, "0");
+    const seconds = String(localDate.getSeconds()).padStart(2, "0");
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
   }
@@ -193,7 +191,7 @@ const Start = (props) => {
 
     const localTime = new Date(time);
     if (inputChange === true) {
-      localTime.setHours(localTime.getHours() - 7); 
+      localTime.setHours(localTime.getHours() - 7);
     }
     console.log("Local Time: ", localTime);
     console.log("Shift Start Time: ", shiftTimes.startTime);
@@ -221,7 +219,10 @@ const Start = (props) => {
       console.log("Actual start: ", currentPO.actual_start);
       console.log("Actual end: ", currentPO.actual_end);
       // Check if the new PO overlaps with the current PO's range
-      if (comparedTime >= currentPO.actual_start && comparedTime < currentPO.actual_end) {
+      if (
+        comparedTime >= currentPO.actual_start &&
+        comparedTime < currentPO.actual_end
+      ) {
         alert("The new Production Order overlaps with an existing one.");
         return;
       }
@@ -253,27 +254,34 @@ const Start = (props) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id, date: time, line: value, status, group }),
+          body: JSON.stringify({
+            id,
+            date: time,
+            line: value,
+            status,
+            group,
+            plant,
+          }),
         });
-  
+
         if (!response.ok) {
           const errorResponse = await response.json();
           throw new Error(errorResponse.error || "Failed to update order");
         }
-  
+
         const data = await response.json();
         alert("Production order started successfully!");
         await props.onUpdate();
         props.setShowStart(false);
         // props.onSubmit(props.id);
-        localStorage.setItem('id', props.id);
+        localStorage.setItem("id", props.id);
         router.push(`/main?value=${value}&id=${id}`);
       } catch (error) {
         console.error("Error:", error);
         alert("Error updating order: " + error.message);
       } finally {
         setLoading(false);
-      } 
+      }
     } else {
       console.log("Submission canceled by user");
     }
@@ -289,9 +297,7 @@ const Start = (props) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
-                  Set Start Time
-                </h3>
+                <h3 className="text-black font-semibold">Set Start Time</h3>
                 <button
                   className="bg-transparent border-0 text-black float-right"
                   onClick={() => props.setShowStart(false)}

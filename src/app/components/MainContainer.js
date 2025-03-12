@@ -41,7 +41,7 @@ const RectangleContainer = ({
     TdStyle11: `${TdBaseStyle} bg-[#D0A842]`,
   };
 
-  console.log("All PO : ",allPO);
+  console.log("All PO : ", allPO);
   const searchParams = useSearchParams();
   const value = searchParams.get("value");
   const id = searchParams.get("id");
@@ -597,16 +597,22 @@ const RectangleContainer = ({
     durationSums.UnavailableTime
   );
   const { net, netDisplay } = calculateNet(qty, rejectQty, skuSpeed || 1);
-  {allPO.map((entry, index) => {
-    let skuSpeed = skuSpeeds[entry.sku] || 1; // Default to 1 if no speed found
-    let { net, netDisplay } = calculateNet(entry.qty, rejectQty, skuSpeed || 1);
-    console.log("totalnetDisplay", netDisplay);
-    // Accumulate totals
-    totalnet += net;
-    totalnetDisplay += netDisplay;
-    })}
-    totalnetDisplay = totalnet.toFixed(2)
-    console.log("totalnetDisplay", totalnetDisplay);
+  {
+    allPO.map((entry, index) => {
+      let skuSpeed = skuSpeeds[entry.sku] || 1; // Default to 1 if no speed found
+      let { net, netDisplay } = calculateNet(
+        entry.qty,
+        rejectQty,
+        skuSpeed || 1
+      );
+      console.log("totalnetDisplay", netDisplay);
+      // Accumulate totals
+      totalnet += net;
+      totalnetDisplay += netDisplay;
+    });
+  }
+  totalnetDisplay = totalnet.toFixed(2);
+  console.log("totalnetDisplay", totalnetDisplay);
 
   const { production, productionDisplay } = calculateProduction(
     net,
@@ -862,7 +868,7 @@ const RectangleContainer = ({
                       textAlign: "left",
                     }}
                   >
-                    {availableTime + unavailableTimeInMinutes}
+                    {(availableTime + unavailableTimeInMinutes).toFixed(2)}
                   </th>
                   <th className={TdStyle.TdStyle5}>Planned Stoppages</th>
                   {/* Ambil data dari planned stoppages */}

@@ -6,6 +6,12 @@ const nominalSpeeds = {
   LINE_E: 7000,
   LINE_F: 9000,
   LINE_G: 9000,
+
+  FLEX_1: 6000,
+  FLEX_2: 6000,
+  GEA_3: 6000,
+  GEA_4: 6000,
+  GEA_5: 6000,
 };
 
 export default nominalSpeeds;

@@ -388,6 +388,7 @@ const FormFill = (props) => {
         endTime,
         id: id || undefined,
         group: localStorage.getItem("group") || undefined, // Use id from props if it exists (for editing)
+        plant: localStorage.getItem("plant") || undefined,
       };
       console.log("Data to send: ", dataToSend);
       console.log("Endpoint: ", endpoint);

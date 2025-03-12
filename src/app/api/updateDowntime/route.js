@@ -12,6 +12,7 @@ export async function PUT(req) {
     shift,
     line,
     type,
+    plant,
   } = await req.json();
   console.log("duration: ", duration);
   console.log(
@@ -81,6 +82,7 @@ export async function PUT(req) {
       shift,
       line,
       type,
+      plant,
     });
 
     if (rowsAffected.error) {

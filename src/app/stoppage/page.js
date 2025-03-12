@@ -129,6 +129,7 @@ function StoppagePage() {
             line: line,
             date_start: toLocalISO(startTime),
             date_end: toLocalISO(endTime),
+            plant: localStorage.getItem("plant"),
           }),
         });
 
@@ -422,7 +423,7 @@ function StoppagePage() {
     console.log("Is editing (parent):", isEditing);
   }, [isEditing]);
 
-  const deleteItemById = async (id) => {
+  const deleteItemById = async (id, plant) => {
     try {
       setDeletingItems((prevState) => ({
         ...prevState,
@@ -434,7 +435,7 @@ function StoppagePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, plant }),
       });
 
       if (!response.ok) {
@@ -707,7 +708,12 @@ function StoppagePage() {
                             </button>
                             <button
                               className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-red-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-red-600 hover:border-4 focus:border-4 hover:border-red-800 hover:text-red-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"
-                              onClick={() => deleteItemById(item.id)}
+                              onClick={() =>
+                                deleteItemById(
+                                  item.id,
+                                  localStorage.getItem("plant")
+                                )
+                              }
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"

@@ -259,6 +259,7 @@ function MainPage() {
             line: value,
             date_start: toLocalISO(start),
             date_end: toLocalISO(end) || getLocalISOString(),
+            plant: localStorage.getItem("plant"),
           }),
         });
         const stoppageData = await stoppagesRes.json();
@@ -379,12 +380,12 @@ function MainPage() {
   const getCurrentShift = () => {
     const now = new Date();
     const hours = now.getHours();
-    
-    if (hours >= 6 && hours < 14) return 'I';
-    if (hours >= 14 && hours < 22) return 'II';
-    return 'III';
+
+    if (hours >= 6 && hours < 14) return "I";
+    if (hours >= 14 && hours < 22) return "II";
+    return "III";
   };
-  
+
   const currentShift = getCurrentShift();
   const shiftMismatch = shift !== currentShift;
 
@@ -399,7 +400,12 @@ function MainPage() {
             <span style={styles.mainText}>
               {plant} - {value.toUpperCase()} - SHIFT {shift} - {date} -{" "}
               {localStorage.getItem("group")}
-              {shiftMismatch && <span style={{ color: "red", fontWeight: "bold" }}> (Not Current Shift) </span>}
+              {shiftMismatch && (
+                <span style={{ color: "red", fontWeight: "bold" }}>
+                  {" "}
+                  (Not Current Shift){" "}
+                </span>
+              )}
             </span>
             {/* <button className="px-2 py-1 rounded-full text-sm font-medium text-indigo-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-indigo-600 hover:border-4 focus:border-4 hover:border-indigo-800 hover:text-indigo-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"
                     onClick={() => setShowModal(true)}>

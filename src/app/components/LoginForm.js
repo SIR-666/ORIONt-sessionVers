@@ -41,7 +41,7 @@ export default function LoginPage() {
     // Check if isSecure is true
     setLoader(true);
 
-    const apiUrl2 = "http://10.24.7.70";
+    const apiUrl2 = "http://127.0.0.1";
     const port3 = 8080;
     const endpoint = `${apiUrl2}:${port3}/login`;
     console.log("Endpoint: ", endpoint);

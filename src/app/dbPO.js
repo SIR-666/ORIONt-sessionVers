@@ -84,6 +84,10 @@ async function getAllPO(line, year, month, shift, date, plant) {
     const sapUrl =
       plant === "Milk Processing"
         ? `${URL.urlSAP}/${year}/${month}/SFP%20ESL/SFP%20UHT`
+        : plant === "Yogurt"
+        ? `${URL.urlSAP}/${year}/${month}/YOGURT`
+        : plant === "Cheese"
+        ? `${URL.urlSAP}/${year}/${month}/MOZZ/RICOTTA`
         : `${URL.urlSAP}/${year}/${month}/GF%20MILK`;
 
     const [responseRes, requestRes, fetchRes] = await Promise.all([
@@ -282,7 +286,7 @@ async function updateTimeStamps(
   }
 }
 
-async function updatePO(id, date, line, status, group, groupSelection) {
+async function updatePO(id, date, line, status, group, groupSelection, plant) {
   console.log(
     "Received and sent data: ",
     id,
@@ -290,7 +294,8 @@ async function updatePO(id, date, line, status, group, groupSelection) {
     line,
     status,
     group,
-    groupSelection
+    groupSelection,
+    plant
   );
   if (status === "Release SAP") {
     try {
@@ -299,7 +304,7 @@ async function updatePO(id, date, line, status, group, groupSelection) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: String(id), date, line, group }),
+        body: JSON.stringify({ id: String(id), date, line, group, plant }),
       });
 
       if (response.status === 400) {
