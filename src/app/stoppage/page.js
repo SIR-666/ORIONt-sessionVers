@@ -8,6 +8,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { adjustDowntimes } from "../downtimeUtils";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
+import LoadingSpinner from "@/app/components/loading"
 
 function StoppagePage() {
   const [tableData, setTableData] = useState([]);
@@ -779,7 +780,7 @@ function StoppagePage() {
 
 const Page = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingSpinner />}>
       <StoppagePage />
     </Suspense>
   );

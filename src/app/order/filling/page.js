@@ -1,7 +1,9 @@
-'use client';
+"use client";
 import OrderPage from "@/app/components/FillingClient";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import LoadingSpinner from "@/app/components/loading";
+
 
 function DataFetcher({ value, shift, date }) {
   const [data, setData] = useState(null);
@@ -17,10 +19,10 @@ function DataFetcher({ value, shift, date }) {
         }
         const data = await fetchedData.json();
         setData(data);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching all PO data:", error);
         setError("Error loading data. Please try again later.");
+      } finally {
         setLoading(false);
       }
     };
@@ -28,10 +30,10 @@ function DataFetcher({ value, shift, date }) {
     if (value) {
       fetchData();
     }
-  }, [value]);
+  }, [value, shift, date]);
 
   if (loading) {
-    return null; // Suspense will wait for this promise to resolve
+    return <LoadingSpinner />; // Tampilkan animasi loading
   }
 
   if (error) {
@@ -43,7 +45,7 @@ function DataFetcher({ value, shift, date }) {
 
 export default function APICall() {
   return (
-    <Suspense fallback={<p className="text-white">Loading...</p>}>
+    <Suspense fallback={<LoadingSpinner />}>
       <SearchParamsWrapper />
     </Suspense>
   );
@@ -51,13 +53,13 @@ export default function APICall() {
 
 function SearchParamsWrapper() {
   const router = useSearchParams();
-  const value = router.get('value');
-  const shift = router.get('shift');
-  const date = router.get('date');
+  const value = router.get("value");
+  const shift = router.get("shift");
+  const date = router.get("date");
 
   return (
-    <Suspense fallback={<p className="text-white">Loading...</p>}>
-      <DataFetcher value={value} shift={shift} date={date}/>
+    <Suspense fallback={<LoadingSpinner />}>
+      <DataFetcher value={value} shift={shift} date={date} />
     </Suspense>
   );
 }
