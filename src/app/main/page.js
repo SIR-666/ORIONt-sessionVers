@@ -7,6 +7,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import MainModal from "../components/MainModal";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
+import LoadingSpinner from "../components/loading";
 
 function MainPage() {
   // const [shiftOptions, setShiftOptions] = useState([]);
@@ -493,7 +494,7 @@ function MainPage() {
 
 const Page = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingSpinner />}>
       <MainPage />
     </Suspense>
   );
