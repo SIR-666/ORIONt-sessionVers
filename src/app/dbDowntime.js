@@ -338,7 +338,8 @@ async function insertQualityLoss(
   quality,
   line,
   startTime,
-  group
+  group,
+  plant
 ) {
   console.log(
     "Received Data from serverless: ",
@@ -348,7 +349,8 @@ async function insertQualityLoss(
     quality,
     line,
     startTime,
-    group
+    group,
+    plant
   );
   if (typeof startTime === "string" || startTime instanceof String) {
     startTime = new Date(startTime);
@@ -369,7 +371,8 @@ async function insertQualityLoss(
       line,
       startTime,
       date_week,
-      group
+      group,
+      plant
     );
     const response = await fetch(`${URL.URL}/insertQualLoss`, {
       method: "POST",
@@ -385,6 +388,7 @@ async function insertQualityLoss(
         startTime,
         date_week,
         group,
+        plant,
       }),
     });
 
@@ -406,14 +410,15 @@ async function insertQualityLoss(
   }
 }
 
-async function insertSpeedLoss(speed, nominal, line, startTime, group) {
+async function insertSpeedLoss(speed, nominal, line, startTime, group, plant) {
   console.log(
     "Received Data from serverless: ",
     speed,
     nominal,
     line,
     startTime,
-    group
+    group,
+    plant
   );
   if (typeof startTime === "string" || startTime instanceof String) {
     startTime = new Date(startTime);
@@ -437,6 +442,7 @@ async function insertSpeedLoss(speed, nominal, line, startTime, group) {
         startTime,
         date_week,
         group,
+        plant,
       }),
     });
 
@@ -482,8 +488,15 @@ async function deleteSpeedLoss(startTime, line) {
   }
 }
 
-async function insertQuantity(qty, line, startTime, group) {
-  console.log("Received Data from serverless: ", qty, line, startTime, group);
+async function insertQuantity(qty, line, startTime, group, plant) {
+  console.log(
+    "Received Data from serverless: ",
+    qty,
+    line,
+    startTime,
+    group,
+    plant
+  );
   if (typeof startTime === "string" || startTime instanceof String) {
     startTime = new Date(startTime);
   }
@@ -505,6 +518,7 @@ async function insertQuantity(qty, line, startTime, group) {
         startTime,
         date_week,
         group,
+        plant,
       }),
     });
 
@@ -519,6 +533,7 @@ async function insertQuantity(qty, line, startTime, group) {
       line,
       startTime,
       date_week,
+      plant,
     };
   } catch (error) {
     console.log("Error inserting quantity: ", error);
@@ -526,7 +541,7 @@ async function insertQuantity(qty, line, startTime, group) {
   }
 }
 
-async function getQualityLoss(line, date_start, date_end) {
+async function getQualityLoss(line, date_start, date_end, plant) {
   try {
     const response = await fetch(`${URL.URL}/getQualityLoss`, {
       method: "POST",
@@ -537,6 +552,7 @@ async function getQualityLoss(line, date_start, date_end) {
         line,
         date_start,
         date_end,
+        plant,
       }),
     });
 
@@ -548,7 +564,7 @@ async function getQualityLoss(line, date_start, date_end) {
   }
 }
 
-async function getRejectSample(line, date_start, date_end) {
+async function getRejectSample(line, date_start, date_end, plant) {
   try {
     const response = await fetch(`${URL.URL}/getRejectSample`, {
       method: "POST",
@@ -559,6 +575,7 @@ async function getRejectSample(line, date_start, date_end) {
         line,
         date_start,
         date_end,
+        plant,
       }),
     });
 
@@ -570,7 +587,7 @@ async function getRejectSample(line, date_start, date_end) {
   }
 }
 
-async function getSpeedLoss(line, date_start, date_end) {
+async function getSpeedLoss(line, date_start, date_end, plant) {
   try {
     const response = await fetch(`${URL.URL}/getSpeedLoss`, {
       method: "POST",
@@ -581,6 +598,7 @@ async function getSpeedLoss(line, date_start, date_end) {
         line,
         date_start,
         date_end,
+        plant,
       }),
     });
 
@@ -615,7 +633,7 @@ async function getNominalSpeed(line, date_start, date_end) {
   }
 }
 
-async function getQuantity(line, date_start, date_end) {
+async function getQuantity(line, date_start, date_end, plant) {
   try {
     const response = await fetch(`${URL.URL}/getQuantity`, {
       method: "POST",
@@ -626,6 +644,7 @@ async function getQuantity(line, date_start, date_end) {
         line,
         date_start,
         date_end,
+        plant,
       }),
     });
 

@@ -1,13 +1,14 @@
 "use client";
 import RectangleChart from "@/app/components/MainChart";
 import RectangleContainer from "@/app/components/MainContainer";
+import RectangleContainerProcessing from "@/app/components/MainContainerProcessing";
 import RectangleTable from "@/app/components/MainTable";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import LoadingSpinner from "../components/loading";
 import MainModal from "../components/MainModal";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
-import LoadingSpinner from "../components/loading";
 
 function MainPage() {
   // const [shiftOptions, setShiftOptions] = useState([]);
@@ -454,16 +455,29 @@ function MainPage() {
           {isLoading ? (
             <p className="text-black">Loading...</p>
           ) : stoppage && PO && data ? (
-            <RectangleContainer
-              initialData={data}
-              stoppageData={stoppage}
-              allPO={PO}
-              group={group}
-              localTime={getLocalISOString()}
-            />
+            plant === "Milk Processing" ? (
+              <RectangleContainerProcessing
+                initialData={data}
+                stoppageData={stoppage}
+                allPO={PO}
+                group={group}
+                localTime={getLocalISOString()}
+              />
+            ) : plant === "Milk Filling Packing" ? (
+              <RectangleContainer
+                initialData={data}
+                stoppageData={stoppage}
+                allPO={PO}
+                group={group}
+                localTime={getLocalISOString()}
+              />
+            ) : (
+              <p className="text-black">Invalid {plant} plant</p>
+            )
           ) : (
             <p className="text-black">Loading......</p>
           )}
+
           <br></br>
           <div className="relative w-full h-128 rounded-xl bg-white shadow-xl">
             <div className="w-full max-w-4xl">

@@ -11,12 +11,12 @@ import {
   calculateProduction,
   calculateRunning,
 } from "./Calculations";
-import QualityLoss from "./QualLoss";
+import QualityLossProcessing from "./QualLossProcessing";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
 
-const RectangleContainer = ({
+const RectangleContainerProcessing = ({
   initialData,
   stoppageData,
   allPO,
@@ -796,16 +796,16 @@ const RectangleContainer = ({
                 <li className="mt-2 text-black">Status: {entry.status}</li>
                 <li className="mt-2 text-black">Material: {entry.sku}</li>
                 <li className="mt-2 text-black">
-                  Total Planned: {entry.qty} pcs
+                  Total Planned: {entry.qty} liter
                 </li>
                 <li
                   className="mt-2 text-black cursor-pointer bg-green-500"
                   onClick={() => setQtyModal(true)}
                 >
-                  Finish Good: {qtyPO[index] || 0} pcs
+                  Finish Good: {qtyPO[index] || 0} liter
                 </li>
                 <li className="mt-2 text-black">
-                  Total Produced in Current Shift: {qty} pcs
+                  Total Produced in Current Shift: {qty} liter
                 </li>
                 <li className="mt-2 text-black">
                   Start Time: {formatFullDateTime(entry.actual_start)}
@@ -818,7 +818,7 @@ const RectangleContainer = ({
                 <p className="mt-2 text-black">
                   Nominal Speed:{" "}
                   {skuSpeeds[entry.product_id]
-                    ? `${skuSpeeds[entry.product_id]} pcs/hr`
+                    ? `${skuSpeeds[entry.product_id]} liter/hr`
                     : "Loading..."}
                 </p>
               </ul>
@@ -1084,7 +1084,9 @@ const RectangleContainer = ({
                   </td>
                 </tr>
                 {qualityLossModal && (
-                  <QualityLoss onClose={() => setQualityLossModal(false)} />
+                  <QualityLossProcessing
+                    onClose={() => setQualityLossModal(false)}
+                  />
                 )}
                 <tr>
                   <td className={TdStyle.TdStyle4}>NPT</td>
@@ -1183,4 +1185,4 @@ const RectangleContainer = ({
   );
 };
 
-export default RectangleContainer;
+export default RectangleContainerProcessing;

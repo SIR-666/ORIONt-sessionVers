@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const ProdFill = (props) => {
   const [selectedLine, setSelectedLine] = useState("");
@@ -162,20 +161,26 @@ const ProdFill = (props) => {
         const shift = shifts[i];
         const shiftStart = new Date(current);
         const shiftEnd = new Date(current);
-  
+
         const [startHour, startMinute] = shift.start.split(":").map(Number);
         const [endHour, endMinute] = shift.end.split(":").map(Number);
-  
+
         shiftStart.setHours(startHour, startMinute, 0, 0);
         if (endHour < startHour) {
           // Handles shifts ending the next day
           shiftEnd.setDate(shiftEnd.getDate() + 1);
         }
         shiftEnd.setHours(endHour, endMinute, 0, 0);
-  
+
         // Check if the order crosses into this shift
-        if ((start >= shiftStart && start < shiftEnd) || (end > shiftStart && end <= shiftEnd) || (start < shiftStart && end > shiftEnd)) {
-          if (!boxes.find((box) => box.start.getTime() === shiftStart.getTime())) {
+        if (
+          (start >= shiftStart && start < shiftEnd) ||
+          (end > shiftStart && end <= shiftEnd) ||
+          (start < shiftStart && end > shiftEnd)
+        ) {
+          if (
+            !boxes.find((box) => box.start.getTime() === shiftStart.getTime())
+          ) {
             boxes.push({
               shift: `Shift ${i + 1}`,
               start: new Date(shiftStart),
@@ -183,7 +188,7 @@ const ProdFill = (props) => {
             });
           }
         }
-  
+
         // Update the `current` pointer
         current = new Date(shiftEnd);
       }
@@ -235,13 +240,26 @@ const ProdFill = (props) => {
 
     try {
       isLoading(true);
-      console.log("Sent data: ", startTime, endTime, selectedPlant, selectedLine, groupSelection);
-      const response = await fetch('/api/createEmptyPO', {
+      console.log(
+        "Sent data: ",
+        startTime,
+        endTime,
+        selectedPlant,
+        selectedLine,
+        groupSelection
+      );
+      const response = await fetch("/api/createEmptyPO", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ startTime, endTime, plant: selectedPlant, line: selectedLine, groupSelection }),
+        body: JSON.stringify({
+          startTime,
+          endTime,
+          plant: selectedPlant,
+          line: selectedLine,
+          groupSelection,
+        }),
       });
 
       const result = await response.json();
@@ -253,7 +271,7 @@ const ProdFill = (props) => {
       alert("New No-PO entry created");
       await props.onUpdate();
       props.setShowForm2(false);
-      localStorage.setItem('id', result.id);
+      localStorage.setItem("id", result.id);
       router.push(`/main?value=${selectedLine}&id=${result.id}`);
     } catch (error) {
       console.error("Error creating PO entry:", error);
@@ -288,9 +306,7 @@ const ProdFill = (props) => {
             className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
             style={{ backgroundColor: "#A3D9A5" }}
           >
-            <h3 className="text-black font-semibold text-gray-700">
-              Add No PO
-            </h3>
+            <h3 className="text-black font-semibold">Add No PO</h3>
             <button
               className="bg-transparent border-0 text-black float-right"
               onClick={() => props.setShowForm2(false)}
@@ -404,39 +420,41 @@ const ProdFill = (props) => {
               />
               <br></br>
               {shiftBoxes.length > 0 ? (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {shiftBoxes.map((box, index) => (
-                        <div
-                          key={index}
-                          className="text-white px-4 py-2 rounded shadow"
-                        >
-                          <select
-                            id="group"
-                            className="text-black rounded-lg border border-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full px-3 py-2 mt-2 ml-0"
-                            value={groupSelection[index] || ""}
-                            onChange={(event) =>
-                              handleGroupChange(index, event.target.value)
-                            }
-                          >
-                            <option value="">Group</option>
-                            {groupData && groupData.length > 0 ? (
-                              groupData.map((item, index) => (
-                                <option key={index} value={item.group}>
-                                  {item.group}
-                                </option>
-                              ))
-                            ) : (
-                              <option value="" disabled>
-                                No groups available
-                              </option>
-                            )}
-                          </select>
-                        </div>
-                      ))}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {shiftBoxes.map((box, index) => (
+                    <div
+                      key={index}
+                      className="text-white px-4 py-2 rounded shadow"
+                    >
+                      <select
+                        id="group"
+                        className="text-black rounded-lg border border-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full px-3 py-2 mt-2 ml-0"
+                        value={groupSelection[index] || ""}
+                        onChange={(event) =>
+                          handleGroupChange(index, event.target.value)
+                        }
+                      >
+                        <option value="">Group</option>
+                        {groupData && groupData.length > 0 ? (
+                          groupData.map((item, index) => (
+                            <option key={index} value={item.group}>
+                              {item.group}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>
+                            No groups available
+                          </option>
+                        )}
+                      </select>
                     </div>
-                  ) : (
-                    <p className="text-gray-500">Please insert start time and end time first</p>
-                  )}
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">
+                  Please insert start time and end time first
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">

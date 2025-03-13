@@ -1,5 +1,5 @@
 import { useSearchParams } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
 import nominalSpeeds from "../speed";
 
@@ -18,8 +18,9 @@ const Speed = ({ onClose }) => {
   const params = useSearchParams();
   const value = params.get("value");
   const id = params.get("id");
-  const shift = localStorage.getItem('shift');
-  const date = localStorage.getItem('date');
+  const shift = localStorage.getItem("shift");
+  const date = localStorage.getItem("date");
+  const plant = localStorage.getItem("plant");
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
@@ -40,20 +41,20 @@ const Speed = ({ onClose }) => {
       return null;
     }
     let startTime, endTime;
-      switch (shift) {
-        case 'I':
+    switch (shift) {
+      case "I":
         startTime = new Date(date);
         startTime.setHours(6, 0, 0, 0);
         endTime = new Date(date);
         endTime.setHours(14, 0, 0, 0);
         break;
-      case 'II': 
+      case "II":
         startTime = new Date(date);
         startTime.setHours(14, 0, 0, 0);
         endTime = new Date(date);
         endTime.setHours(22, 0, 0, 0);
         break;
-      case 'III': 
+      case "III":
         startTime = new Date(date);
         startTime.setHours(22, 0, 0, 0);
         endTime = new Date(date);
@@ -63,22 +64,22 @@ const Speed = ({ onClose }) => {
       default:
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
-      }
-      console.log("Shift start time: ", startTime);
-      console.log("Shift end time: ", endTime);
+    }
+    console.log("Shift start time: ", startTime);
+    console.log("Shift end time: ", endTime);
 
-      return { startTime, endTime };
-  }
+    return { startTime, endTime };
+  };
 
   function toLocalISO(date) {
     const localDate = new Date(date);
 
     const year = localDate.getFullYear();
-    const month = String(localDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(localDate.getDate()).padStart(2, '0');
-    const hours = String(localDate.getHours()).padStart(2, '0');
-    const minutes = String(localDate.getMinutes()).padStart(2, '0');
-    const seconds = String(localDate.getSeconds()).padStart(2, '0');
+    const month = String(localDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(localDate.getDate()).padStart(2, "0");
+    const hours = String(localDate.getHours()).padStart(2, "0");
+    const minutes = String(localDate.getMinutes()).padStart(2, "0");
+    const seconds = String(localDate.getSeconds()).padStart(2, "0");
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
   }
@@ -102,16 +103,19 @@ const Speed = ({ onClose }) => {
           const getShiftTimes = getShift(shift, date);
           let startTime, endTime;
 
-          const start = new Date(element.actual_start); 
+          const start = new Date(element.actual_start);
           start.setHours(start.getHours() - 7);
           // console.log("start po: ", start);
-          const end = element.actual_end ? new Date(element.actual_end) : new Date();
+          const end = element.actual_end
+            ? new Date(element.actual_end)
+            : new Date();
           if (element.actual_end) {
             end.setHours(end.getHours() - 7);
           }
           // console.log("End: ", end);
 
-          startTime = start < getShiftTimes.startTime ? getShiftTimes.startTime : start;
+          startTime =
+            start < getShiftTimes.startTime ? getShiftTimes.startTime : start;
           endTime = end < getShiftTimes.endTime ? end : getShiftTimes.endTime;
           const res = await fetch("/api/getNominalSpeed", {
             method: "POST",
@@ -150,7 +154,7 @@ const Speed = ({ onClose }) => {
   useEffect(() => {
     const getSpeed = async () => {
       let speed;
-  
+
       if (sku !== "") {
         try {
           const speeds = [];
@@ -161,7 +165,7 @@ const Speed = ({ onClose }) => {
             },
             body: JSON.stringify({ sku: sku }),
           });
-  
+
           const skuData = await response.json();
           console.log("Speed data: ", skuData[0].speed);
           if (skuData && typeof skuData[0].speed === "number") {
@@ -169,9 +173,10 @@ const Speed = ({ onClose }) => {
           } else {
             console.warn(`No speed found for SKU ${sku}`);
           }
-  
+
           // Use the first valid speed found or fallback to the nominal speed
-          speed = speeds.length > 0 ? speeds[0] : nominalSpeeds[formattedLineName]; 
+          speed =
+            speeds.length > 0 ? speeds[0] : nominalSpeeds[formattedLineName];
         } catch (error) {
           console.error("Error fetching SKU nominal speed:", error);
           speed = null;
@@ -179,11 +184,11 @@ const Speed = ({ onClose }) => {
       } else {
         speed = nominalSpeeds[formattedLineName];
       }
-  
+
       console.log("Final speed returned:", speed);
-      setSKUSpeed(speed);  // Set the final speed in the state
+      setSKUSpeed(speed); // Set the final speed in the state
     };
-  
+
     // Trigger speed calculation when SKU changes
     if (sku) {
       getSpeed();
@@ -349,7 +354,8 @@ const Speed = ({ onClose }) => {
 
       console.log("Speed: ", skuSpeed);
       const actualSpeed =
-        (((skuSpeed || nominalSpeed)  - parseInt(speed)) * timeDifference) / (skuSpeed || 1);
+        (((skuSpeed || nominalSpeed) - parseInt(speed)) * timeDifference) /
+        (skuSpeed || 1);
       console.log("Speed Loss: ", actualSpeed);
 
       setLoading(true);
@@ -365,6 +371,7 @@ const Speed = ({ onClose }) => {
             value: value,
             startTime: startTime,
             group: group,
+            plant: plant,
           }),
         });
         if (response.ok) {
@@ -395,9 +402,7 @@ const Speed = ({ onClose }) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
-                  Set Speed Loss
-                </h3>
+                <h3 className="text-black font-semibold">Set Speed Loss</h3>
                 <button
                   className="bg-transparent border-0 text-black float-right"
                   onClick={onClose}

@@ -10,6 +10,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import QualityLoss from "./QualLoss";
+import QualityLossProcessing from "./QualLossProcessing";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 
@@ -174,7 +175,13 @@ function SidebarContent({ isOpen }) {
       </div>
       {quantityModal && <Quantity onClose={() => setQuantityModal(false)} />}
       {qualityLossModal && (
-        <QualityLoss onClose={() => setQualityLossModal(false)} />
+        <>
+          {plant === "Milk Processing" ? (
+            <QualityLossProcessing onClose={() => setQualityLossModal(false)} />
+          ) : plant === "Milk Filling Packing" ? (
+            <QualityLoss onClose={() => setQualityLossModal(false)} />
+          ) : null}
+        </>
       )}
       {speedLossModal && <Speed onClose={() => setSpeedLossModal(false)} />}
     </aside>

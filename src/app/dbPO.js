@@ -370,7 +370,8 @@ async function insertPerformance(
   ut,
   startTime,
   line,
-  group
+  group,
+  plant
 ) {
   if (typeof startTime === "string" || startTime instanceof String) {
     startTime = new Date(startTime);
@@ -394,7 +395,8 @@ async function insertPerformance(
     planned,
     startTime,
     line,
-    group
+    group,
+    plant
   );
   try {
     const response = await fetch(`${URL.URL}/insertPerformance`, {
@@ -417,6 +419,7 @@ async function insertPerformance(
         date_week,
         line,
         group,
+        plant,
       }),
     });
 

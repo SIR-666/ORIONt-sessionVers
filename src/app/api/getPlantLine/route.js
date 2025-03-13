@@ -1,6 +1,8 @@
+import url from "@/app/url";
+
 export async function GET() {
   try {
-    const response = await fetch("http://127.0.0.1:8080/getgreenTAGarea");
+    const response = await fetch(`${url.urlSqlApi}/getgreenTAGarea`);
 
     const jsonData = await response.json();
     const newResponse = new Response(JSON.stringify(jsonData), {

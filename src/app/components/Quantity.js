@@ -1,5 +1,5 @@
 import { useSearchParams } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
 
 const Quantity = ({ onClose }) => {
@@ -10,8 +10,9 @@ const Quantity = ({ onClose }) => {
   const params = useSearchParams();
   const id = params.get("id");
   const value = params.get("value");
-  const shift = localStorage.getItem('shift');
-  const date = localStorage.getItem('date');
+  const shift = localStorage.getItem("shift");
+  const date = localStorage.getItem("date");
+  const plant = localStorage.getItem("plant");
 
   function getLocalISOString() {
     const now = new Date();
@@ -27,20 +28,20 @@ const Quantity = ({ onClose }) => {
       return null;
     }
     let startTime, endTime;
-      switch (shift) {
-        case 'I':
+    switch (shift) {
+      case "I":
         startTime = new Date(date);
         startTime.setHours(6, 0, 0, 0);
         endTime = new Date(date);
         endTime.setHours(14, 0, 0, 0);
         break;
-      case 'II': 
+      case "II":
         startTime = new Date(date);
         startTime.setHours(14, 0, 0, 0);
         endTime = new Date(date);
         endTime.setHours(22, 0, 0, 0);
         break;
-      case 'III': 
+      case "III":
         startTime = new Date(date);
         startTime.setHours(22, 0, 0, 0);
         endTime = new Date(date);
@@ -50,22 +51,22 @@ const Quantity = ({ onClose }) => {
       default:
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
-      }
-      console.log("Shift start time: ", startTime);
-      console.log("Shift end time: ", endTime);
+    }
+    console.log("Shift start time: ", startTime);
+    console.log("Shift end time: ", endTime);
 
-      return { startTime, endTime };
-  }
+    return { startTime, endTime };
+  };
 
   function toLocalISO(date) {
     const localDate = new Date(date);
 
     const year = localDate.getFullYear();
-    const month = String(localDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(localDate.getDate()).padStart(2, '0');
-    const hours = String(localDate.getHours()).padStart(2, '0');
-    const minutes = String(localDate.getMinutes()).padStart(2, '0');
-    const seconds = String(localDate.getSeconds()).padStart(2, '0');
+    const month = String(localDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(localDate.getDate()).padStart(2, "0");
+    const hours = String(localDate.getHours()).padStart(2, "0");
+    const minutes = String(localDate.getMinutes()).padStart(2, "0");
+    const seconds = String(localDate.getSeconds()).padStart(2, "0");
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
   }
@@ -90,16 +91,19 @@ const Quantity = ({ onClose }) => {
           const getShiftTimes = getShift(shift, date);
           let startTime, endTime;
 
-          const start = new Date(entry.actual_start); 
+          const start = new Date(entry.actual_start);
           start.setHours(start.getHours() - 7);
           // console.log("start po: ", start);
-          const end = entry.actual_end ? new Date(entry.actual_end) : new Date();
+          const end = entry.actual_end
+            ? new Date(entry.actual_end)
+            : new Date();
           if (entry.actual_end) {
             end.setHours(end.getHours() - 7);
           }
           // console.log("End: ", end);
 
-          startTime = start < getShiftTimes.startTime ? getShiftTimes.startTime : start;
+          startTime =
+            start < getShiftTimes.startTime ? getShiftTimes.startTime : start;
           endTime = end < getShiftTimes.endTime ? end : getShiftTimes.endTime;
           console.log("Sent start time: ", startTime);
           console.log("Sent end time: ", endTime);
@@ -112,6 +116,7 @@ const Quantity = ({ onClose }) => {
               line: value,
               date_start: toLocalISO(startTime),
               date_end: toLocalISO(endTime) || getLocalISOString(),
+              plant: plant,
             }),
           });
           if (!res.ok) {
@@ -168,7 +173,7 @@ const Quantity = ({ onClose }) => {
       try {
         const shiftTime = getShift(shift, date);
         let startTime;
-        const start = new Date(data?.actual_start); 
+        const start = new Date(data?.actual_start);
         start.setHours(start.getHours() - 7);
         startTime = start < shiftTime.startTime ? shiftTime.startTime : start;
         const response = await fetch("/api/createFinishGood", {
@@ -181,6 +186,7 @@ const Quantity = ({ onClose }) => {
             value: value,
             actual_start: toLocalISO(startTime),
             group: group,
+            plant: plant,
           }),
         });
         if (response.ok) {
@@ -209,9 +215,7 @@ const Quantity = ({ onClose }) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
-                  Set Quantity
-                </h3>
+                <h3 className="text-black font-semibold">Set Quantity</h3>
                 <button
                   className="bg-transparent border-0 text-black float-right"
                   onClick={onClose}
@@ -227,7 +231,9 @@ const Quantity = ({ onClose }) => {
               <div className="relative p-6 flex-auto w-full flex flex-col">
                 <div className="grid grid-cols-5">
                   <div className="relative col-span-2 items-center justify-center w-full flex flex-col h-full">
-                    <h2 className="text-black mb-7">Current Production Order: </h2>
+                    <h2 className="text-black mb-7">
+                      Current Production Order:{" "}
+                    </h2>
                     <h2 className="text-black">Quantity: </h2>
                   </div>
                   <div className="relative col-span-2 w-full flex flex-col h-full">
@@ -243,7 +249,9 @@ const Quantity = ({ onClose }) => {
                   </div>
                   <div className="relative col-span-1 items-center justify-center w-full flex flex-col h-full">
                     <br></br>
-                    <h2 className="text-black mt-4">pcs</h2>
+                    <h2 className="text-black mt-4">
+                      {plant === "Milk Processing" ? "liter" : "pcs"}
+                    </h2>
                   </div>
                 </div>
               </div>

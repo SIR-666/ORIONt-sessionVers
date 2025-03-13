@@ -1,5 +1,6 @@
 "use client";
 import OrderPage from "@/app/components/FillingClient";
+import LoadingSpinner from "@/app/components/loading";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -33,7 +34,7 @@ function DataFetcher({ value, shift, date, plant }) {
   }, [value]);
 
   if (loading) {
-    return null; // Suspense will wait for this promise to resolve
+    return <LoadingSpinner />; // Tampilkan animasi loading
   }
 
   if (error) {
@@ -45,7 +46,7 @@ function DataFetcher({ value, shift, date, plant }) {
 
 export default function APICall() {
   return (
-    <Suspense fallback={<p className="text-white">Loading...</p>}>
+    <Suspense fallback={<LoadingSpinner />}>
       <SearchParamsWrapper />
     </Suspense>
   );

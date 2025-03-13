@@ -9,6 +9,7 @@ const MainModal = (props) => {
   const [selectedShift, setSelectedShift] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedTank, setSelectedTank] = useState("");
   const [data, setData] = useState([]);
   const [tablePlant, setTablePlantData] = useState([]);
   const [tableLine, setTableLineData] = useState([]);
@@ -28,6 +29,11 @@ const MainModal = (props) => {
   const handleSelectGroup = (event) => {
     const value = event.target.value;
     setSelectedGroup(value);
+  };
+
+  const handleSelectTank = (event) => {
+    const value = event.target.value;
+    setSelectedTank(value);
   };
 
   const handleChange = (event) => {
@@ -134,6 +140,8 @@ const MainModal = (props) => {
       if (storedShift) setSelectedShift(storedShift);
       if (storedDate) setSelectedDate(storedDate);
       if (storedGroup) setSelectedGroup(storedGroup);
+      if (storedPlant === "Milk Processing")
+        setSelectedTank(localStorage.getItem("tank"));
     }
   }, [data]);
 
@@ -154,6 +162,8 @@ const MainModal = (props) => {
       localStorage.setItem("shift", selectedShift);
       localStorage.setItem("date", selectedDate);
       localStorage.setItem("group", selectedGroup);
+      if (selectedPlant === "Milk Processing")
+        localStorage.setItem("tank", selectedTank);
       router.push(`/main?value=${selectedLine}&id=${id}`);
       props.setShowModal(false);
       setTimeout(() => {
@@ -229,7 +239,7 @@ const MainModal = (props) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
+                <h3 className="text-black font-semibold">
                   Set Plant & Production Line
                 </h3>
                 <button
@@ -279,7 +289,7 @@ const MainModal = (props) => {
                         htmlFor="subGroup"
                         className="block mb-2 text-black font-medium"
                       >
-                        Production Line
+                        Sterilizer
                       </label>
                       <select
                         id="subGroup"
@@ -288,7 +298,7 @@ const MainModal = (props) => {
                         onChange={handleSelectLine}
                         disabled={processingLines.length === 0} // Disable if no subgroups
                       >
-                        <option value="">Choose a production line</option>
+                        <option value="">Choose a sterilizer</option>
                         {processingLines.length > 0 ? (
                           processingLines.map((subGroup, index) => (
                             <option key={index} value={subGroup}>
@@ -332,6 +342,29 @@ const MainModal = (props) => {
                       </select>
                     </div>
                   )}
+                  {selectedPlant === "Milk Processing" ? (
+                    <div className="flex-2">
+                      <label
+                        htmlFor="plant"
+                        className="block mb-2 text-black font-medium"
+                      >
+                        Tank
+                      </label>
+                      <select
+                        id="observedArea"
+                        className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        value={selectedTank}
+                        onChange={handleSelectTank}
+                      >
+                        <option value="">Choose a tank</option>
+                        <option value="AT1">AT1</option>
+                        <option value="AT2">AT2</option>
+                        <option value="AT3">AT3</option>
+                        <option value="AT4">AT4</option>
+                        <option value="AT5">AT5</option>
+                      </select>
+                    </div>
+                  ) : null}
                 </form>
                 <form className="bg-gray-200 shadow-md rounded px-8 pt-6 pb-8 w-full flex flex-col sm:flex-row gap-14">
                   <div className="flex-2">

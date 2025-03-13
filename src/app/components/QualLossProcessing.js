@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
 import nominalSpeeds from "../speed";
 
-const QualityLoss = ({ onClose }) => {
+const QualLossProcessing = ({ onClose }) => {
   const [data, setData] = useState(null);
   const [filling, setFilling] = useState(0);
   const [packing, setPacking] = useState(0);
@@ -320,11 +320,13 @@ const QualityLoss = ({ onClose }) => {
               <div className="relative p-6 flex-auto w-full flex flex-col">
                 <div className="grid grid-cols-4">
                   <div className="relative col-span-1 items-center justify-center w-full flex flex-col h-full">
-                    <h2 className="text-black px-3 py-2">Reject Filling: </h2>
+                    <h2 className="text-black px-3 py-2">Blow Awal: </h2>
                     <br></br>
-                    <h2 className="text-black px-3 py-2">Reject Packing: </h2>
+                    <h2 className="text-black px-3 py-2">Drain Akhir: </h2>
                     <br></br>
-                    <h2 className="text-black px-3 py-2">Sample: </h2>
+                    <h2 className="text-black px-3 py-2">Sirkulasi: </h2>
+                    <br></br>
+                    <h2 className="text-black px-3 py-2">Unplanned CIP: </h2>
                   </div>
                   <div className="relative col-span-2 items-center justify-center w-full flex flex-col h-full">
                     <input
@@ -353,13 +355,24 @@ const QualityLoss = ({ onClose }) => {
                       value={sample}
                       onChange={handleSample}
                     />
+                    <br></br>
+                    <input
+                      type="number"
+                      name="quality"
+                      id="quality"
+                      className="border border-gray-300 px-3 py-2 text-black"
+                      value={sample}
+                      onChange={handleSample}
+                    />
                   </div>
                   <div className="relative col-span-1 items-center justify-center w-full flex flex-col h-full">
-                    <h2 className="text-black px-3 py-2">pcs</h2>
+                    <h2 className="text-black px-3 py-2">liter</h2>
                     <br></br>
-                    <h2 className="text-black px-3 py-2">pcs</h2>
+                    <h2 className="text-black px-3 py-2">liter</h2>
                     <br></br>
-                    <h2 className="text-black px-3 py-2">pcs</h2>
+                    <h2 className="text-black px-3 py-2">liter</h2>
+                    <br></br>
+                    <h2 className="text-black px-3 py-2">liter</h2>
                   </div>
                 </div>
               </div>
@@ -393,4 +406,4 @@ const QualityLoss = ({ onClose }) => {
   );
 };
 
-export default QualityLoss;
+export default QualLossProcessing;
