@@ -137,9 +137,14 @@ const QualityLoss = ({ onClose }) => {
           const qualityData = await res.json();
           console.log("Reject samples: ", qualityData);
           if (Array.isArray(qualityData) && qualityData.length > 0) {
-            setFilling(qualityData[0].Downtime);
-            setPacking(qualityData[1].Downtime);
-            setSample(qualityData[2].Downtime);
+            const downtimeMap = qualityData.reduce((acc, item) => {
+              acc[item.name] = item.Downtime;
+              return acc;
+            }, {});
+
+            setFilling(downtimeMap["Reject filling(Pcs)"] || 0);
+            setPacking(downtimeMap["Reject packing (Pcs)"] || 0);
+            setSample(downtimeMap["Sample (pcs)"] || 0);
           }
           setGroup(element.group);
           setSKU(element.sku);

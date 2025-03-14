@@ -126,6 +126,7 @@ const Speed = ({ onClose }) => {
               line: value,
               date_start: toLocalISO(startTime),
               date_end: toLocalISO(endTime) || getLocalISOString(),
+              plant: plant,
             }),
           });
           if (!res.ok) {
@@ -295,7 +296,7 @@ const Speed = ({ onClose }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ startTime: date, line: value }),
+        body: JSON.stringify({ startTime: date, line: value, plant: plant }),
       });
 
       if (!response.ok) {

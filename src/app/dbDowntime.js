@@ -341,17 +341,6 @@ async function insertQualityLoss(
   group,
   plant
 ) {
-  console.log(
-    "Received Data from serverless: ",
-    filling,
-    packing,
-    sample,
-    quality,
-    line,
-    startTime,
-    group,
-    plant
-  );
   if (typeof startTime === "string" || startTime instanceof String) {
     startTime = new Date(startTime);
   }
@@ -383,6 +372,101 @@ async function insertQualityLoss(
         filling,
         packing,
         sample,
+        quality,
+        line,
+        startTime,
+        date_week,
+        group,
+        plant,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create quality loss entry");
+    }
+
+    const result = await response.json();
+    console.log("Result from createQualityLoss API:", result);
+    return {
+      quality,
+      line,
+      startTime,
+      date_week,
+    };
+  } catch (error) {
+    console.log("Error inserting quality loss: ", error);
+    throw error;
+  }
+}
+
+async function getQualityLossProcessingMaster(sterilizer, tank, step) {
+  try {
+    const response = await fetch(
+      `${
+        URL.URL
+      }/getQualityLossProcessingMaster?sterilizer=${encodeURIComponent(
+        sterilizer
+      )}&tank=${encodeURIComponent(tank)}&step=${encodeURIComponent(step)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+    console.log("Retrieved Quality Loss Master: ", data);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function insertQualityLossProcessing(
+  blowAwal,
+  drainAkhir,
+  sirkulasi,
+  unplannedCIP,
+  quality,
+  line,
+  startTime,
+  group,
+  plant
+) {
+  if (typeof startTime === "string" || startTime instanceof String) {
+    startTime = new Date(startTime);
+  }
+  var oneJan = new Date(startTime.getFullYear(), 0, 1);
+  var numberOfDays = Math.floor(
+    (startTime - oneJan) / (24 * 60 * 60 * 1000) + 1
+  );
+  var weekNumber = Math.ceil(numberOfDays / 7);
+  const date_week = weekNumber.toString();
+  try {
+    console.log(
+      "Sending data to backend",
+      blowAwal,
+      drainAkhir,
+      sirkulasi,
+      unplannedCIP,
+      quality,
+      line,
+      startTime,
+      date_week,
+      group,
+      plant
+    );
+    const response = await fetch(`${URL.URL}/insertQualLoss`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        blowAwal,
+        drainAkhir,
+        sirkulasi,
+        unplannedCIP,
         quality,
         line,
         startTime,
@@ -464,15 +548,15 @@ async function insertSpeedLoss(speed, nominal, line, startTime, group, plant) {
   }
 }
 
-async function deleteSpeedLoss(startTime, line) {
-  console.log("Received data from serverless:", startTime, line);
+async function deleteSpeedLoss(startTime, line, plant) {
+  console.log("Received data from serverless:", startTime, line, plant);
   try {
     const response = await fetch(`${URL.URL}/deleteSpeedLoss`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ startTime, line }),
+      body: JSON.stringify({ startTime, line, plant }),
     });
 
     if (!response.ok) {
@@ -610,8 +694,14 @@ async function getSpeedLoss(line, date_start, date_end, plant) {
   }
 }
 
-async function getNominalSpeed(line, date_start, date_end) {
-  console.log("Received Data from serverless: ", line, date_start, date_end);
+async function getNominalSpeed(line, date_start, date_end, plant) {
+  console.log(
+    "Received Data from serverless: ",
+    line,
+    date_start,
+    date_end,
+    plant
+  );
   try {
     const response = await fetch(`${URL.URL}/getNominalSpeed`, {
       method: "POST",
@@ -622,6 +712,7 @@ async function getNominalSpeed(line, date_start, date_end) {
         line,
         date_start,
         date_end,
+        plant,
       }),
     });
 
@@ -668,6 +759,8 @@ module.exports = {
   insertSpeedLoss,
   deleteSpeedLoss,
   insertQualityLoss,
+  getQualityLossProcessingMaster,
+  insertQualityLossProcessing,
   insertQuantity,
   getQualityLoss,
   getRejectSample,

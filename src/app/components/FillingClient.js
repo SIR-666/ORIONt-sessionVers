@@ -306,9 +306,11 @@ export default function OrderPage({ initialData }) {
           <br></br>
           <div style={styles.container}>
             <span style={styles.mainText}>
-              {plant} - {value.toUpperCase()} - SHIFT{" "}
-              {localStorage.getItem("shift")} - {formatDateTime2(dataTime)} -{" "}
-              {localStorage.getItem("group")}
+              {plant} - {value.toUpperCase()}{" "}
+              {plant === "Milk Processing"
+                ? `- ${localStorage.getItem("tank")}`
+                : ""}{" "}
+              - SHIFT {shift} - {date} - {localStorage.getItem("group")}
             </span>
             {/* <button
               className="px-2 py-1 rounded-full text-sm font-medium text-indigo-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-indigo-600 hover:border-4 focus:border-4 hover:border-indigo-800 hover:text-indigo-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"

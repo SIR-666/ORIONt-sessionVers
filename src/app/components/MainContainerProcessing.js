@@ -216,17 +216,24 @@ const RectangleContainerProcessing = ({
             plannedSum += downtimeDuration;
           } else if (
             [
-              "Filling",
-              "Robot",
-              "Conveyor",
-              "Autocase Packer",
-              "Code Carton",
-              "Code Pack",
+              "Unloading",
+              "Separator",
+              "Thermization",
+              "Storage",
+              "Scanima_Mixer",
+              "Breedo",
+              "Flex 1",
+              "Flex 2",
+              "GEA",
+              "Aseptic_Tank1",
+              "Aseptic_Tank2",
+              "Aseptic_Tank3",
+              "Aseptic_Tank4",
+              "CIP_Kitchen1",
+              "CIP_Kitchen2",
+              "CIP_Kitchen3",
+              "CIP_Kitchen4",
               "Process Failure",
-              "Lain",
-              "Straw",
-              "Cap",
-              "Helix",
             ].includes(entry.Mesin)
           ) {
             unplannedSum += downtimeDuration;

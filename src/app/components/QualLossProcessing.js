@@ -5,9 +5,10 @@ import nominalSpeeds from "../speed";
 
 const QualLossProcessing = ({ onClose }) => {
   const [data, setData] = useState(null);
-  const [filling, setFilling] = useState(0);
-  const [packing, setPacking] = useState(0);
-  const [sample, setSample] = useState(0);
+  const [blowAwal, setBlowAwal] = useState(0);
+  const [drainAkhir, setDrainAkhir] = useState(0);
+  const [sirkulasi, setSirkulasi] = useState(0);
+  const [unplannedCIP, setUnplannedCIP] = useState(0);
   const [group, setGroup] = useState("");
   const [skuSpeed, setSKUSpeed] = useState(null);
   const [sku, setSKU] = useState("");
@@ -18,6 +19,8 @@ const QualLossProcessing = ({ onClose }) => {
   const shift = localStorage.getItem("shift");
   const date = localStorage.getItem("date");
   const plant = localStorage.getItem("plant");
+  const line = localStorage.getItem("line");
+  const tank = localStorage.getItem("tank");
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
@@ -137,9 +140,15 @@ const QualLossProcessing = ({ onClose }) => {
           const qualityData = await res.json();
           console.log("Reject samples: ", qualityData);
           if (Array.isArray(qualityData) && qualityData.length > 0) {
-            setFilling(qualityData[0].Downtime);
-            setPacking(qualityData[1].Downtime);
-            setSample(qualityData[2].Downtime);
+            const downtimeMap = qualityData.reduce((acc, item) => {
+              acc[item.name] = item.Downtime;
+              return acc;
+            }, {});
+
+            setBlowAwal(downtimeMap["BLOW AWAL"] || 0);
+            setDrainAkhir(downtimeMap["DRAIN AKHIR"] || 0);
+            setSirkulasi(downtimeMap["SIRKULASI"] || 0);
+            setUnplannedCIP(downtimeMap["UNPLANNED CIP"] || 0);
           }
           setGroup(element.group);
           setSKU(element.sku);
@@ -199,24 +208,156 @@ const QualLossProcessing = ({ onClose }) => {
     }
   }, [sku, formattedLineName]);
 
-  const handleFilling = (event) => {
-    const inputValue = event.target.value;
-    if (!isNaN(inputValue) || inputValue === "") {
-      setFilling(inputValue);
+  const yaValues = {
+    YA1: 1,
+    YA2: 2,
+    YA3: 3,
+    YA4: 4,
+    YA5: 5,
+    YA6: 6,
+    YA7: 7,
+    YA8: 8,
+    YA9: 9,
+    YA10: 10,
+  };
+
+  const handleGetBlowAwal = async (event) => {
+    try {
+      const step = "BLOW AWAL";
+      const yaSelected = event.target.value; // Ambil nilai YA dari dropdown
+
+      const res = await fetch(
+        `/api/getQualityLossProcessingMaster?sterilizer=${line}&tank=${tank}&step=${step}`,
+        { method: "GET", headers: { "Content-Type": "application/json" } }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch quality loss data");
+      }
+
+      const data = await res.json();
+      const score = data.score || 0; // Pastikan score tidak undefined
+
+      if (!yaValues[yaSelected]) {
+        throw new Error("Invalid YA value selected");
+      }
+
+      const totalScore = yaValues[yaSelected] * score;
+      setBlowAwal(totalScore);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const handlePacking = (event) => {
+  const handleBlowAwal = (event) => {
     const inputValue = event.target.value;
     if (!isNaN(inputValue) || inputValue === "") {
-      setPacking(inputValue);
+      setBlowAwal(inputValue);
     }
   };
 
-  const handleSample = (event) => {
+  const handleGetDrainAkhir = async (event) => {
+    try {
+      const step = "DRAIN AKHIR";
+      const yaSelected = event.target.value; // Ambil nilai YA dari dropdown
+
+      const res = await fetch(
+        `/api/getQualityLossProcessingMaster?sterilizer=${line}&tank=${tank}&step=${step}`,
+        { method: "GET", headers: { "Content-Type": "application/json" } }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch quality loss data");
+      }
+
+      const data = await res.json();
+      const score = data.score || 0; // Pastikan score tidak undefined
+
+      if (!yaValues[yaSelected]) {
+        throw new Error("Invalid YA value selected");
+      }
+
+      const totalScore = yaValues[yaSelected] * score;
+      setDrainAkhir(totalScore);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDrainAkhir = (event) => {
     const inputValue = event.target.value;
     if (!isNaN(inputValue) || inputValue === "") {
-      setSample(inputValue);
+      setDrainAkhir(inputValue);
+    }
+  };
+
+  const handleGetSirkulasi = async (event) => {
+    try {
+      const step = "SIRKULASI";
+      const yaSelected = event.target.value; // Ambil nilai YA dari dropdown
+
+      const res = await fetch(
+        `/api/getQualityLossProcessingMaster?sterilizer=${line}&tank=${tank}&step=${step}`,
+        { method: "GET", headers: { "Content-Type": "application/json" } }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch quality loss data");
+      }
+
+      const data = await res.json();
+      const score = data.score || 0; // Pastikan score tidak undefined
+
+      if (!yaValues[yaSelected]) {
+        throw new Error("Invalid YA value selected");
+      }
+
+      const totalScore = yaValues[yaSelected] * score;
+      setSirkulasi(totalScore);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSirkulasi = (event) => {
+    const inputValue = event.target.value;
+    if (!isNaN(inputValue) || inputValue === "") {
+      setSirkulasi(inputValue);
+    }
+  };
+
+  const handleGetUnplannedCIP = async (event) => {
+    try {
+      const step = "UNPLANNED CIP";
+      const yaSelected = event.target.value; // Ambil nilai YA dari dropdown
+
+      const res = await fetch(
+        `/api/getQualityLossProcessingMaster?sterilizer=${line}&tank=${tank}&step=${step}`,
+        { method: "GET", headers: { "Content-Type": "application/json" } }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch quality loss data");
+      }
+
+      const data = await res.json();
+      const score = data.score || 0; // Pastikan score tidak undefined
+
+      if (!yaValues[yaSelected]) {
+        throw new Error("Invalid YA value selected");
+      }
+
+      const totalScore = yaValues[yaSelected] * score;
+      setUnplannedCIP(totalScore);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUnplannedCIP = (event) => {
+    const inputValue = event.target.value;
+    if (!isNaN(inputValue) || inputValue === "") {
+      setUnplannedCIP(inputValue);
     }
   };
 
@@ -238,12 +379,14 @@ const QualLossProcessing = ({ onClose }) => {
     );
 
     if (userConfirmed) {
-      const fillingValue = parseInt(filling, 10) || 0;
-      const packingValue = parseInt(packing, 10) || 0;
-      const sampleValue = parseInt(sample, 10) || 0;
+      const blowAwalValue = parseInt(blowAwal, 10) || 0;
+      const drainAkhirValue = parseInt(drainAkhir, 10) || 0;
+      const sirkulasiValue = parseInt(sirkulasi, 10) || 0;
+      const unplannedCIPValue = parseInt(unplannedCIP, 10) || 0;
 
       // Calculate quality loss
-      const totalRejects = fillingValue + packingValue + sampleValue;
+      const totalRejects =
+        blowAwalValue + drainAkhirValue + sirkulasiValue + unplannedCIPValue;
       if (totalRejects === 0) {
         alert("At least one of the inputs must be greater than 0.");
         return;
@@ -262,15 +405,16 @@ const QualLossProcessing = ({ onClose }) => {
         const start = new Date(data?.actual_start);
         start.setHours(start.getHours() - 7);
         startTime = start < shiftTime.startTime ? shiftTime.startTime : start;
-        const response = await fetch("/api/createQualLoss", {
+        const response = await fetch("/api/createQualLossProcessing", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            filling: fillingValue,
-            packing: packingValue,
-            sample: sampleValue,
+            blowAwal: blowAwalValue,
+            drainAkhir: drainAkhirValue,
+            sirkulasi: sirkulasiValue,
+            unplannedCIP: unplannedCIPValue,
             qual: qual || 0,
             value: value,
             actual_start: toLocalISO(startTime),
@@ -318,7 +462,7 @@ const QualLossProcessing = ({ onClose }) => {
                 </button>
               </div>
               <div className="relative p-6 flex-auto w-full flex flex-col">
-                <div className="grid grid-cols-4">
+                <div className="grid grid-cols-5">
                   <div className="relative col-span-1 items-center justify-center w-full flex flex-col h-full">
                     <h2 className="text-black px-3 py-2">Blow Awal: </h2>
                     <br></br>
@@ -328,14 +472,67 @@ const QualLossProcessing = ({ onClose }) => {
                     <br></br>
                     <h2 className="text-black px-3 py-2">Unplanned CIP: </h2>
                   </div>
+                  <div className="relative col-span-1 items-center justify-center w-full flex flex-col h-full">
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      onChange={handleGetBlowAwal}
+                    >
+                      <option value="">Select a loss</option>
+                      {Object.keys(yaValues).map((ya) => (
+                        <option key={ya} value={ya}>
+                          {ya}
+                        </option>
+                      ))}
+                    </select>
+                    <br></br>
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      onChange={handleGetDrainAkhir}
+                    >
+                      <option value="">Select a loss</option>
+                      {Object.keys(yaValues).map((ya) => (
+                        <option key={ya} value={ya}>
+                          {ya}
+                        </option>
+                      ))}
+                    </select>
+                    <br></br>
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      onChange={handleGetSirkulasi}
+                    >
+                      <option value="">Select a loss</option>
+                      {Object.keys(yaValues).map((ya) => (
+                        <option key={ya} value={ya}>
+                          {ya}
+                        </option>
+                      ))}
+                    </select>
+                    <br></br>
+                    <select
+                      id="observedArea"
+                      className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                      onChange={handleGetUnplannedCIP}
+                    >
+                      <option value="">Select a loss</option>
+                      {Object.keys(yaValues).map((ya) => (
+                        <option key={ya} value={ya}>
+                          {ya}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="relative col-span-2 items-center justify-center w-full flex flex-col h-full">
                     <input
                       type="number"
                       name="quality"
                       id="quality"
                       className="border border-gray-300 px-3 py-2 text-black"
-                      value={filling}
-                      onChange={handleFilling}
+                      value={blowAwal}
+                      onChange={handleBlowAwal}
                     />
                     <br></br>
                     <input
@@ -343,8 +540,8 @@ const QualLossProcessing = ({ onClose }) => {
                       name="quality"
                       id="quality"
                       className="border border-gray-300 px-3 py-2 text-black"
-                      value={packing}
-                      onChange={handlePacking}
+                      value={drainAkhir}
+                      onChange={handleDrainAkhir}
                     />
                     <br></br>
                     <input
@@ -352,8 +549,8 @@ const QualLossProcessing = ({ onClose }) => {
                       name="quality"
                       id="quality"
                       className="border border-gray-300 px-3 py-2 text-black"
-                      value={sample}
-                      onChange={handleSample}
+                      value={sirkulasi}
+                      onChange={handleSirkulasi}
                     />
                     <br></br>
                     <input
@@ -361,8 +558,8 @@ const QualLossProcessing = ({ onClose }) => {
                       name="quality"
                       id="quality"
                       className="border border-gray-300 px-3 py-2 text-black"
-                      value={sample}
-                      onChange={handleSample}
+                      value={unplannedCIP}
+                      onChange={handleUnplannedCIP}
                     />
                   </div>
                   <div className="relative col-span-1 items-center justify-center w-full flex flex-col h-full">

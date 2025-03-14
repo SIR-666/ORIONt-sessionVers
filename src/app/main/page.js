@@ -400,8 +400,11 @@ function MainPage() {
           <br></br>
           <div style={styles.container}>
             <span style={styles.mainText}>
-              {plant} - {value.toUpperCase()} - SHIFT {shift} - {date} -{" "}
-              {localStorage.getItem("group")}
+              {plant} - {value.toUpperCase()}{" "}
+              {plant === "Milk Processing"
+                ? `- ${localStorage.getItem("tank")}`
+                : ""}{" "}
+              - SHIFT {shift} - {date} - {localStorage.getItem("group")}
               {shiftMismatch && (
                 <span style={{ color: "red", fontWeight: "bold" }}>
                   {" "}
