@@ -1,8 +1,10 @@
 import url from "@/app/url";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(req.url, "http://10.24.0.81:3007");
     const plant = searchParams.get("plant") || "";
 
     if (!plant) {

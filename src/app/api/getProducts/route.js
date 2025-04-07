@@ -1,5 +1,7 @@
 import url from "@/app/url";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req) {
   try {
     // Ambil parameter dari URL

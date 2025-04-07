@@ -11,7 +11,7 @@ const ReportPerformance = () => {
   const [filterField, setFilterField] = useState("All"); // New state for the filter field
 
   const [loading, setLoading] = useState(false);
-  const plant = localStorage.getItem("plant");
+  const [plant, setPlant] = useState(null);
 
   const formatDateTime = (dateString) => {
     if (!dateString || typeof dateString !== "string") {
@@ -36,12 +36,13 @@ const ReportPerformance = () => {
   };
 
   const fetchData = async () => {
+    if (!plant) return;
+
     setLoading(true);
     try {
       const response = await fetch(`/api/getAllPerformance?plant=${plant}`);
       const newData = await response.json();
-      console.log("Fetched Data:", newData);
-      setTableData(newData); // Update the data with the current page's data
+      setTableData(newData);
       setFilteredData(newData);
     } catch (error) {
       console.error("Error fetching performance data:", error);
@@ -53,8 +54,15 @@ const ReportPerformance = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const storedPlant = localStorage.getItem("plant");
+    setPlant(storedPlant);
   }, []);
+
+  useEffect(() => {
+    if (plant) {
+      fetchData();
+    }
+  }, [plant]);
 
   useEffect(() => {
     if (filterField && filterValue) {
