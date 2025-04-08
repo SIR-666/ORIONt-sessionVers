@@ -57,7 +57,7 @@ function SearchParamsWrapper() {
   const value = router.get("value");
   const shift = router.get("shift");
   const date = router.get("date");
-  const plant = "Milk Filling Packing"; // Hardcoded plant value
+  const plant = "Yogurt"; // Hardcoded plant value
 
   return (
     <Suspense fallback={<p className="text-white">Loading...</p>}>

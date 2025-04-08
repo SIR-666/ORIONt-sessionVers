@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 const ProdType = (props) => {
   const [selectedItem, setSelectedItem] = useState("");
@@ -75,9 +75,7 @@ const ProdType = (props) => {
             className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
             style={{ backgroundColor: "#A3D9A5" }}
           >
-            <h3 className="text-black font-semibold text-gray-700">
-              Select Material
-            </h3>
+            <h3 className="text-black font-semibold">Select Material</h3>
             <button
               className="bg-transparent border-0 text-black float-right"
               onClick={() => props.setShowForm1(false)}

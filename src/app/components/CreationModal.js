@@ -30,9 +30,7 @@ const CreationModal = (props) => {
               className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
               style={{ backgroundColor: "#A3D9A5" }}
             >
-              <h3 className="text-black font-semibold text-gray-700">
-                Create New Data
-              </h3>
+              <h3 className="text-black font-semibold">Create New Data</h3>
               <button
                 className="bg-transparent border-0 text-black float-right"
                 onClick={() => props.setShowModal(false)}

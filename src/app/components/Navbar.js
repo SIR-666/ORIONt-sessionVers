@@ -68,6 +68,7 @@ export default function Navbar({ toggleSidebar, transparent }) {
     localStorage.removeItem("profile");
     localStorage.removeItem("user");
     localStorage.removeItem("plant");
+    localStorage.removeItem("tank");
     localStorage.removeItem("line");
     localStorage.removeItem("selectedMaterial");
     localStorage.removeItem("materialData");

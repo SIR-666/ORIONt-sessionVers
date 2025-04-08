@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
+import url from "../url";
 
 const Modal = (props) => {
   const [selectedLine, setSelectedLine] = useState("");
@@ -14,6 +15,7 @@ const Modal = (props) => {
   const [tableLine, setTableLineData] = useState([]);
   const [filteredLines, setFilteredLines] = useState([]);
   const [processingLines, setProcessingLines] = useState([]);
+  const [group, setGroup] = useState([]);
   const [previousPage, setPreviousPage] = useState(null);
   const router = useRouter();
   const handleSelectLine = (event) => {
@@ -161,61 +163,88 @@ const Modal = (props) => {
     }
   }, [data]);
 
+  useEffect(() => {
+    const fetchGroupData = async () => {
+      if (selectedPlant) {
+        try {
+          const response = await fetch(
+            `${url.URL}/getGroupByPlant?plant=${selectedPlant}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+          const jsonData = await response.json();
+          console.log("Fetched Group Data: ", jsonData);
+
+          // Ambil hanya field `group` dan buat unique list
+          const uniqueGroups = [...new Set(jsonData.map((item) => item.group))];
+
+          setGroup(uniqueGroups);
+        } catch (error) {
+          console.error("Error fetching group data:", error);
+        }
+      }
+    };
+
+    fetchGroupData();
+  }, [selectedPlant]);
+
   const handleSubmit = () => {
     let route = "";
+    const encodedParams = `value=${encodeURIComponent(
+      selectedLine
+    )}&shift=${encodeURIComponent(selectedShift)}&date=${encodeURIComponent(
+      selectedDate
+    )}`;
+
     switch (selectedPlant) {
       case "Milk Filling Packing":
-        route = `../order/filling?value=${encodeURIComponent(
-          selectedLine
-        )}&shift=${encodeURIComponent(selectedShift)}&date=${encodeURIComponent(
-          selectedDate
-        )}`;
-        const encodedLine = encodeURIComponent(selectedLine);
-        console.log("Line: ", encodedLine);
+        route = `../order/filling?${encodedParams}`;
         break;
-
       case "Milk Processing":
-        route = `../order/processing?value=${encodeURIComponent(
-          selectedLine
-        )}&shift=${encodeURIComponent(selectedShift)}&date=${encodeURIComponent(
-          selectedDate
-        )}`;
-        const codedLine = encodeURIComponent(selectedLine);
-        console.log("Line: ", codedLine);
+        route = `../order/processing?${encodedParams}`;
         break;
-
+      case "Yogurt":
+        route = `../order/yogurt?${encodedParams}`;
+        break;
+      case "Cheese":
+        route = `../order/cheese?${encodedParams}`;
+        break;
       default:
         alert("Invalid route");
         return;
     }
-    console.log("Routing to:", route); // Check the route format
-    console.log("Selected Plant:", selectedPlant);
-    console.log("Selected Line:", selectedLine);
-    console.log("Selected Shift:", selectedShift);
-    console.log("Selected Date: ", selectedDate);
 
-    localStorage.setItem("line", selectedLine);
+    console.log("Routing to:", route);
+    console.log("Selected Plant:", selectedPlant);
+
+    // Simpan data
     localStorage.setItem("plant", selectedPlant);
+    localStorage.setItem("line", selectedLine);
     localStorage.setItem("shift", selectedShift);
     localStorage.setItem("date", selectedDate);
     localStorage.setItem("group", selectedGroup);
-    if (selectedPlant === "Milk Processing")
+    if (selectedPlant === "Milk Processing") {
       localStorage.setItem("tank", selectedTank);
+    }
 
-    router.push(route);
-    router.refresh();
-    // Hapus 'id' dari localStorage jika ada
+    // Bersihkan jika ada
     if (localStorage.getItem("selectedMaterial")) {
       localStorage.removeItem("selectedMaterial");
       console.log("ID removed from localStorage");
-    } else console.log("ID notfound from localStorage");
+    }
 
+    // Navigasi
+    router.push(route);
+
+    // Reload hanya jika semua field tersedia
     if (
-      localStorage.getItem("line") &&
-      localStorage.getItem("plant") &&
-      localStorage.getItem("shift") &&
-      localStorage.getItem("date") &&
-      localStorage.getItem("group")
+      selectedLine &&
+      selectedPlant &&
+      selectedShift &&
+      selectedDate &&
+      selectedGroup
     ) {
       setTimeout(() => {
         window.location.reload();
@@ -224,6 +253,7 @@ const Modal = (props) => {
 
     props.setShowModal(false);
   };
+
   return (
     <>
       <div className="flex justify-center items-center overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
@@ -405,15 +435,24 @@ const Modal = (props) => {
                       Group
                     </label>
                     <select
-                      id="observedArea"
+                      id="group"
                       className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                       value={selectedGroup}
                       onChange={handleSelectGroup}
+                      disabled={!selectedPlant}
                     >
                       <option value="">Choose a group</option>
-                      <option value="BROMO">BROMO</option>
-                      <option value="SEMERU">SEMERU</option>
-                      <option value="KRAKATAU">KRAKATAU</option>
+                      {group && group.length > 0 ? (
+                        group.map((item, index) => (
+                          <option key={index} value={item}>
+                            {item}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          No groups available for this plant
+                        </option>
+                      )}
                     </select>
                   </div>
                 </form>

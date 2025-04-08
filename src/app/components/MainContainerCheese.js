@@ -16,7 +16,7 @@ import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
 
-const RectangleContainer = ({
+const RectangleContainerCheese = ({
   initialData,
   stoppageData,
   allPO,
@@ -212,31 +212,40 @@ const RectangleContainer = ({
         // console.log("Downtime duration:", downtimeDuration);
 
         if (downtimeDuration > 0) {
-          const mesin = entry.Mesin.trim();
-          if (mesin === "Planned Stop") {
+          if (entry.Mesin === "Planned Stop") {
             plannedSum += downtimeDuration;
           } else if (
             [
+              "Vacuum",
+              "Outfeed",
+              "Safety",
+              "Man",
+              "Cleaning",
+              "Unloading Receiving Milk",
+              "Pasteurizer",
+              "Curdling",
+              "Steam_Stretcher",
+              "Sterilizer",
+              "Cooling",
+              "Brining",
+              "Drying",
+              "Electric",
+              "System",
+              "Moulding",
               "Filling",
-              "Robot",
-              "Conveyor",
-              "Autocase Packer",
-              "Code Carton",
-              "Code Pack",
+              "WHE",
+              "Flucculator",
+              "Draining",
+              "Mixing",
+              "Homogenizing",
               "Process Failure",
-              "Lain",
-              "Straw",
-              "Cap",
-              "Helix",
-            ].includes(mesin)
+            ].includes(entry.Mesin)
           ) {
             unplannedSum += downtimeDuration;
-          } else if (mesin === "Unavailable Time") {
+          } else if (entry.Mesin === "Unavailable Time") {
             unavailableSum += downtimeDuration;
-          } else if (mesin === "Process Waiting") {
+          } else if (entry.Mesin === "Process Waiting") {
             waitingSum += downtimeDuration;
-          } else {
-            console.log("entry mesin:", mesin);
           }
         }
       });
@@ -1186,4 +1195,4 @@ const RectangleContainer = ({
   );
 };
 
-export default RectangleContainer;
+export default RectangleContainerCheese;

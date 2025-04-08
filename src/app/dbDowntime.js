@@ -309,14 +309,14 @@ async function getDowntimeId(id) {
   }
 }
 
-async function deleteDowntime(id, plant) {
+async function deleteDowntime(id, plant, line) {
   try {
     const response = await fetch(`${URL.URL}/deleteStoppage`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id, plant }),
+      body: JSON.stringify({ id, plant, line }),
     });
 
     if (!response.ok) {

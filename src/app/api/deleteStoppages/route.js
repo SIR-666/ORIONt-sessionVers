@@ -1,11 +1,11 @@
 import { deleteDowntime } from "@/app/dbDowntime";
 
 export async function POST(req) {
-  const { id, plant } = await req.json();
+  const { id, plant, line } = await req.json();
   console.log("Deleting stoppage id: ", id);
 
   try {
-    const response = await deleteDowntime(id, plant);
+    const response = await deleteDowntime(id, plant, line);
 
     return new Response(JSON.stringify(response), {
       status: 200,

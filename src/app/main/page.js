@@ -6,6 +6,7 @@ import RectangleTable from "@/app/components/MainTable";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import LoadingSpinner from "../components/loading";
+import RectangleContainerCheese from "../components/MainContainerCheese";
 import MainModal from "../components/MainModal";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
@@ -468,6 +469,14 @@ function MainPage() {
               />
             ) : plant === "Milk Filling Packing" ? (
               <RectangleContainer
+                initialData={data}
+                stoppageData={stoppage}
+                allPO={PO}
+                group={group}
+                localTime={getLocalISOString()}
+              />
+            ) : plant === "Cheese" ? (
+              <RectangleContainerCheese
                 initialData={data}
                 stoppageData={stoppage}
                 allPO={PO}

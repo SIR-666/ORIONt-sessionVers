@@ -144,6 +144,29 @@ async function getAllPO(line, year, month, shift, date, plant) {
         return data.filter((item) => item.MATERIAL?.includes("ESL"));
       } else if (["GEA 3", "GEA 4"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("UHT"));
+      } else if (["YA"].includes(line)) {
+        return data.filter((item) => item.MATERIAL?.includes("125"));
+      } else if (["YB"].includes(line)) {
+        return data.filter(
+          (item) =>
+            item.MATERIAL?.includes("500") || item.MATERIAL?.includes("1000")
+        );
+      } else if (["YD (POUCH)"].includes(line)) {
+        return data.filter((item) => item.MATERIAL?.includes("POUCH"));
+      } else if (["YRTD"].includes(line)) {
+        return data.filter((item) => item.MATERIAL?.includes("RTD"));
+      } else if (["PASTEURIZER"].includes(line)) {
+        return data.filter((item) => item.MATERIAL?.includes("SFP"));
+      } else if (["RICO"].includes(line)) {
+        return data.filter(
+          (item) =>
+            item.MATERIAL?.includes("RICOTTA") & !item.MATERIAL?.includes("SFP")
+        );
+      } else if (["MOZ 200", "MOZ 1000"].includes(line)) {
+        return data.filter(
+          (item) =>
+            item.MATERIAL?.includes("MOZZ") & !item.MATERIAL?.includes("SFP")
+        );
       } else {
         return data;
       }

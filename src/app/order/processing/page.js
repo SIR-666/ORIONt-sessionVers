@@ -28,10 +28,10 @@ function DataFetcher({ value, shift, date, plant }) {
       }
     };
 
-    if (value) {
+    if (value && plant) {
       fetchData();
     }
-  }, [value]);
+  }, [value, plant]);
 
   if (loading) {
     return <LoadingSpinner />; // Tampilkan animasi loading
@@ -57,7 +57,7 @@ function SearchParamsWrapper() {
   const value = router.get("value");
   const shift = router.get("shift");
   const date = router.get("date");
-  const plant = localStorage.getItem("plant");
+  const plant = "Milk Processing"; // Hardcoded plant value
 
   return (
     <Suspense fallback={<p className="text-white">Loading...</p>}>

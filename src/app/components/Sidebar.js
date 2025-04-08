@@ -65,6 +65,10 @@ function SidebarContent({ isOpen }) {
             window.location.href = `../../order/filling?value=${line}&shift=${shift}&date=${date}`;
           } else if (plant === "Milk Processing") {
             window.location.href = `../../order/processing?value=${line}&shift=${shift}&date=${date}`;
+          } else if (plant === "Yogurt") {
+            window.location.href = `../../order/yogurt?value=${line}&shift=${shift}&date=${date}`;
+          } else if (plant === "Cheese") {
+            window.location.href = `../../order/cheese?value=${line}&shift=${shift}&date=${date}`;
           }
         } else {
           window.location.href = "../../order";
@@ -179,6 +183,8 @@ function SidebarContent({ isOpen }) {
           {plant === "Milk Processing" ? (
             <QualityLossProcessing onClose={() => setQualityLossModal(false)} />
           ) : plant === "Milk Filling Packing" ? (
+            <QualityLoss onClose={() => setQualityLossModal(false)} />
+          ) : plant === "Cheese" ? (
             <QualityLoss onClose={() => setQualityLossModal(false)} />
           ) : null}
         </>

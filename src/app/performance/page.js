@@ -12,6 +12,7 @@ const ReportPerformance = () => {
 
   const [loading, setLoading] = useState(false);
   const [plant, setPlant] = useState(null);
+  const [line, setLine] = useState(null);
 
   const formatDateTime = (dateString) => {
     if (!dateString || typeof dateString !== "string") {
@@ -36,11 +37,13 @@ const ReportPerformance = () => {
   };
 
   const fetchData = async () => {
-    if (!plant) return;
+    if (!plant || !line) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/getAllPerformance?plant=${plant}`);
+      const response = await fetch(
+        `/api/getAllPerformance?plant=${plant}&line=${line}`
+      );
       const newData = await response.json();
       setTableData(newData);
       setFilteredData(newData);
@@ -55,14 +58,16 @@ const ReportPerformance = () => {
 
   useEffect(() => {
     const storedPlant = localStorage.getItem("plant");
+    const storedLine = localStorage.getItem("line");
     setPlant(storedPlant);
+    setLine(storedLine);
   }, []);
 
   useEffect(() => {
-    if (plant) {
+    if (plant && line) {
       fetchData();
     }
-  }, [plant]);
+  }, [plant, line]);
 
   useEffect(() => {
     if (filterField && filterValue) {

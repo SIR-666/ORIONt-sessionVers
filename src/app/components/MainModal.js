@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
+import url from "../url";
 
 const MainModal = (props) => {
   const [PO, setPO] = useState([]);
@@ -15,6 +16,7 @@ const MainModal = (props) => {
   const [tableLine, setTableLineData] = useState([]);
   const [filteredLines, setFilteredLines] = useState([]);
   const [processingLines, setProcessingLines] = useState([]);
+  const [group, setGroup] = useState([]);
   const router = useRouter();
   const handleSelectLine = (event) => {
     const value = event.target.value;
@@ -171,6 +173,33 @@ const MainModal = (props) => {
       }, 2000);
     }
   };
+
+  useEffect(() => {
+    const fetchGroupData = async () => {
+      if (selectedPlant) {
+        try {
+          const response = await fetch(
+            `${url.URL}/getGroupByPlant?plant=${selectedPlant}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+          const jsonData = await response.json();
+          console.log("Fetched Group Data: ", jsonData);
+
+          // Ambil hanya field `group` dan buat unique list
+          const uniqueGroups = [...new Set(jsonData.map((item) => item.group))];
+
+          setGroup(uniqueGroups);
+        } catch (error) {
+          console.error("Error fetching group data:", error);
+        }
+      }
+    };
+
+    fetchGroupData();
+  }, [selectedPlant]);
 
   const handleSubmit = async () => {
     let startTime, endTime;
@@ -410,15 +439,24 @@ const MainModal = (props) => {
                       Group
                     </label>
                     <select
-                      id="observedArea"
+                      id="group"
                       className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                       value={selectedGroup}
                       onChange={handleSelectGroup}
+                      disabled={!selectedPlant}
                     >
                       <option value="">Choose a group</option>
-                      <option value="BROMO">BROMO</option>
-                      <option value="SEMERU">SEMERU</option>
-                      <option value="KRAKATAU">KRAKATAU</option>
+                      {group && group.length > 0 ? (
+                        group.map((item, index) => (
+                          <option key={index} value={item}>
+                            {item}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          No groups available for this plant
+                        </option>
+                      )}
                     </select>
                   </div>
                 </form>

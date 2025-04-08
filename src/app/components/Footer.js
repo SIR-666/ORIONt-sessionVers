@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Footer(props) {
   return (
     <>
@@ -17,7 +15,7 @@ export default function Footer(props) {
               <div className="text-sm text-gray-500 font-semibold py-1">
                 Copyright © {new Date().getFullYear()}{" "}
                 <a
-                  href="https://www.greenfieldsdairy.com/"
+                  href="https://greenfieldsdairy.com/"
                   className="text-gray-500 hover:text-gray-400 text-sm font-semibold py-1"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -26,9 +24,7 @@ export default function Footer(props) {
                 </a>
               </div>
             </div>
-            <div className="w-full md:w-8/12 px-4">
-              
-            </div>
+            <div className="w-full md:w-8/12 px-4"></div>
           </div>
         </div>
       </footer>

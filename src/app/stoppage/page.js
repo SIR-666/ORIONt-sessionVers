@@ -3,12 +3,12 @@ import Form from "@/app/components/AddStoppage";
 import FormFill from "@/app/components/AddStoppageForm";
 import FormType from "@/app/components/AddStoppageType";
 import Button2 from "@/app/components/Button2";
+import LoadingSpinner from "@/app/components/loading";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { adjustDowntimes } from "../downtimeUtils";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
-import LoadingSpinner from "@/app/components/loading"
 
 function StoppagePage() {
   const [tableData, setTableData] = useState([]);
@@ -29,6 +29,7 @@ function StoppagePage() {
   const [clickedRowData, setClickedRowData] = useState(null);
   const [clickedItemData, setClickedItemData] = useState({});
   const [plant, setPlant] = useState("");
+  const [line, setLine] = useState("");
   const [time, setTime] = useState(new Date());
   const [deletingItems, setDeletingItems] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -388,10 +389,12 @@ function StoppagePage() {
       const storedShift = localStorage.getItem("shift");
       const storedDate = localStorage.getItem("date");
       const storedGroup = localStorage.getItem("group");
-      setPlant(storedData ? storedData.replace(/["']/g, "") : "");
+      const storedLine = localStorage.getItem("line");
+      setPlant(storedData);
       setShift(storedShift);
       setDate(storedDate);
       setGroup(storedGroup);
+      setLine(storedLine);
     }
   }, []);
 
@@ -424,7 +427,7 @@ function StoppagePage() {
     console.log("Is editing (parent):", isEditing);
   }, [isEditing]);
 
-  const deleteItemById = async (id, plant) => {
+  const deleteItemById = async (id, plant, line) => {
     try {
       setDeletingItems((prevState) => ({
         ...prevState,
@@ -436,7 +439,7 @@ function StoppagePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id, plant }),
+        body: JSON.stringify({ id, plant, line }),
       });
 
       if (!response.ok) {
@@ -710,10 +713,7 @@ function StoppagePage() {
                             <button
                               className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-red-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-red-600 hover:border-4 focus:border-4 hover:border-red-800 hover:text-red-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"
                               onClick={() =>
-                                deleteItemById(
-                                  item.id,
-                                  localStorage.getItem("plant")
-                                )
+                                deleteItemById(item.id, plant, line)
                               }
                             >
                               <svg
