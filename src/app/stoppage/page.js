@@ -1,11 +1,12 @@
 "use client";
 import Form from "@/app/components/AddStoppage";
-import FormFill from "@/app/components/AddStoppageForm";
 import FormType from "@/app/components/AddStoppageType";
 import Button2 from "@/app/components/Button2";
 import LoadingSpinner from "@/app/components/loading";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import FormFill from "../components/AddStoppageForm";
+import FormFill2 from "../components/AddStoppageForm2";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
 import url from "../url";
@@ -395,19 +396,32 @@ function StoppagePage() {
               clickedData={clickedRowData}
             />
           )}
-          {showForm2 && (
-            <FormFill
-              setShowForm2={setShowForm2}
-              clickedData={clickedRowData}
-              isEditing={isEditing}
-              edit={setIsEditing}
-              editData={editData}
-              clickedItem={clickedItemData}
-              shift={getGreeting()}
-              po={PO}
-              group={group}
-            />
-          )}
+          {showForm2 &&
+            (plant === "Milk Processing" ? (
+              <FormFill2
+                setShowForm2={setShowForm2}
+                clickedData={clickedRowData}
+                isEditing={isEditing}
+                edit={setIsEditing}
+                editData={editData}
+                clickedItem={clickedItemData}
+                shift={getGreeting()}
+                po={PO}
+                group={group}
+              />
+            ) : (
+              <FormFill
+                setShowForm2={setShowForm2}
+                clickedData={clickedRowData}
+                isEditing={isEditing}
+                edit={setIsEditing}
+                editData={editData}
+                clickedItem={clickedItemData}
+                shift={getGreeting()}
+                po={PO}
+                group={group}
+              />
+            ))}
           <br></br>
           <br></br>
           <div style={styles.container}>
