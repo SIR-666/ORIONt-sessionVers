@@ -21,7 +21,10 @@ export async function GET(req) {
 
     // Panggil API backend (karena SQL ada di backend terpisah)
     const backendURL = `${url.URL}/getProducts?ids=${encodeURIComponent(ids)}`;
-    const response = await fetch(backendURL);
+    const response = await fetch(backendURL, {
+      // Optional: prevent fetch itself from using cache
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       throw new Error("Failed to fetch product data from backend");
@@ -32,7 +35,10 @@ export async function GET(req) {
 
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store", // ✅ ini mencegah browser/client cache
+      },
     });
   } catch (error) {
     console.error("Error fetching product data:", error);
