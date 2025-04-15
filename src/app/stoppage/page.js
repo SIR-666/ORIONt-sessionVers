@@ -5,13 +5,15 @@ import FormType from "@/app/components/AddStoppageType";
 import Button2 from "@/app/components/Button2";
 import LoadingSpinner from "@/app/components/loading";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { adjustDowntimes } from "../downtimeUtils";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
+import url from "../url";
 
 function StoppagePage() {
   const [tableData, setTableData] = useState([]);
+  const [tableDataDowntimeCILT, setTableDataDowntimeCILT] = useState([]);
+  const [loading, isLoading] = useState(false);
   const [filterValue, setFilterValue] = useState("");
   const [data, setData] = useState(null);
   const [PO, setPO] = useState(null);
@@ -106,6 +108,8 @@ function StoppagePage() {
   useEffect(() => {
     const shift = localStorage.getItem("shift");
     const date = localStorage.getItem("date");
+    const plant = localStorage.getItem("plant");
+    const line = localStorage.getItem("line");
 
     // Panggil getShift dan simpan hasilnya
     const shiftData = getShift(shift, date);
@@ -119,7 +123,6 @@ function StoppagePage() {
 
     const fetchData = async () => {
       try {
-        const line = localStorage.getItem("line");
         setGroup(localStorage.getItem("group"));
 
         const stoppagesRes = await fetch(`/api/getStoppages`, {
@@ -131,7 +134,7 @@ function StoppagePage() {
             line: line,
             date_start: toLocalISO(startTime),
             date_end: toLocalISO(endTime),
-            plant: localStorage.getItem("plant"),
+            plant: plant,
           }),
         });
 
@@ -149,230 +152,39 @@ function StoppagePage() {
       }
     };
 
+    const fetchDataDowntimeCILT = async () => {
+      try {
+        const stoppagesRes = await fetch(
+          `${url.URL}/getDowntimeFromCILT?plant=${plant}&date=${date}&shift=${shift}&line=${line}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log("Stoppage data: ", stoppagesRes);
+
+        if (!stoppagesRes.ok) {
+          const errorResponse = await stoppagesRes.json();
+          throw new Error(errorResponse.error || "Failed to update order");
+        }
+
+        const stoppageData = await stoppagesRes.json();
+        console.log("Stoppage data cilt: ", stoppageData);
+        setTableDataDowntimeCILT(
+          Array.isArray(stoppageData) ? stoppageData : []
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchDataDowntimeCILT();
     fetchData();
     console.log("Fetched data: ", tableData);
   }, []);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const productionOrderRes = await fetch(`/api/getPObyId?id=${id}`);
-
-  //       if (!productionOrderRes.ok) {
-  //         throw new Error("Failed to fetch one or more data sources");
-  //       }
-
-  //       const productionData = await productionOrderRes.json();
-
-  //       console.log("Retrieved PO from backend: ", productionData);
-
-  //       // Sort and set the production order data
-  //       setPO(productionData);
-  //       const currentShift = localStorage.getItem("shift");
-  //       const currentDate = localStorage.getItem("date");
-  //       const shiftTimes = getShift(currentShift, currentDate);
-
-  //       let start, end;
-  //       productionData.forEach(async (entry) => {
-  //         let startTime = new Date(entry.actual_start);
-  //         let endTime = entry.actual_end
-  //           ? new Date(entry.actual_end)
-  //           : new Date();
-  //         const startUTCTime = new Date(
-  //           startTime.setHours(startTime.getHours() - 7)
-  //         );
-  //         const endUTCTime = new Date(endTime.setHours(endTime.getHours() - 7));
-
-  //         start =
-  //           startUTCTime < shiftTimes.startTime
-  //             ? shiftTimes.startTime
-  //             : shiftTimes.startTime;
-  //         end =
-  //           endUTCTime < shiftTimes.endTime
-  //             ? shiftTimes.endTime
-  //             : shiftTimes.endTime;
-  //         // let localTime = startTime.getUTCHours();
-  //         // if (localTime >= 6 && localTime < 14) {
-  //         //   // Shift I: 6:00 AM to 2:00 PM
-  //         //   start = new Date(startTime);
-  //         //   start.setUTCHours(6, 0, 0, 0); // Set start to 6:00 AM
-  //         //   end = new Date(startTime);
-  //         //   end.setUTCHours(14, 0, 0, 0); // Set end to 2:00 PM
-  //         // } else if (localTime >= 14 && localTime < 22) {
-  //         //   // Shift II: 2:00 PM to 10:00 PM
-  //         //   start = new Date(startTime);
-  //         //   start.setUTCHours(14, 0, 0, 0); // Set start to 2:00 PM
-  //         //   end = new Date(startTime);
-  //         //   end.setUTCHours(22, 0, 0, 0); // Set end to 10:00 PM
-  //         // } else if (localTime >= 22 || localTime < 6) {
-  //         //   // Shift III: 10:00 PM to 6:00 AM (spans two days)
-  //         //   start = new Date(startTime);
-  //         //   start.setUTCHours(22, 0, 0, 0); // Set start to 10:00 PM
-
-  //         //   end = new Date(startTime);
-  //         //   if (localTime >= 22) {
-  //         //     // If current time is 10:00 PM or later, set end to 6:00 AM the next day
-  //         //     end.setDate(end.getDate() + 1);
-  //         //   } else if (localTime < 6) {
-  //         //     start.setDate(start.getDate() - 1);
-  //         //   }
-  //         //   end.setUTCHours(6, 0, 0, 0);
-  //         // }
-
-  //         console.log(
-  //           "Sent data for fetching: ",
-  //           value,
-  //           toLocalISO(start),
-  //           toLocalISO(end) || getLocalISOString()
-  //         );
-  //         setGroup(entry.group);
-  //         const stoppagesRes = await fetch(`/api/getStoppages`, {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify({
-  //             line: value,
-  //             date_start: toLocalISO(start),
-  //             date_end: toLocalISO(end) || getLocalISOString(),
-  //           }),
-  //         });
-
-  //         if (!stoppagesRes.ok) {
-  //           const errorResponse = await stoppagesRes.json();
-  //           throw new Error(errorResponse.error || "Failed to update order");
-  //         }
-
-  //         const stoppageData = await stoppagesRes.json();
-  //         setTableData(Array.isArray(stoppageData) ? stoppageData : []);
-  //       });
-
-  //       // const stoppagesRes = await fetch(`/api/getStoppages`, {
-  //       //   method: "POST",
-  //       //   headers: {
-  //       //     "Content-Type": "application/json",
-  //       //   },
-  //       //   body: JSON.stringify({
-  //       //     line: value,
-  //       //     date_start: toLocalISO(start),
-  //       //     date_end: toLocalISO(end) || getLocalISOString(),
-  //       //   }),
-  //       // });
-
-  //       // if (!stoppagesRes.ok) {
-  //       //   const errorResponse = await stoppagesRes.json();
-  //       //   throw new Error(errorResponse.error || "Failed to update order");
-  //       // }
-
-  //       // const stoppageData = await stoppagesRes.json();
-  //       // setTableData(Array.isArray(stoppageData) ? stoppageData : []);
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //       // alert("Error getting stoppages: " + error.message);
-  //       alert(
-  //         "Silahkan pilih Production Order terlebih dahulu: " + error.message
-  //       );
-  //       setTableData([]);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [value]);
-
-  // useEffect(() => {
-  //   const fetchAllPO = async () => {
-  //     try {
-  //       const currentShift = localStorage.getItem("shift");
-  //       const currentDate = localStorage.getItem("date");
-  //       const shiftTimes = getShift(currentShift, currentDate);
-  //       let start, end;
-  //       const promises = PO.map(async (entry) => {
-  //         let startTime = new Date(entry.actual_start);
-  //         let endTime = entry.actual_end
-  //           ? new Date(entry.actual_end)
-  //           : new Date();
-  //         const startUTCTime = new Date(
-  //           startTime.setHours(startTime.getHours() - 7)
-  //         );
-  //         const endUTCTime = new Date(endTime.setHours(endTime.getHours() - 7));
-
-  //         start =
-  //           startUTCTime < shiftTimes.startTime
-  //             ? shiftTimes.startTime
-  //             : shiftTimes.startTime;
-  //         end =
-  //           endUTCTime < shiftTimes.endTime
-  //             ? shiftTimes.endTime
-  //             : shiftTimes.endTime;
-  //         // let localTime = startTime.getUTCHours();
-  //         // console.log("utc time: ", localTime);
-  //         // if (localTime >= 6 && localTime < 14) {
-  //         //   // Shift I: 6:00 AM to 2:00 PM
-  //         //   start = new Date(startTime);
-  //         //   start.setUTCHours(6, 0, 0, 0); // Set start to 6:00 AM
-  //         //   end = new Date(startTime);
-  //         //   end.setUTCHours(14, 0, 0, 0); // Set end to 2:00 PM
-  //         // } else if (localTime >= 14 && localTime < 22) {
-  //         //   // Shift II: 2:00 PM to 10:00 PM
-  //         //   start = new Date(startTime);
-  //         //   start.setUTCHours(14, 0, 0, 0); // Set start to 2:00 PM
-  //         //   end = new Date(startTime);
-  //         //   end.setUTCHours(22, 0, 0, 0); // Set end to 10:00 PM
-  //         // } else if (localTime >= 22 || localTime < 6) {
-  //         //   // Shift III: 10:00 PM to 6:00 AM (spans two days)
-  //         //   start = new Date(startTime);
-  //         //   start.setUTCHours(22, 0, 0, 0); // Set start to 10:00 PM
-
-  //         //   end = new Date(startTime);
-  //         //   if (localTime >= 22) {
-  //         //     // If current time is 10:00 PM or later, set end to 6:00 AM the next day
-  //         //     end.setDate(end.getDate() + 1);
-  //         //   } else if (localTime < 6) {
-  //         //     start.setDate(start.getDate() - 1);
-  //         //   }
-  //         //   end.setUTCHours(6, 0, 0, 0);
-  //         // }
-
-  //         console.log("Date start: ", toLocalISO(start));
-  //         console.log("Date end: ", toLocalISO(end));
-  //         const shiftRes = await fetch(`/api/getAllShiftPO`, {
-  //           method: "POST",
-  //           headers: { "Content-Type": "application/json" },
-  //           body: JSON.stringify({
-  //             line: value,
-  //             date_start: toLocalISO(start),
-  //             date_end: toLocalISO(end),
-  //           }),
-  //         });
-
-  //         if (!shiftRes.ok) {
-  //           throw new Error("Failed to fetch all PO data");
-  //         }
-
-  //         let result;
-  //         try {
-  //           result = await shiftRes.json();
-  //         } catch (error) {
-  //           console.warn("Failed to parse JSON response:", error);
-  //           result = []; // Set to empty array if JSON parsing fails
-  //         }
-
-  //         // console.log('Received Production Order from backend:', result);
-  //         return result;
-  //       });
-
-  //       const allResults = await Promise.all(promises);
-  //       setData(allResults.flat());
-  //     } catch (error) {
-  //       console.error("Error fetching production orders:", error);
-  //       // Optionally set data to an empty array or string to ensure it doesn't interfere
-  //       setData([]);
-  //     }
-  //   };
-  //   if (value && PO) {
-  //     // Ensure value exists before attempting fetch
-  //     fetchAllPO();
-  //   }
-  // }, [value, PO]);
 
   useEffect(() => {
     const timerId = setInterval(() => {
@@ -467,20 +279,6 @@ function StoppagePage() {
     }
   };
 
-  const adjustedDowntimes = useMemo(() => {
-    const result = adjustDowntimes(tableData, data, value.toUpperCase());
-
-    console.log("Sent Stoppage data:", tableData);
-    console.log("Sent PO data:", data);
-    return result.filter((item) =>
-      Object.values(item).some((val) =>
-        val?.toString().toLowerCase().includes(filterValue.toLowerCase())
-      )
-    );
-  }, [tableData, data, value, filterValue]);
-
-  // console.log("Retrieved Downtime based on PO: ", adjustedDowntimes);
-
   const handleClick = (buttonIndex) => {
     setClicked(buttonIndex);
   };
@@ -502,7 +300,87 @@ function StoppagePage() {
     setShowForm2(true);
   };
 
-  return (
+  const handleUpdateStatusDowntimeCILT = async (
+    id,
+    machine,
+    startTime,
+    duration,
+    comments,
+    typeData,
+    categoryData,
+    actionType
+  ) => {
+    try {
+      isLoading(true);
+      const status = 1; // Assuming 1 means "Accepted" and "Rejected"
+
+      const updateResponse = await fetch(
+        `${url.URL}/updateStatusDowntimeCILT`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id, status }),
+        }
+      );
+
+      if (!updateResponse.ok) {
+        const errorResponse = await updateResponse.json();
+        alert("Failed to update downtime");
+        throw new Error(errorResponse.error || "Failed to update downtime");
+      }
+
+      if (actionType === "Accept") {
+        const end = new Date(startTime);
+        end.setMinutes(end.getMinutes() + parseInt(duration));
+        const endTime = end.toISOString();
+
+        const dataToSend = {
+          code: typeData,
+          machine: machine,
+          startTime: startTime.slice(0, 16),
+          endTime: endTime.slice(0, 16),
+          duration: parseInt(duration),
+          comments: comments,
+          type: categoryData,
+          shift: shift,
+          line: line,
+          group: group,
+          plant: plant,
+        };
+
+        console.log("Sending to createStoppage:", dataToSend);
+
+        const createResponse = await fetch("/api/createStoppage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSend),
+        });
+
+        if (!createResponse.ok) {
+          const errorResponse = await createResponse.json();
+          alert("Failed to create downtime");
+          throw new Error(errorResponse.error || "Failed to create downtime");
+        }
+      }
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("❌ Failed to update or create downtime: " + error.message);
+    } finally {
+      isLoading(false);
+    }
+  };
+
+  return loading ? (
+    <LoadingSpinner />
+  ) : (
     <>
       <MainLayout>
         <main className="flex-1 p-8 bg-white">
@@ -534,8 +412,11 @@ function StoppagePage() {
           <br></br>
           <div style={styles.container}>
             <span style={styles.mainText}>
-              {plant} - {value.toUpperCase()} - SHIFT {shift} - {date} -{" "}
-              {localStorage.getItem("group")}
+              {plant} - {value.toUpperCase()}{" "}
+              {plant === "Milk Processing"
+                ? `- ${localStorage.getItem("tank")}`
+                : ""}{" "}
+              - SHIFT {shift} - {date} - {localStorage.getItem("group")}
             </span>
             <span style={styles.dateText} suppressHydrationWarning>
               {time
@@ -606,16 +487,16 @@ function StoppagePage() {
           </div>
         </main>
         <div className="relative w-full h-128 rounded-xl bg-white shadow-xl">
-          <div className="relative w-full overflow-y-auto overflow-x-auto flex flex-col h-full px-5 py-4">
+          {/* <div className="relative w-full overflow-y-auto overflow-x-auto flex flex-col h-full px-5 py-4">
+            <text className="text-lg font-semibold text-black mb-2 mt-2">
+              Downtime From CILT
+            </text>
             <table className="w-flex text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+              <thead className="text-xs text-gray-700 uppercase bg-blue-100">
                 <tr>
                   <th scope="col" className="py-3 px-6">
                     Downtime ID
                   </th>
-                  {/* <th scope="col" className="py-3 px-6">
-                    Production Order (PO)
-                  </th> */}
                   <th scope="col" className="py-3 px-6">
                     Machine
                   </th>
@@ -631,16 +512,129 @@ function StoppagePage() {
                   <th scope="col" className="py-3 px-6">
                     Duration (Minutes)
                   </th>
-                  {/* <th scope="col" className="py-3 px-6">Impacts Line</th> */}
                   <th scope="col" className="py-3 px-6">
                     Comments
                   </th>
                   <th scope="col" className="py-3 px-6">
                     Category
                   </th>
-                  {/* <th scope="col" className="py-3 px-6">Crew Size</th>
-                    <th scope="col" className="py-3 px-6">Standard Duration</th>
-                    <th scope="col" className="py-3 px-6">Multiplier</th> */}
+                  <th scope="col" className="py-3 px-6">
+                    Group
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Last Reported
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableDataDowntimeCILT.map((item, index) => {
+                  const downtimeEnd = new Date(item.Date);
+                  downtimeEnd.setMinutes(
+                    downtimeEnd.getMinutes() + parseInt(item.Minutes)
+                  );
+
+                  return (
+                    <tr
+                      className="bg-white border-b"
+                      key={`${item.id}-${index}`}
+                    >
+                      <td className="py-4 px-6">{item.id}</td>
+                      <td className="py-4 px-6">{item.Mesin}</td>
+                      <td className="py-4 px-6">{item.Jenis}</td>
+                      <td className="py-4 px-6">{formatDateTime(item.Date)}</td>
+                      <td className="py-4 px-6">
+                        {formatDateTime(downtimeEnd)}
+                      </td>
+                      <td className="py-4 px-6">{item.Minutes}</td>
+                      <td className="py-4 px-6">{item.Keterangan}</td>
+                      <td className="py-4 px-6">{item.Downtime_Category}</td>
+                      <td className="py-4 px-6">{group}</td>
+                      <td className="py-4 px-6">
+                        {formatDateTime(item.Created_At)}
+                      </td>
+                      <td className="py-4 px-6">
+                        {deletingItems[item.id] ? (
+                          <span>Deleting...</span>
+                        ) : (
+                          <>
+                            <button
+                              className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-green-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-green-600 hover:border-4 focus:border-4 hover:border-green-800 hover:text-green-800 focus:border-green-200 active:border-grey-900 active:text-grey-900"
+                              onClick={() => {
+                                handleUpdateStatusDowntimeCILT(
+                                  item.id,
+                                  item.Mesin,
+                                  item.Date,
+                                  item.Minutes,
+                                  item.Keterangan,
+                                  item.Jenis,
+                                  item.Downtime_Category,
+                                  "Accept"
+                                );
+                              }}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-red-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-red-600 hover:border-4 focus:border-4 hover:border-red-800 hover:text-red-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"
+                              onClick={() =>
+                                handleUpdateStatusDowntimeCILT(
+                                  item.id,
+                                  item.Mesin,
+                                  item.Date,
+                                  item.Minutes,
+                                  item.Keterangan,
+                                  item.Jenis,
+                                  item.Downtime_Category,
+                                  "Reject"
+                                )
+                              }
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div> */}
+
+          <div className="relative w-full overflow-y-auto overflow-x-auto flex flex-col h-full px-5 py-4">
+            <text className="text-lg font-semibold text-black mb-2">
+              Downtime Production
+            </text>
+            <table className="w-flex text-sm text-left text-gray-500">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                  <th scope="col" className="py-3 px-6">
+                    Downtime ID
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Machine
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Stoppage Type
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Start Time
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    End Time
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Duration (Minutes)
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Comments
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Category
+                  </th>
                   <th scope="col" className="py-3 px-6">
                     Group
                   </th>
@@ -665,21 +659,15 @@ function StoppagePage() {
                       key={`${item.id}-${index}`}
                     >
                       <td className="py-4 px-6">{item.id}</td>
-                      {/* <td className="py-4 px-6">{item.orderId}</td> */}
                       <td className="py-4 px-6">{item.Mesin}</td>
                       <td className="py-4 px-6">{item.Jenis}</td>
                       <td className="py-4 px-6">{formatDateTime(item.Date)}</td>
                       <td className="py-4 px-6">
                         {formatDateTime(downtimeEnd)}
                       </td>
-                      {/* <td className="py-4 px-6">{formatDateTime(item.endTime)}</td> */}
                       <td className="py-4 px-6">{item.Minutes}</td>
-                      {/* <td className="py-4 px-6">X</td> */}
                       <td className="py-4 px-6">{item.Keterangan}</td>
                       <td className="py-4 px-6">{item.Downtime_Category}</td>
-                      {/* <td className="py-4 px-6">7.20</td>
-                            <td className="py-4 px-6">00:00:00</td>
-                            <td className="py-4 px-6">1</td> */}
                       <td className="py-4 px-6">{item.Group}</td>
                       <td className="py-4 px-6">
                         {formatDateTime(item.datesystem)}

@@ -83,7 +83,7 @@ async function getAllPO(line, year, month, shift, date, plant) {
   try {
     const sapUrl =
       plant === "Milk Processing"
-        ? `${URL.urlSAP}/${year}/${month}/SFP%20ESL/SFP%20UHT`
+        ? `${URL.URL}/getProcessingOrder?plant=${plant}`
         : plant === "Yogurt"
         ? `${URL.urlSAP}/${year}/${month}/YOGURT`
         : plant === "Cheese"
@@ -320,7 +320,7 @@ async function updatePO(id, date, line, status, group, groupSelection, plant) {
     groupSelection,
     plant
   );
-  if (status === "Release SAP") {
+  if (status === "Release SAP" || status === "Release") {
     try {
       const response = await fetch(`${URL.URL}/createPO`, {
         method: "POST",
@@ -331,13 +331,14 @@ async function updatePO(id, date, line, status, group, groupSelection, plant) {
       });
 
       if (response.status === 400) {
-        throw new Error("Production order already existed in another line");
+        const errorData = await response.json();
+        throw new Error(errorData.message || response.statusText);
       } else if (!response.ok) {
         throw new Error("Failed to update production order");
       }
 
       const result = await response.json();
-      return result.rowsAffected;
+      return { rowsAffected: result.rowsAffected, id: result.id };
     } catch (err) {
       console.error(err);
       throw err;

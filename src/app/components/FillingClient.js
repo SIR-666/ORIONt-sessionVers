@@ -208,6 +208,7 @@ export default function OrderPage({ initialData }) {
 
   const statusMapping = {
     "^REL.*": "Release SAP", // Regex pattern for keys starting with 'REL'
+    "^PROCESSING.*": "Release", // Regex pattern for keys starting with 'PROCESSING'
   };
 
   function getStatus(status) {
@@ -352,7 +353,9 @@ export default function OrderPage({ initialData }) {
           <div className="flex grid-cols-4 gap-4 mr-60">
             <Button
               label="New"
-              isActive={statusFilter === "Release SAP"}
+              isActive={
+                statusFilter === "Release SAP" || statusFilter === "Release"
+              }
               onClick={() => handleClick("Release SAP")}
             />
             <Button
@@ -415,9 +418,13 @@ export default function OrderPage({ initialData }) {
               <table className="w-full text-sm text-left text-gray-500">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                   <tr>
-                    <th scope="col" className="py-3 px-6">
-                      Production Order
-                    </th>
+                    {plant !== "Milk Processing" ? (
+                      <th scope="col" className="py-3 px-6">
+                        {plant === "Milk Processing"
+                          ? "SFP ID"
+                          : "Production Order"}
+                      </th>
+                    ) : null}
                     <th scope="col" className="py-3 px-6">
                       Material
                     </th>
@@ -431,9 +438,11 @@ export default function OrderPage({ initialData }) {
                     <th scope="col" className="py-3 px-6">
                       Actual Start/End Time
                     </th>
-                    <th scope="col" className="py-3 px-6">
-                      Planned Start/End Time
-                    </th>
+                    {plant !== "Milk Processing" ? (
+                      <th scope="col" className="py-3 px-6">
+                        Planned Start/End Time
+                      </th>
+                    ) : null}
                     <th scope="col" className="py-3 px-6">
                       Details
                     </th>
@@ -442,9 +451,11 @@ export default function OrderPage({ initialData }) {
                 <tbody>
                   {filteredData.map((row) => (
                     <tr className="bg-white border-b" key={row.id}>
-                      <td className="py-4 px-6 font-medium text-lg">
-                        {row.id || row["NO PROCESS ORDER"]}
-                      </td>
+                      {plant !== "Milk Processing" ? (
+                        <td className="py-4 px-6 font-medium text-lg">
+                          {row.id || row["NO PROCESS ORDER"]}
+                        </td>
+                      ) : null}
                       <td className="py-4 px-6 font-medium text-lg">
                         {row.sku || row.MATERIAL}
                       </td>
@@ -453,7 +464,13 @@ export default function OrderPage({ initialData }) {
                           /(?<=,\d+)\.000$/,
                           ""
                         ) ??
-                          new Intl.NumberFormat("id-ID").format(row.qty / 1000)}
+                          (plant === "Milk Processing"
+                            ? new Intl.NumberFormat("id-ID").format(
+                                row.qty || 0
+                              )
+                            : new Intl.NumberFormat("id-ID").format(
+                                (row.qty || 0) / 1000
+                              ))}
                       </td>
                       <td className="py-4 px-6 font-medium text-lg">
                         {row.status || getStatus(row.STATUS) || row.STATUS}
@@ -462,31 +479,33 @@ export default function OrderPage({ initialData }) {
                         <p>{formatDateTime3(row.actual_start)}</p>
                         <p>{formatDateTime3(row.actual_end)}</p>
                       </td>
-                      <td className="py-4 px-6 font-medium text-lg">
-                        <p>
-                          {row.date_start
-                            ? formatDateTime3(row.date_start)
-                            : "" || (
-                                <>
-                                  {formatDateTime4(
-                                    row["TANGGAL BASIC DATE START"]
-                                  )}
-                                  <br />
-                                  {/* {row["TIME SCHEDULED START"]} */}
-                                  {row["TIME BASIC DATE START"]}
-                                </>
-                              )}
-                        </p>
-                        <p>
-                          {formatDateTime3(row.date_end) || (
-                            <>
-                              {formatDateTime4(row["TANGGAL BASIC DATE END"])}
-                              <br />
-                              {row["TIME BASIC DATE"]}
-                            </>
-                          )}
-                        </p>
-                      </td>
+                      {plant !== "Milk Processing" ? (
+                        <td className="py-4 px-6 font-medium text-lg">
+                          <p>
+                            {row.date_start
+                              ? formatDateTime3(row.date_start)
+                              : "" || (
+                                  <>
+                                    {formatDateTime4(
+                                      row["TANGGAL BASIC DATE START"]
+                                    )}
+                                    <br />
+                                    {/* {row["TIME SCHEDULED START"]} */}
+                                    {row["TIME BASIC DATE START"]}
+                                  </>
+                                )}
+                          </p>
+                          <p>
+                            {formatDateTime3(row.date_end) || (
+                              <>
+                                {formatDateTime4(row["TANGGAL BASIC DATE END"])}
+                                <br />
+                                {row["TIME BASIC DATE"]}
+                              </>
+                            )}
+                          </p>
+                        </td>
+                      ) : null}
                       <td className="py-4 px-6">
                         {row.status === "New" ? (
                           <button
@@ -657,7 +676,8 @@ export default function OrderPage({ initialData }) {
                               Details
                             </button>
                           </div>
-                        ) : getStatus(row.STATUS) === "Release SAP" ? (
+                        ) : getStatus(row.STATUS) === "Release SAP" ||
+                          getStatus(row.STATUS) === "Release" ? (
                           <button
                             className={`
                             flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium

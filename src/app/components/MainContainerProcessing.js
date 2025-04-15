@@ -57,6 +57,7 @@ const RectangleContainerProcessing = ({
   const [qty, setQty] = useState(0);
   const [rejectQty, setrejectQty] = useState(0);
   const [qtyPO, setQtyPO] = useState([]);
+  const [productIds, setProductIds] = useState([]);
   const [calendarMinutes, setCalendarMinutes] = useState(0);
   const [skuSpeed, setSKUSpeed] = useState(null);
   const [skuSpeeds, setSkuSpeeds] = useState({});
@@ -158,6 +159,7 @@ const RectangleContainerProcessing = ({
         // Ambil semua product_id dari allPO
         const productIds = allPO.map((entry) => entry.product_id);
         if (productIds.length > 0) {
+          setProductIds(productIds);
           const response = await fetch(
             `/api/getProducts?ids=${productIds.join(",")}`
           );
@@ -606,14 +608,12 @@ const RectangleContainerProcessing = ({
     timeDifference,
     durationSums.UnavailableTime
   );
-  const { net, netDisplay } = calculateNet(qty, rejectQty, skuSpeed || 1);
   {
-    allPO.map((entry, index) => {
-      let skuSpeed = skuSpeeds[entry.sku] || 1; // Default to 1 if no speed found
+    allPO.map((_, index) => {
       let { net, netDisplay } = calculateNet(
-        entry.qty,
+        qtyPO[index],
         rejectQty,
-        skuSpeed || 1
+        skuSpeeds[productIds[index]] || 1
       );
       console.log("totalnetDisplay", netDisplay);
       // Accumulate totals
@@ -621,6 +621,7 @@ const RectangleContainerProcessing = ({
       totalnetDisplay += netDisplay;
     });
   }
+  const net = totalnet;
   totalnetDisplay = totalnet.toFixed(2);
   console.log("totalnetDisplay", totalnetDisplay);
 
@@ -795,7 +796,7 @@ const RectangleContainerProcessing = ({
             {allPO.map((entry, index) => (
               <ul key={entry.id}>
                 <li className="text-2xl font-bold text-black">
-                  Production Order{" "}
+                  SFP ID{" "}
                   {entry.id.toString().length > 12
                     ? `${entry.id.toString().slice(0, -1)}-${entry.id % 10}`
                     : entry.id}
@@ -1104,7 +1105,7 @@ const RectangleContainerProcessing = ({
                       color: "black",
                     }}
                   >
-                    {netDisplay}
+                    {totalnetDisplay}
                   </td>
                   <td className={TdStyle.TdStyle11}>
                     Estimated Unplanned Stoppage

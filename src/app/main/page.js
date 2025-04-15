@@ -448,8 +448,10 @@ function MainPage() {
           <br></br>
           <h1 className="text-black text-2xl text-center font-bold">{value}</h1>
           <div className="flex items-center space-x-4">
-            <h3 className="text-black">
-              Selected Production Order:{" "}
+            <h3 className="text-black font-semibold">
+              {plant === "Milk Processing"
+                ? "Selected SFP ID:"
+                : "Selected Production Order:"}{" "}
               {id.toString().length > 12
                 ? `${id.toString().slice(0, -1)}-${id % 10}`
                 : id}

@@ -56,7 +56,7 @@ export async function POST(req) {
         headers: { "Content-Type": "application/json" },
       });
     } else {
-      const rowsAffected = await updatePO(
+      const { rowsAffected, id: updatedId } = await updatePO(
         id,
         date,
         line,
@@ -65,10 +65,13 @@ export async function POST(req) {
         groupSelection,
         plant
       );
-      return new Response(JSON.stringify({ success: true, rowsAffected }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ success: true, rowsAffected, id: updatedId }), // ✅ tambahkan `id`
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
   } catch (error) {
     console.error("Database error:", error);

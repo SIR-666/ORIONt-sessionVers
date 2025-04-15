@@ -274,8 +274,8 @@ const Start = (props) => {
         await props.onUpdate();
         props.setShowStart(false);
         // props.onSubmit(props.id);
-        localStorage.setItem("id", props.id);
-        router.push(`/main?value=${value}&id=${id}`);
+        localStorage.setItem("id", data.id);
+        router.push(`/main?value=${value}&id=${data.id}`);
       } catch (error) {
         console.error("Error:", error);
         alert("Error updating order: " + error.message);
