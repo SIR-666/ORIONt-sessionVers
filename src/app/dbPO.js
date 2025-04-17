@@ -97,11 +97,15 @@ async function getAllPO(line, year, month, shift, date, plant) {
         console.error("Error fetching responseRes:", err);
         return null;
       }),
-      fetch(sapUrl).catch((err) => {
+      fetch(sapUrl, {
+        cache: "no-store",
+      }).catch((err) => {
         console.error("Error fetching requestRes:", err);
         return null;
       }),
-      fetch(`${URL.URL}/getOrders`).catch((err) => {
+      fetch(`${URL.URL}/getOrders`, {
+        cache: "no-store",
+      }).catch((err) => {
         console.error("Error fetching fetchRes:", err);
         return null;
       }),
