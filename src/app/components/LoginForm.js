@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "../../app/favicon.png"; // Path:
+import LogoGreenfields from "../../app/logo-greenfield-black.png";
 
 export default function LoginPage() {
   const [loader, setLoader] = useState(false);
@@ -127,14 +128,24 @@ export default function LoginPage() {
           className="flex flex-col items-center justify-center space-y-3 border-b border-gray-200 px-4 py-6 pt-8 text-center sm:px-16"
           style={{ backgroundColor: "#EAEDED" }}
         >
-          <Image src={Logo} alt="Logo" className="h-12 w-12 mb-2" />{" "}
-          {/* Logo PNG */}
-          <h2 className="text-2xl font-semibold text-black">ORIONt</h2>
+          <Image src={LogoGreenfields} alt="Logo" className="h-16 w-60" />
+          <div className="flex items-center mb-2">
+            <Image
+              src={Logo}
+              alt="ORIONt Logo"
+              width={40} // Ukuran logo
+              height={40}
+              className="mr-1" // Margin kanan untuk jarak ke teks
+            />
+            <span className="text-2xl font-bold text-black whitespace-nowrap">
+              RIONt
+            </span>
+          </div>
           <h5 className="text-lg font-semibold text-gray-700">
             Online Reporting on track
           </h5>
           <p className="text-sm text-gray-500 italic">
-            Precision in Every Milestone
+            PT. Greenfields Indonesia
           </p>
         </div>
         <form

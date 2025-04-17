@@ -2,6 +2,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import Logo from "../../app/favicon.png"; // Path ke logo
+import LogoGreenfields from "../../app/logo-greenfield-black.png";
 
 export default function Navbar({ toggleSidebar, transparent }) {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
@@ -212,6 +213,14 @@ export default function Navbar({ toggleSidebar, transparent }) {
                 </a>
               </li>
             </ul>
+          </div>
+          <div className="flex items-center mr-4">
+            <Image
+              src={LogoGreenfields}
+              alt="logo-greenfields"
+              width={160} // Ukuran logo
+              height={160}
+            />
           </div>
           <button
             type="button"
