@@ -90,54 +90,25 @@ async function getAllPO(line, year, month, shift, date, plant) {
         ? `${URL.urlSAP}/${year}/${month}/MOZZ/RICOTTA`
         : `${URL.urlSAP}/${year}/${month}/GF%20MILK`;
 
-    const [responseRes, requestRes, fetchRes] = await Promise.all([
+    const [responseRes, requestRes, fetchRes] = await Promise.allSettled([
       fetch(`${URL.URL}/getAllPO/${line}/${shift}/${date}`, {
         cache: "no-store",
-      }).catch((err) => {
-        console.error("Error fetching responseRes:", err);
-        return null;
       }),
-      fetch(sapUrl, {
-        cache: "no-store",
-      }).catch((err) => {
-        console.error("Error fetching requestRes:", err);
-        return null;
-      }),
-      fetch(`${URL.URL}/getOrders`, {
-        cache: "no-store",
-      }).catch((err) => {
-        console.error("Error fetching fetchRes:", err);
-        return null;
-      }),
+      fetch(sapUrl, { cache: "no-store" }),
+      fetch(`${URL.URL}/getOrders`, { cache: "no-store" }),
     ]);
 
-    if (!responseRes || !requestRes || !fetchRes) {
-      console.warn(
-        "One or more fetches failed. Proceeding with available data."
-      );
-    }
-
-    const parseJSON = async (response, responseName) => {
-      if (!response) return [];
+    const parseJSON = async (res) => {
+      if (!res || res.status !== "fulfilled") return [];
+      const response = res.value;
       const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        console.warn(
-          `${responseName} did not return JSON. Content-Type: ${contentType}`
-        );
-        const text = await response.text();
-        console.warn(`${responseName} response body:`, text);
-        return []; // Return empty array for non-JSON responses
-      }
-      return response.json().catch((err) => {
-        console.error(`Error parsing JSON from ${responseName}:`, err);
-        return []; // Return empty array if JSON parsing fails
-      });
+      if (!contentType?.includes("application/json")) return [];
+      return await response.json().catch(() => []);
     };
 
-    // Safely parse all responses
-    const response = await parseJSON(responseRes, "responseRes");
-    const request = await parseJSON(requestRes, "requestRes");
-    const fetchData = await parseJSON(fetchRes, "fetchRes");
+    const response = await parseJSON(responseRes);
+    const request = await parseJSON(requestRes);
+    const fetchData = await parseJSON(fetchRes);
 
     const filterMaterials = (data, line) => {
       if (["Line A", "Line B", "Line C", "Line D"].includes(line)) {
@@ -164,59 +135,34 @@ async function getAllPO(line, year, month, shift, date, plant) {
       } else if (["RICO"].includes(line)) {
         return data.filter(
           (item) =>
-            item.MATERIAL?.includes("RICOTTA") & !item.MATERIAL?.includes("SFP")
+            item.MATERIAL?.includes("RICOTTA") &&
+            !item.MATERIAL?.includes("SFP")
         );
       } else if (["MOZ 200", "MOZ 1000"].includes(line)) {
         return data.filter(
           (item) =>
-            item.MATERIAL?.includes("MOZZ") & !item.MATERIAL?.includes("SFP")
+            item.MATERIAL?.includes("MOZZ") && !item.MATERIAL?.includes("SFP")
         );
-      } else {
-        return data;
       }
+      return data;
     };
 
     const filteredRequest = filterMaterials(request, line);
+    const seen = new Set(fetchData.map((item) => item.id));
+    const combinedData = [
+      ...response.map((item) => ({ ...item, id: item.id.toString() })),
+      ...filteredRequest.filter((item) => {
+        const id = item["NO PROCESS ORDER"];
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      }),
+    ];
 
-    console.log("Response Data:", response);
-    console.log("Request Data:", filteredRequest);
-    console.log("Fetched Data:", fetchData);
-    let combinedData = [];
-    if (response.length === 0) {
-      const requestData = request;
-      const seen = new Set(fetchData.map((item) => item.id));
-      combinedData = [
-        ...filteredRequest.filter((item) => {
-          const uniqueId = item["NO PROCESS ORDER"];
-          if (seen.has(uniqueId)) return false;
-          seen.add(uniqueId);
-          return true;
-        }),
-      ];
-    } else {
-      const responseData = response.map((item) => ({
-        ...item,
-        id: item.id.toString(),
-      }));
-
-      const requestData = request;
-      const seen = new Set(fetchData.map((item) => item.id));
-      combinedData = [
-        ...responseData,
-        ...filteredRequest.filter((item) => {
-          const uniqueId = item["NO PROCESS ORDER"];
-          if (seen.has(uniqueId)) return false;
-          seen.add(uniqueId);
-          return true;
-        }),
-      ];
-    }
-
-    // Display or process combined data
-    // console.log("Combined Data:", combinedData);
     return combinedData;
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching PO data:", error);
+    return [];
   }
 }
 
