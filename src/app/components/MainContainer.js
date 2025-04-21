@@ -57,6 +57,7 @@ const RectangleContainer = ({
   const [qty, setQty] = useState(0);
   const [rejectQty, setrejectQty] = useState(0);
   const [qtyPO, setQtyPO] = useState([]);
+  const [productIds, setProductIds] = useState([]);
   const [calendarMinutes, setCalendarMinutes] = useState(0);
   const [skuSpeed, setSKUSpeed] = useState(null);
   const [skuSpeeds, setSkuSpeeds] = useState({});
@@ -158,6 +159,7 @@ const RectangleContainer = ({
         // Ambil semua product_id dari allPO
         const productIds = allPO.map((entry) => entry.product_id);
         if (productIds.length > 0) {
+          setProductIds(productIds);
           const response = await fetch(
             `/api/getProducts?ids=${productIds.join(",")}`
           );
@@ -602,14 +604,12 @@ const RectangleContainer = ({
     timeDifference,
     durationSums.UnavailableTime
   );
-  const { net, netDisplay } = calculateNet(qty, rejectQty, skuSpeed || 1);
   {
     allPO.map((entry, index) => {
-      let skuSpeed = skuSpeeds[entry.sku] || 1; // Default to 1 if no speed found
       let { net, netDisplay } = calculateNet(
-        entry.qty,
+        qtyPO[index],
         rejectQty,
-        skuSpeed || 1
+        skuSpeeds[productIds[index]] || 1
       );
       console.log("totalnetDisplay", netDisplay);
       // Accumulate totals
@@ -617,6 +617,7 @@ const RectangleContainer = ({
       totalnetDisplay += netDisplay;
     });
   }
+  const net = totalnet;
   totalnetDisplay = totalnet.toFixed(2);
   console.log("totalnetDisplay", totalnetDisplay);
 
@@ -650,7 +651,7 @@ const RectangleContainer = ({
 
   const pe = net && production ? ((net / production) * 100).toFixed(2) : "0.00";
   const oee =
-    net && timeDifference ? ((net / timeDifference) * 100).toFixed(2) : "0.00";
+    net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
   // sent to backend (hours)
   const netDB = (qty - rejectQty) / (skuSpeed || 1);
   const prodDB =
@@ -1098,7 +1099,7 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    {netDisplay}
+                    {totalnetDisplay}
                   </td>
                   <td className={TdStyle.TdStyle11}>
                     Estimated Unplanned Stoppage
