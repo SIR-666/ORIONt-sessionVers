@@ -565,7 +565,7 @@ const RectangleContainerCheese = ({
 
         // Set states
         setQualityLoss(totalQualityLoss);
-        setSpeedLoss(totalSpeedLoss);
+        setSpeedLoss(totalSpeedLoss * 60);
         setQty(totalQuantity);
         setrejectQty(totalRejectSample);
       } catch (error) {
@@ -978,7 +978,7 @@ const RectangleContainerCheese = ({
                       color: "black",
                     }}
                   >
-                    {parseFloat(speedLoss).toFixed(3)}
+                    {parseFloat(speedLoss).toFixed(2)}
                   </td>
                   <td
                     style={{
