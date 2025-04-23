@@ -118,7 +118,9 @@ const Start = (props) => {
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
       const parsedDate = new Date(dataTime);
-      if (shiftLocal === "II") {
+      if (shiftLocal === "I") {
+        dataTime = parsedDate.setHours(6, 0, 0, 0);
+      } else if (shiftLocal === "II") {
         dataTime = parsedDate.setHours(14, 0, 0, 0);
       } else if (shiftLocal === "III") {
         dataTime = parsedDate.setHours(22, 0, 0, 0);
