@@ -655,7 +655,7 @@ const RectangleContainerProcessing = ({
 
   const pe = net && production ? ((net / production) * 100).toFixed(2) : "0.00";
   const oee =
-    net && timeDifference ? ((net / timeDifference) * 100).toFixed(2) : "0.00";
+    net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
   // sent to backend (hours)
   const netDB = (qty - rejectQty) / (skuSpeed || 1);
   const prodDB =
