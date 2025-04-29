@@ -11,12 +11,12 @@ import {
   calculateProduction,
   calculateRunning,
 } from "./Calculations";
-import QualityLoss from "./QualLoss";
+import QualityLossPasteurizer from "./QualLossPasteurizer";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
 
-const RectangleContainerCheese = ({
+const RectangleContainerPasteurizer = ({
   initialData,
   stoppageData,
   allPO,
@@ -57,6 +57,7 @@ const RectangleContainerCheese = ({
   const [qty, setQty] = useState(0);
   const [rejectQty, setrejectQty] = useState(0);
   const [qtyPO, setQtyPO] = useState([]);
+  const [productIds, setProductIds] = useState([]);
   const [calendarMinutes, setCalendarMinutes] = useState(0);
   const [skuSpeed, setSKUSpeed] = useState(null);
   const [skuSpeeds, setSkuSpeeds] = useState({});
@@ -158,6 +159,7 @@ const RectangleContainerCheese = ({
         // Ambil semua product_id dari allPO
         const productIds = allPO.map((entry) => entry.product_id);
         if (productIds.length > 0) {
+          setProductIds(productIds);
           const response = await fetch(
             `/api/getProducts?ids=${productIds.join(",")}`
           );
@@ -216,50 +218,9 @@ const RectangleContainerCheese = ({
             plannedSum += downtimeDuration;
           } else if (
             [
-              "Vacuum_200",
-              "Vacuum_1000",
-              "OUT_200",
-              "OUT_1000",
-              "OUT_Rico",
-              "Safety_200",
-              "Safety_1000",
-              "Safety_Rico",
-              "Man_200",
-              "Man_1000",
-              "Man_Rico",
-              "Cleaning_200",
-              "Cleaning_1000",
-              "Cleaning_Rico",
-              "Unloading_Receiving_Milk_200",
-              "Unloading_Receiving_Milk_1000",
-              "Pasteurizer_200",
-              "Pasteurizer_1000",
-              "Pasteurizer_Rico",
-              "Curdling_200",
-              "Curdling_1000",
-              "Steam_Stretcher_200",
-              "Steam_Stretcher_1000",
-              "Sterilizer_200",
-              "Sterilizer_1000",
-              "Cooling_200",
-              "Cooling_1000",
-              "Brining_200",
-              "Brining_1000",
-              "Drying_200",
-              "Drying_1000",
-              "Electric_200",
-              "Electric_1000",
-              "Electric_Rico",
-              "System_200",
-              "System_1000",
-              "Moulding_200",
-              "Moulding_1000",
-              "Filling_Rico",
-              "WHE_Rico",
-              "Flucculator_Rico",
-              "Draining_Rico",
-              "Mixing_Rico",
-              "Homogenizing_Rico",
+              "Pasteurizer_Homogenizer",
+              "Fermentor",
+              "CIP",
               "Process Failure",
             ].includes(entry.Mesin)
           ) {
@@ -633,14 +594,12 @@ const RectangleContainerCheese = ({
     timeDifference,
     durationSums.UnavailableTime
   );
-  const { net, netDisplay } = calculateNet(qty, rejectQty, skuSpeed || 1);
   {
-    allPO.map((entry, index) => {
-      let skuSpeed = skuSpeeds[entry.sku] || 1; // Default to 1 if no speed found
+    allPO.map((_, index) => {
       let { net, netDisplay } = calculateNet(
-        entry.qty,
+        qtyPO[index],
         rejectQty,
-        skuSpeed || 1
+        skuSpeeds[productIds[index]] || 1
       );
       console.log("totalnetDisplay", netDisplay);
       // Accumulate totals
@@ -648,6 +607,7 @@ const RectangleContainerCheese = ({
       totalnetDisplay += netDisplay;
     });
   }
+  const net = totalnet;
   totalnetDisplay = totalnet.toFixed(2);
   console.log("totalnetDisplay", totalnetDisplay);
 
@@ -822,7 +782,7 @@ const RectangleContainerCheese = ({
             {allPO.map((entry, index) => (
               <ul key={entry.id}>
                 <li className="text-2xl font-bold text-black">
-                  Production Order{" "}
+                  SFP ID{" "}
                   {entry.id.toString().length > 12
                     ? `${entry.id.toString().slice(0, -1)}-${entry.id % 10}`
                     : entry.id}
@@ -830,16 +790,16 @@ const RectangleContainerCheese = ({
                 <li className="mt-2 text-black">Status: {entry.status}</li>
                 <li className="mt-2 text-black">Material: {entry.sku}</li>
                 <li className="mt-2 text-black">
-                  Total Planned: {entry.qty} pcs
+                  Total Planned: {entry.qty} liter
                 </li>
                 <li
                   className="mt-2 text-black cursor-pointer bg-green-500"
                   onClick={() => setQtyModal(true)}
                 >
-                  Finish Good: {qtyPO[index] || 0} pcs
+                  Finish Good: {qtyPO[index] || 0} liter
                 </li>
                 <li className="mt-2 text-black">
-                  Total Produced in Current Shift: {qty} pcs
+                  Total Produced in Current Shift: {qty} liter
                 </li>
                 <li className="mt-2 text-black">
                   Start Time: {formatFullDateTime(entry.actual_start)}
@@ -852,7 +812,7 @@ const RectangleContainerCheese = ({
                 <p className="mt-2 text-black">
                   Nominal Speed:{" "}
                   {skuSpeeds[entry.product_id]
-                    ? `${skuSpeeds[entry.product_id]} pcs/hr`
+                    ? `${skuSpeeds[entry.product_id]} liter/hr`
                     : "Loading..."}
                 </p>
               </ul>
@@ -1118,7 +1078,9 @@ const RectangleContainerCheese = ({
                   </td>
                 </tr>
                 {qualityLossModal && (
-                  <QualityLoss onClose={() => setQualityLossModal(false)} />
+                  <QualityLossPasteurizer
+                    onClose={() => setQualityLossModal(false)}
+                  />
                 )}
                 <tr>
                   <td className={TdStyle.TdStyle4}>NPT</td>
@@ -1129,7 +1091,7 @@ const RectangleContainerCheese = ({
                       color: "black",
                     }}
                   >
-                    {netDisplay}
+                    {totalnetDisplay}
                   </td>
                   <td className={TdStyle.TdStyle11}>
                     Estimated Unplanned Stoppage
@@ -1217,4 +1179,4 @@ const RectangleContainerCheese = ({
   );
 };
 
-export default RectangleContainerCheese;
+export default RectangleContainerPasteurizer;

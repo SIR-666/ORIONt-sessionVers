@@ -430,6 +430,9 @@ function StoppagePage() {
               {plant === "Milk Processing"
                 ? `- ${localStorage.getItem("tank")}`
                 : ""}{" "}
+              {plant === "Yogurt" && value === "PASTEURIZER"
+                ? `- ${localStorage.getItem("fermentor")}`
+                : ""}{" "}
               - SHIFT {shift} - {date} - {localStorage.getItem("group")}
             </span>
             <span style={styles.dateText} suppressHydrationWarning>

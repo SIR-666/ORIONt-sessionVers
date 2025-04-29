@@ -16,7 +16,7 @@ import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
 
-const RectangleContainerCheese = ({
+const RectangleContainerYogurt = ({
   initialData,
   stoppageData,
   allPO,
@@ -216,50 +216,23 @@ const RectangleContainerCheese = ({
             plannedSum += downtimeDuration;
           } else if (
             [
-              "Vacuum_200",
-              "Vacuum_1000",
-              "OUT_200",
-              "OUT_1000",
-              "OUT_Rico",
-              "Safety_200",
-              "Safety_1000",
-              "Safety_Rico",
-              "Man_200",
-              "Man_1000",
-              "Man_Rico",
-              "Cleaning_200",
-              "Cleaning_1000",
-              "Cleaning_Rico",
-              "Unloading_Receiving_Milk_200",
-              "Unloading_Receiving_Milk_1000",
-              "Pasteurizer_200",
-              "Pasteurizer_1000",
-              "Pasteurizer_Rico",
-              "Curdling_200",
-              "Curdling_1000",
-              "Steam_Stretcher_200",
-              "Steam_Stretcher_1000",
-              "Sterilizer_200",
-              "Sterilizer_1000",
-              "Cooling_200",
-              "Cooling_1000",
-              "Brining_200",
-              "Brining_1000",
-              "Drying_200",
-              "Drying_1000",
-              "Electric_200",
-              "Electric_1000",
-              "Electric_Rico",
-              "System_200",
-              "System_1000",
-              "Moulding_200",
-              "Moulding_1000",
-              "Filling_Rico",
-              "WHE_Rico",
-              "Flucculator_Rico",
-              "Draining_Rico",
-              "Mixing_Rico",
-              "Homogenizing_Rico",
+              "Pasteurizer_Homogenizer",
+              "Fermentor",
+              "CIP",
+              "Filling_500_1000",
+              "Filling_125",
+              "Filling All",
+              "Code_Pack",
+              "Code_Carton",
+              "Shrink_Tunnel",
+              "Conveyor",
+              "Carton_Sealer",
+              "Shrink_Tunnel",
+              "Filling",
+              "Downstream_Conveyor",
+              "Blowing",
+              "Sleeve",
+              "Autopack",
               "Process Failure",
             ].includes(entry.Mesin)
           ) {
@@ -1217,4 +1190,4 @@ const RectangleContainerCheese = ({
   );
 };
 
-export default RectangleContainerCheese;
+export default RectangleContainerYogurt;

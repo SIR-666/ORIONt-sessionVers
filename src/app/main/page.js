@@ -7,21 +7,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import LoadingSpinner from "../components/loading";
 import RectangleContainerCheese from "../components/MainContainerCheese";
+import RectangleContainerPasteurizer from "../components/MainContainerPasteurizer";
+import RectangleContainerYogurt from "../components/MainContainerYogurt";
 import MainModal from "../components/MainModal";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
 
 function MainPage() {
-  // const [shiftOptions, setShiftOptions] = useState([]);
   const [time, setTime] = useState(new Date());
   const searchParams = useSearchParams();
   const value = searchParams.get("value");
   const id = searchParams.get("id");
-  // const [showShifts, setShowShifts] = useState(false);
   const [data, setData] = useState(null);
-  const [adjustedData, setAdjustedData] = useState(null);
   const [PO, setPO] = useState([]);
-  const [selectedPO, setSelectedPO] = useState("");
   const [shift, setShift] = useState("");
   const [group, setGroup] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -30,10 +28,8 @@ function MainPage() {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [plant, setPlant] = useState("");
+  const [line, setLine] = useState("");
   const [date, setCurrentDate] = useState(null);
-  const [forceFetch, setForceFetch] = useState(false);
-  // const [downtimeData, setDowntimeData] = useState(null);
-  // const [totalDowntime, setTotalDowntime] = useState(0);
   const router = useRouter();
 
   const currentHour = time.getHours();
@@ -67,8 +63,9 @@ function MainPage() {
     if (typeof window !== "undefined") {
       const storedData = localStorage.getItem("plant");
       const storedShift = localStorage.getItem("shift");
-      const storedDate = localStorage.getItem("date");
+      const storedLine = localStorage.getItem("line");
       setPlant(storedData ? storedData.replace(/["']/g, "") : "");
+      setLine(storedLine);
       setShift(storedShift);
       setCurrentDate(formatDateTime2(dataTime));
     }
@@ -407,6 +404,9 @@ function MainPage() {
               {plant === "Milk Processing"
                 ? `- ${localStorage.getItem("tank")}`
                 : ""}{" "}
+              {plant === "Yogurt" && value === "PASTEURIZER"
+                ? `- ${localStorage.getItem("fermentor")}`
+                : ""}{" "}
               - SHIFT {shift} - {date} - {localStorage.getItem("group")}
               {shiftMismatch && (
                 <span style={{ color: "red", fontWeight: "bold" }}>
@@ -479,6 +479,22 @@ function MainPage() {
               />
             ) : plant === "Cheese" ? (
               <RectangleContainerCheese
+                initialData={data}
+                stoppageData={stoppage}
+                allPO={PO}
+                group={group}
+                localTime={getLocalISOString()}
+              />
+            ) : plant === "Yogurt" && line !== "PASTEURIZER" ? (
+              <RectangleContainerYogurt
+                initialData={data}
+                stoppageData={stoppage}
+                allPO={PO}
+                group={group}
+                localTime={getLocalISOString()}
+              />
+            ) : plant === "Yogurt" && line === "PASTEURIZER" ? (
+              <RectangleContainerPasteurizer
                 initialData={data}
                 stoppageData={stoppage}
                 allPO={PO}

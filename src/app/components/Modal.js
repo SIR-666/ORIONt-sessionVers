@@ -10,6 +10,7 @@ const Modal = (props) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState("");
   const [selectedTank, setSelectedTank] = useState("");
+  const [selectedFermentor, setSelectedFermentor] = useState("");
   const [data, setData] = useState([]);
   const [tablePlant, setTablePlantData] = useState([]);
   const [tableLine, setTableLineData] = useState([]);
@@ -36,6 +37,11 @@ const Modal = (props) => {
   const handleSelectTank = (event) => {
     const value = event.target.value;
     setSelectedTank(value);
+  };
+
+  const handleSelectFermentor = (event) => {
+    const value = event.target.value;
+    setSelectedFermentor(value);
   };
 
   const handleChange = (event) => {
@@ -101,6 +107,7 @@ const Modal = (props) => {
         localStorage.removeItem("date");
         localStorage.removeItem("group");
         localStorage.removeItem("tank");
+        localStorage.removeItem("fermentor");
 
         // Redirect to login page
         router.push("/login");
@@ -160,6 +167,8 @@ const Modal = (props) => {
       if (storedGroup) setSelectedGroup(storedGroup);
       if (storedPlant === "Milk Processing")
         setSelectedTank(localStorage.getItem("tank"));
+      if (storedPlant === "Yogurt" && storedLine === "PASTEURIZER")
+        setSelectedFermentor(localStorage.getItem("fermentor"));
     }
   }, [data]);
 
@@ -227,6 +236,9 @@ const Modal = (props) => {
     localStorage.setItem("group", selectedGroup);
     if (selectedPlant === "Milk Processing") {
       localStorage.setItem("tank", selectedTank);
+    }
+    if (selectedPlant === "Yogurt" && selectedLine === "PASTEURIZER") {
+      localStorage.setItem("fermentor", selectedFermentor);
     }
 
     // Bersihkan jika ada
@@ -387,6 +399,30 @@ const Modal = (props) => {
                         <option value="AT3">AT3</option>
                         <option value="AT4">AT4</option>
                         <option value="AT5">AT5</option>
+                      </select>
+                    </div>
+                  ) : null}
+                  {selectedPlant === "Yogurt" &&
+                  selectedLine === "PASTEURIZER" ? (
+                    <div className="flex-2">
+                      <label
+                        htmlFor="plant"
+                        className="block mb-2 text-black font-medium"
+                      >
+                        Fermentor
+                      </label>
+                      <select
+                        id="observedArea"
+                        className="text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        value={selectedFermentor}
+                        onChange={handleSelectFermentor}
+                      >
+                        <option value="">Choose a fermentor</option>
+                        <option value="T101">T101</option>
+                        <option value="T103">T103</option>
+                        <option value="T104">T104</option>
+                        <option value="T105">T105</option>
+                        <option value="T111">T111</option>
                       </select>
                     </div>
                   ) : null}

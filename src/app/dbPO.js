@@ -83,12 +83,14 @@ async function getAllPO(line, year, month, shift, date, plant) {
   try {
     const sapUrl =
       plant === "Milk Processing"
-        ? `${URL.URL}/getProcessingOrder?plant=${plant}`
-        : plant === "Yogurt"
-        ? `${URL.urlSAP}/${year}/${month}/YOGURT`
+        ? `${URL.URL}/getProductDummy?plant=${plant}`
+        : plant === "Yogurt" && line !== "PASTEURIZER"
+        ? `${URL.URL}/getProductDummy?plant=${plant}`
+        : plant === "Yogurt" && line === "PASTEURIZER"
+        ? `${URL.URL}/getPasteurizerOrder?plant=${plant}&line=${line}`
         : plant === "Cheese"
-        ? `${URL.urlSAP}/${year}/${month}/MOZZ/RICOTTA`
-        : `${URL.urlSAP}/${year}/${month}/GF%20MILK`;
+        ? `${URL.URL}/getProductDummy?plant=${plant}`
+        : `${URL.URL}/getProductDummy?plant=${plant}`;
 
     const [responseRes, requestRes, fetchRes] = await Promise.allSettled([
       fetch(`${URL.URL}/getAllPO/${line}/${shift}/${date}`, {
@@ -111,8 +113,10 @@ async function getAllPO(line, year, month, shift, date, plant) {
     const fetchData = await parseJSON(fetchRes);
 
     const filterMaterials = (data, line) => {
-      if (["Line A", "Line B", "Line C", "Line D"].includes(line)) {
+      if (["Line A", "Line B", "Line C"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("ESL"));
+      } else if (["Line D"].includes(line)) {
+        return data.filter((item) => item.MATERIAL?.includes("1890"));
       } else if (["Line E", "Line F", "Line G"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("UHT"));
       } else if (["Flex 1", "Flex 2", "GEA 5"].includes(line)) {
@@ -126,22 +130,21 @@ async function getAllPO(line, year, month, shift, date, plant) {
           (item) =>
             item.MATERIAL?.includes("500") || item.MATERIAL?.includes("1000")
         );
-      } else if (["YD (POUCH)"].includes(line)) {
-        return data.filter((item) => item.MATERIAL?.includes("POUCH"));
       } else if (["YRTD"].includes(line)) {
-        return data.filter((item) => item.MATERIAL?.includes("RTD"));
+        return data.filter((item) => item.MATERIAL?.includes("240"));
       } else if (["PASTEURIZER"].includes(line)) {
-        return data.filter((item) => item.MATERIAL?.includes("SFP"));
+        return data.filter((item) => item.MATERIAL?.includes("YOGURT"));
       } else if (["RICO"].includes(line)) {
+        return data.filter((item) => item.MATERIAL?.includes("RICOTTA"));
+      } else if (["MOZ 1000"].includes(line)) {
         return data.filter(
           (item) =>
-            item.MATERIAL?.includes("RICOTTA") &&
-            !item.MATERIAL?.includes("SFP")
+            item.MATERIAL?.includes("1000") && item.MATERIAL?.includes("MOZZ")
         );
-      } else if (["MOZ 200", "MOZ 1000"].includes(line)) {
+      } else if (["MOZ 200"].includes(line)) {
         return data.filter(
           (item) =>
-            item.MATERIAL?.includes("MOZZ") && !item.MATERIAL?.includes("SFP")
+            !item.MATERIAL?.includes("1000") && item.MATERIAL?.includes("MOZZ")
         );
       }
       return data;

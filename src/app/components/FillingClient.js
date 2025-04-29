@@ -34,6 +34,7 @@ export default function OrderPage({ initialData }) {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [plant, setPlant] = useState("");
+  const [line, setLine] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
@@ -49,6 +50,8 @@ export default function OrderPage({ initialData }) {
     if (typeof window !== "undefined") {
       const storedData = localStorage.getItem("plant");
       setPlant(storedData ? storedData.replace(/["']/g, "") : "");
+      const storedLine = localStorage.getItem("line");
+      setLine(storedLine);
     }
   }, []);
 
@@ -207,8 +210,8 @@ export default function OrderPage({ initialData }) {
   }, [value]);
 
   const statusMapping = {
-    "^REL.*": "Release SAP", // Regex pattern for keys starting with 'REL'
     "^PROCESSING.*": "Release", // Regex pattern for keys starting with 'PROCESSING'
+    "^RELEASE.*": "Release", // Regex pattern for keys starting with 'RELEASE'
   };
 
   function getStatus(status) {
@@ -310,6 +313,9 @@ export default function OrderPage({ initialData }) {
               {plant} - {value.toUpperCase()}{" "}
               {plant === "Milk Processing"
                 ? `- ${localStorage.getItem("tank")}`
+                : ""}{" "}
+              {plant === "Yogurt" && value === "PASTEURIZER"
+                ? `- ${localStorage.getItem("fermentor")}`
                 : ""}{" "}
               - SHIFT {shift} - {date} - {localStorage.getItem("group")}
             </span>
@@ -418,19 +424,14 @@ export default function OrderPage({ initialData }) {
               <table className="w-full text-sm text-left text-gray-500">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                   <tr>
-                    {plant !== "Milk Processing" ? (
-                      <th scope="col" className="py-3 px-6">
-                        {plant === "Milk Processing"
-                          ? "SFP ID"
-                          : "Production Order"}
-                      </th>
-                    ) : null}
                     <th scope="col" className="py-3 px-6">
                       Material
                     </th>
                     <th scope="col" className="py-3 px-6">
                       Quantity{" "}
-                      {plant === "Milk Processing" ? "(liter)" : "(carton)"}
+                      {plant === "Milk Processing" || line === "PASTEURIZER"
+                        ? "(liter)"
+                        : "(pcs)"}
                     </th>
                     <th scope="col" className="py-3 px-6">
                       Status
@@ -438,11 +439,6 @@ export default function OrderPage({ initialData }) {
                     <th scope="col" className="py-3 px-6">
                       Actual Start/End Time
                     </th>
-                    {plant !== "Milk Processing" ? (
-                      <th scope="col" className="py-3 px-6">
-                        Planned Start/End Time
-                      </th>
-                    ) : null}
                     <th scope="col" className="py-3 px-6">
                       Details
                     </th>
@@ -451,11 +447,6 @@ export default function OrderPage({ initialData }) {
                 <tbody>
                   {filteredData.map((row) => (
                     <tr className="bg-white border-b" key={row.id}>
-                      {plant !== "Milk Processing" ? (
-                        <td className="py-4 px-6 font-medium text-lg">
-                          {row.id || row["NO PROCESS ORDER"]}
-                        </td>
-                      ) : null}
                       <td className="py-4 px-6 font-medium text-lg">
                         {row.sku || row.MATERIAL}
                       </td>
@@ -464,13 +455,7 @@ export default function OrderPage({ initialData }) {
                           /(?<=,\d+)\.000$/,
                           ""
                         ) ??
-                          (plant === "Milk Processing"
-                            ? new Intl.NumberFormat("id-ID").format(
-                                row.qty || 0
-                              )
-                            : new Intl.NumberFormat("id-ID").format(
-                                (row.qty || 0) / 1000
-                              ))}
+                          new Intl.NumberFormat("id-ID").format(row.qty || 0)}
                       </td>
                       <td className="py-4 px-6 font-medium text-lg">
                         {row.status || getStatus(row.STATUS) || row.STATUS}
@@ -479,33 +464,6 @@ export default function OrderPage({ initialData }) {
                         <p>{formatDateTime3(row.actual_start)}</p>
                         <p>{formatDateTime3(row.actual_end)}</p>
                       </td>
-                      {plant !== "Milk Processing" ? (
-                        <td className="py-4 px-6 font-medium text-lg">
-                          <p>
-                            {row.date_start
-                              ? formatDateTime3(row.date_start)
-                              : "" || (
-                                  <>
-                                    {formatDateTime4(
-                                      row["TANGGAL BASIC DATE START"]
-                                    )}
-                                    <br />
-                                    {/* {row["TIME SCHEDULED START"]} */}
-                                    {row["TIME BASIC DATE START"]}
-                                  </>
-                                )}
-                          </p>
-                          <p>
-                            {formatDateTime3(row.date_end) || (
-                              <>
-                                {formatDateTime4(row["TANGGAL BASIC DATE END"])}
-                                <br />
-                                {row["TIME BASIC DATE"]}
-                              </>
-                            )}
-                          </p>
-                        </td>
-                      ) : null}
                       <td className="py-4 px-6">
                         {row.status === "New" ? (
                           <button
