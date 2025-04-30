@@ -10,6 +10,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import QualityLoss from "./QualLoss";
+import QualLossPasteurizer from "./QualLossPasteurizer";
 import QualityLossProcessing from "./QualLossProcessing";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
@@ -186,6 +187,10 @@ function SidebarContent({ isOpen }) {
             <QualityLoss onClose={() => setQualityLossModal(false)} />
           ) : plant === "Cheese" ? (
             <QualityLoss onClose={() => setQualityLossModal(false)} />
+          ) : plant === "Yogurt" && line !== "PASTEURIZER" ? (
+            <QualityLoss onClose={() => setQualityLossModal(false)} />
+          ) : plant === "Yogurt" && line === "PASTEURIZER" ? (
+            <QualLossPasteurizer onClose={() => setQualityLossModal(false)} />
           ) : null}
         </>
       )}

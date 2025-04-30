@@ -1202,9 +1202,9 @@ const RectangleContainerCheese = ({
       <div className="grid grid-cols-2 gap-2">
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
-            {pe || 0.0}%
+            {((estimated / timeDifference) * 100).toFixed(2) || 0.0}%
           </h1>
-          <p className="text-gray-500 text-center">%PE</p>
+          <p className="text-gray-500 text-center">%EUPS</p>
         </div>
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
