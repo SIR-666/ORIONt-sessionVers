@@ -5,6 +5,7 @@ import RectangleContainerProcessing from "@/app/components/MainContainerProcessi
 import RectangleTable from "@/app/components/MainTable";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import HistoryFinishGoodTable from "../components/HistoryFinishGoodTable";
 import LoadingSpinner from "../components/loading";
 import RectangleContainerCheese from "../components/MainContainerCheese";
 import RectangleContainerPasteurizer from "../components/MainContainerPasteurizer";
@@ -524,6 +525,14 @@ function MainPage() {
           </div>
           <br></br>
           <div className="overflow-x-auto">
+            <h3 className="text-black font-semibold">
+              History Finish Good (1 last day from now)
+            </h3>
+            <HistoryFinishGoodTable />
+          </div>
+          <br></br>
+          <div className="overflow-x-auto">
+            <h3 className="text-black font-semibold">List of Downtime</h3>
             {stoppage ? (
               <RectangleTable stoppageData={stoppage} />
             ) : (
