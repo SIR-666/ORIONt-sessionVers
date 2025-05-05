@@ -557,7 +557,7 @@ const RectangleContainer = ({
         );
 
         // Set states
-        setQualityLoss(totalQualityLoss);
+        setQualityLoss(totalQualityLoss * 60);
         setSpeedLoss(totalSpeedLoss * 60);
         setQty(totalQuantity);
         setrejectQty(totalRejectSample);

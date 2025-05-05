@@ -7,41 +7,23 @@ const Start = (props) => {
   const [currentTime, setCurrentTime] = useState("");
   const [inputChange, setInputChange] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentGroup, setCurrentGroup] = useState("");
   const [group, setGroup] = useState("");
+  const [groupMessage, setGroupMessage] = useState("");
   const [groupData, setGroupData] = useState(null);
   const params = useSearchParams();
   const value = params.get("value");
   const { id, status } = props;
   const router = useRouter();
+
+  // Cek perubahan group dan currentGroup
   useEffect(() => {
-    // You can fetch the specific data if needed here using the `id`
-    console.log(
-      `Editing item with ID: ${props.id} and status: ${props.status}`
-    );
-  }, [props.id]);
-
-  // useEffect(() => {
-  //   // Function to format current date and time
-  //   const getCurrentDateTime = () => {
-  //     const now = new Date();
-  //     const year = now.getFullYear();
-  //     const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-  //     const day = String(now.getDate()).padStart(2, "0");
-  //     const hours = String(now.getHours()).padStart(2, "0");
-  //     const minutes = String(now.getMinutes()).padStart(2, "0");
-  //     const seconds = String(now.getSeconds()).padStart(2, "0");
-  //     const milliseconds = String(now.getMilliseconds()).padStart(2, "0");
-  //     return `${year}-${month}-${day}T${hours}:${minutes}`;
-  //   };
-
-  //   const current = getCurrentDateTime();
-  //   const dataTime = localStorage.getItem("date");
-  //   console.log("Current Date: ", current);
-  //   console.log("Data Date: ", dataTime);
-
-  //   setCurrentTime(current);
-  //   if (!time) setTime(current);
-  // }, []);
+    if (group && currentGroup && group !== currentGroup) {
+      setGroupMessage("Selected group not same");
+    } else {
+      setGroupMessage("");
+    }
+  }, [group, currentGroup]);
 
   const currentShift = localStorage.getItem("shift");
   const currentDate = localStorage.getItem("date");
@@ -76,8 +58,6 @@ const Start = (props) => {
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
     }
-    // console.log("Shift start time: ", startTime);
-    // console.log("Shift end time: ", endTime);
 
     return { startTime, endTime };
   };
@@ -114,6 +94,7 @@ const Start = (props) => {
     // Retrieve 'dataTime' from localStorage
     let dataTime = localStorage.getItem("date");
     const shiftLocal = localStorage.getItem("shift");
+    setCurrentGroup(localStorage.getItem("group"));
 
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
@@ -129,9 +110,6 @@ const Start = (props) => {
     } else {
       dataTime = current; // Fallback if no date is in localStorage
     }
-
-    // console.log("Current Date: ", current);
-    // console.log("Data Date: ", dataTime);
 
     // Update states
     setCurrentTime(current);
@@ -343,12 +321,6 @@ const Start = (props) => {
                     >
                       <option defaultValue="Active">Active</option>
                     </select>
-                    {/* <input
-                      type="username"
-                      name="crew"
-                      className="border border-gray-300 px-3 py-2 rounded-lg text-black mt-2"
-                      disabled
-                    /> */}
                     <select
                       id="group"
                       className="text-black rounded-lg border border-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full px-3 py-2 mt-2 ml-0"
@@ -368,6 +340,10 @@ const Start = (props) => {
                         </option>
                       )}
                     </select>
+
+                    {groupMessage && (
+                      <p className="text-red-500 mt-2">{groupMessage}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -381,12 +357,15 @@ const Start = (props) => {
                 </button>
                 <button
                   className={`text-white ${
-                    loading
+                    loading || (group && currentGroup && group !== currentGroup)
                       ? "bg-gray-500 cursor-not-allowed"
                       : "bg-yellow-500 active:bg-yellow-700"
                   } font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1`}
                   type="button"
                   onClick={handleSubmit}
+                  disabled={
+                    loading || (group && currentGroup && group !== currentGroup)
+                  } // Disable button saat group tidak sama
                 >
                   OK
                 </button>
