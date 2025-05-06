@@ -33,29 +33,34 @@ function SidebarContent({ isOpen }) {
   const storedId = localStorage.getItem("id");
 
   useEffect(() => {
-    // Check if we're in the client environment
     if (typeof window !== "undefined") {
       setLineValue(searchParams.get("value") || localStorage.getItem("line"));
       setLineId(searchParams.get("id") || localStorage.getItem("id"));
+      setPath(window.location.pathname);
     }
   }, [searchParams]);
 
   let ident;
   if (po) {
     const selectedMaterial = JSON.parse(po);
-
-    // Access the id property of the first object in the array
     ident = selectedMaterial[0]?.id;
   } else if (storedId) {
     ident = storedId;
   }
 
-  // console.log("Ident: ", ident);
+  // Get main path only (/main, /order, /stoppage, etc)
+  const getMainPath = (pathname) => {
+    const parts = pathname.split("/").filter(Boolean);
+    return parts.length > 0 ? `/${parts[0]}` : "/";
+  };
+
+  const mainPath = getMainPath(path);
 
   const navItems = [
     {
       label: "Home",
       href: `../../main?value=${lineValue}&id=${lineId || ident}`,
+      basePath: "/main",
       show: !!po || !!storedId,
     },
     {
@@ -75,57 +80,64 @@ function SidebarContent({ isOpen }) {
           window.location.href = "../../order";
         }
       },
+      basePath: "/order",
       show: true,
     },
     {
       label: "Manage Downtime",
       href: `../../stoppage?value=${lineValue}&id=${lineId || ident}`,
-      //   show: !!po || !!storedId,
+      basePath: "/stoppage",
       show: true,
     },
     {
       label: "Insert Finished Goods",
       action: () => {
         if (path === "/main") {
-          console.log("Opening Insert Finished Goods modal...");
           setQuantityModal(true);
         } else {
           alert("This action is only available on the Home page.");
         }
       },
+      basePath: "/main",
       show: true,
     },
     {
       label: "Insert Quality Loss",
       action: () => {
         if (path === "/main") {
-          console.log("Opening Insert Quality Loss modal...");
           setQualityLossModal(true);
         } else {
           alert("This action is only available on the Home page.");
         }
       },
+      basePath: "/main",
       show: true,
     },
     {
       label: "Insert Speed Loss",
       action: () => {
         if (path === "/main") {
-          console.log("Opening Insert Speed Loss modal...");
           setSpeedLossModal(true);
         } else {
           alert("This action is only available on the Home page.");
         }
       },
+      basePath: "/main",
       show: true,
     },
-    { label: "Downtime Report", href: "../../report", show: true },
-    { label: "Performance Report", href: "../../performance", show: true },
+    {
+      label: "Downtime Report",
+      href: "../../report",
+      basePath: "/report",
+      show: true,
+    },
+    {
+      label: "Performance Report",
+      href: "../../performance",
+      basePath: "/performance",
+      show: true,
+    },
   ];
-
-  useEffect(() => {
-    setPath(window.location.pathname);
-  }, [path]);
 
   const renderIcon = (label) => {
     switch (label) {
@@ -146,7 +158,7 @@ function SidebarContent({ isOpen }) {
       case "Performance Report":
         return <Table2Icon className="size-4 mr-4" />;
       default:
-        break;
+        return null;
     }
   };
 
@@ -161,23 +173,38 @@ function SidebarContent({ isOpen }) {
       >
         {navItems
           .filter((item) => item.show)
-          .map((item, index) => (
-            <a
-              key={index}
-              href={item.href}
-              className=" flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
-              onClick={(e) => {
-                if (item.action) {
-                  e.preventDefault();
-                  item.action();
-                }
-              }}
-            >
-              {renderIcon(item.label)}
-              {item.label}
-            </a>
-          ))}
+          .map((item, index) => {
+            const isActive =
+              mainPath === item.basePath &&
+              item.label !== "Insert Finished Goods" &&
+              item.label !== "Insert Quality Loss" &&
+              item.label !== "Insert Speed Loss";
+
+            return (
+              <a
+                key={index}
+                href={item.href}
+                className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                onClick={(e) => {
+                  if (item.action) {
+                    e.preventDefault();
+                    item.action();
+                  }
+                }}
+              >
+                {renderIcon(item.label)}
+                <span
+                  className={`transition-colors duration-200 ${
+                    isActive ? "text-green-500 font-bold" : ""
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </a>
+            );
+          })}
       </div>
+
       {quantityModal && <Quantity onClose={() => setQuantityModal(false)} />}
       {qualityLossModal && (
         <>

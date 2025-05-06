@@ -1,9 +1,16 @@
-import { useSearchParams } from "next/navigation";
-
 const RectangleTable = ({ stoppageData }) => {
-  const searchParams = useSearchParams();
-  const value = searchParams.get("value");
-  const shift = searchParams.get("shift");
+  const formatTimeUTC = (date) => {
+    const hours = String(date.getUTCHours()).padStart(2, "0");
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
+  const getTimeRange = (date, minutes) => {
+    const start = new Date(date);
+    const end = new Date(start.getTime() + minutes * 60000);
+
+    return `${formatTimeUTC(start)} - ${formatTimeUTC(end)}`;
+  };
 
   return (
     <div className="relative w-full h-96 rounded-xl bg-white shadow-xl">
@@ -13,6 +20,9 @@ const RectangleTable = ({ stoppageData }) => {
             <tr>
               <th scope="col" className="py-3 px-6">
                 Machine
+              </th>
+              <th scope="col" className="py-3 px-6">
+                Range Time
               </th>
               <th scope="col" className="py-3 px-6">
                 Duration (minute)
@@ -29,6 +39,9 @@ const RectangleTable = ({ stoppageData }) => {
             {stoppageData.map((item, index) => (
               <tr className="bg-white border-b" key={index}>
                 <td className="py-4 px-6">{item.Mesin}</td>
+                <td className="py-4 px-6">
+                  {getTimeRange(item.Date, item.Minutes)}
+                </td>
                 <td className="py-4 px-6">{item.Minutes}</td>
                 <td className="py-4 px-6">{item.Jenis}</td>
                 <td className="py-4 px-6">{item.Keterangan}</td>
