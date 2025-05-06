@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
 
 const End = (props) => {
   const [time, setTime] = useState("");
   const [currentTime, setCurrentTime] = useState("");
+  const [isEndTimeValid, setIsEndTimeValid] = useState(true);
   const [data, setData] = useState([]);
   const [shiftBoxes, setShiftBoxes] = useState([]);
   const [group, setGroup] = useState("");
@@ -78,7 +79,7 @@ const End = (props) => {
     }
     // console.log("Current Date: ", current);
     // console.log("Data Date: ", dataTime);
-    
+
     setCurrentTime(current);
     if (!time) setTime(dataTime);
   }, []);
@@ -163,20 +164,22 @@ const End = (props) => {
         const shift = shifts[i];
         const shiftStart = new Date(current);
         const shiftEnd = new Date(current);
-  
+
         const [startHour, startMinute] = shift.start.split(":").map(Number);
         const [endHour, endMinute] = shift.end.split(":").map(Number);
-  
+
         shiftStart.setHours(startHour, startMinute, 0, 0);
         if (endHour < startHour) {
           // Handles shifts ending the next day
           shiftEnd.setDate(shiftEnd.getDate() + 1);
         }
         shiftEnd.setHours(endHour, endMinute, 0, 0);
-  
+
         // Check if the order crosses into this shift
         if (start < shiftEnd && end > shiftStart && start < shiftStart) {
-          if (!boxes.find((box) => box.start.getTime() === shiftStart.getTime())) {
+          if (
+            !boxes.find((box) => box.start.getTime() === shiftStart.getTime())
+          ) {
             boxes.push({
               shift: `Shift ${i + 1}`,
               start: new Date(shiftStart),
@@ -184,7 +187,7 @@ const End = (props) => {
             });
           }
         }
-  
+
         // Update the `current` pointer
         current = new Date(shiftEnd);
       }
@@ -206,6 +209,16 @@ const End = (props) => {
       endTime = utcDate;
       setTime(utcDate);
       console.log("New Date: ", utcDate);
+    }
+
+    // Cek if end time is later than current time
+    const now = new Date();
+    const nowUTC = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    const endTimeDate = new Date(endTime);
+    if (endTimeDate > nowUTC) {
+      setIsEndTimeValid(false);
+    } else {
+      setIsEndTimeValid(true);
     }
 
     if (startTime && endTime) {
@@ -244,7 +257,11 @@ const End = (props) => {
       console.log("Next PO: ", nextPO);
 
       // Check if the new PO overlaps with the current PO's range
-      if (time >= currentPO.actual_start && time < currentPO.actual_end && currentPO.status !== "Active") {
+      if (
+        time >= currentPO.actual_start &&
+        time < currentPO.actual_end &&
+        currentPO.status !== "Active"
+      ) {
         alert("The new end time overlaps with an existing Production Order.");
         return;
       }
@@ -259,7 +276,9 @@ const End = (props) => {
       }
 
       if (
-        currentPO.actual_end === null && nextPO && time > nextPO.actual_start
+        currentPO.actual_end === null &&
+        nextPO &&
+        time > nextPO.actual_start
       ) {
         alert("The new end time overlaps with the next Production Order.");
         return;
@@ -279,14 +298,21 @@ const End = (props) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id, date: time, line: value, status, group, groupSelection }),
+          body: JSON.stringify({
+            id,
+            date: time,
+            line: value,
+            status,
+            group,
+            groupSelection,
+          }),
         });
-  
+
         if (!response.ok) {
           const errorResponse = await response.json();
           throw new Error(errorResponse.error || "Failed to update order");
         }
-  
+
         const data = await response.json();
         alert("Production order stopped successfully!");
         props.onUpdate();
@@ -296,7 +322,7 @@ const End = (props) => {
         alert("Error updating order: " + error.message);
       } finally {
         setLoading(false);
-      } 
+      }
     } else {
       console.log("Submission canceled by user");
     }
@@ -312,9 +338,7 @@ const End = (props) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
-                  Set End Time
-                </h3>
+                <h3 className="text-black font-semibold">Set End Time</h3>
                 <button
                   className="bg-transparent border-0 text-black float-right"
                   onClick={() => props.setShowEnd(false)}
@@ -382,6 +406,11 @@ const End = (props) => {
                     <p className="text-gray-500">No shifts crossed.</p>
                   )}
                 </div>
+                {!isEndTimeValid && (
+                  <p className="text-red-500 text-sm mt-2">
+                    End time cannot be later than current time.
+                  </p>
+                )}
               </div>
               <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
                 <button
@@ -393,13 +422,13 @@ const End = (props) => {
                 </button>
                 <button
                   className={`text-white ${
-                    loading
+                    loading || !isEndTimeValid
                       ? "bg-gray-500 cursor-not-allowed"
                       : "bg-yellow-500 active:bg-yellow-700"
                   } font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1`}
                   type="button"
                   onClick={handleSubmit}
-                  disabled={loading}
+                  disabled={loading || !isEndTimeValid}
                 >
                   OK
                 </button>

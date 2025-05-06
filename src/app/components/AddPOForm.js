@@ -35,7 +35,9 @@ const ProdFill = (props) => {
 
     if (dataTime) {
       const parsedDate = new Date(dataTime);
-      if (props.shift === "II") {
+      if (props.shift === "I") {
+        dataTime = parsedDate.setHours(6, 0, 0, 0);
+      } else if (props.shift === "II") {
         dataTime = parsedDate.setHours(14, 0, 0, 0);
       } else if (props.shift === "III") {
         dataTime = parsedDate.setHours(22, 0, 0, 0);

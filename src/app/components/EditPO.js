@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
 
 const Edit = (props) => {
-  const [editOption, setEditOption] = useState("both");
+  const [editOption, setEditOption] = useState("start");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [currentTime, setCurrentTime] = useState("");
@@ -127,19 +127,19 @@ const Edit = (props) => {
         // setData(productionData[selectedIndex]);
         const selectedItem = productionData[selectedIndex];
         Object.entries(selectedItem).forEach(([key, value]) => {
-        console.log(`Key: ${key}, Value: ${value}`);
-        if (key === 'group') {
-          setGroup(value);
-        } else if (key === 'actual_start') {
-          const dateStart = parseISOToLocal(value);
-          setStartTime(value);
-          console.log("PO start: ", value);
-        } else if (key === 'actual_end') {
-          const dateEnd = parseISOToLocal(value);
-          setEndTime(value);
-          console.log("PO end: ", value);
-        }
-      });
+          console.log(`Key: ${key}, Value: ${value}`);
+          if (key === "group") {
+            setGroup(value);
+          } else if (key === "actual_start") {
+            const dateStart = parseISOToLocal(value);
+            setStartTime(value);
+            console.log("PO start: ", value);
+          } else if (key === "actual_end") {
+            const dateEnd = parseISOToLocal(value);
+            setEndTime(value);
+            console.log("PO end: ", value);
+          }
+        });
       } catch (error) {
         console.error("Error fetching data:", error);
         alert("Error fetching PO data: " + error.message);
@@ -316,19 +316,19 @@ const Edit = (props) => {
           status,
           group,
           actual_start: time,
-          poStart: startTime, 
-          poEnd: endTime, 
+          poStart: startTime,
+          poEnd: endTime,
         };
       } else if (editOption === "end") {
-        body = { 
-          id, 
-          date: time, 
-          line: value, 
-          status, 
-          group, 
-          actual_end: time, 
-          poStart: startTime, 
-          poEnd: endTime, 
+        body = {
+          id,
+          date: time,
+          line: value,
+          status,
+          group,
+          actual_end: time,
+          poStart: startTime,
+          poEnd: endTime,
         };
       } else if (editOption === "both") {
         body = {
@@ -339,8 +339,8 @@ const Edit = (props) => {
           group,
           actual_start: timeStart,
           actual_end: timeEnd,
-          poStart: startTime, 
-          poEnd: endTime, 
+          poStart: startTime,
+          poEnd: endTime,
         };
       }
 
@@ -384,7 +384,7 @@ const Edit = (props) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
+                <h3 className="text-black font-semibold">
                   Edit Production Order {props.id}
                 </h3>
                 <button
@@ -404,7 +404,7 @@ const Edit = (props) => {
                   <label className="text-black font-bold mb-2">
                     Edit Option:
                   </label>
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 mt-2">
                     <label className="text-black">
                       <input
                         type="radio"
@@ -423,7 +423,7 @@ const Edit = (props) => {
                       />
                       End Time
                     </label>
-                    <label className="text-black">
+                    {/* <label className="text-black">
                       <input
                         type="radio"
                         value="both"
@@ -431,7 +431,7 @@ const Edit = (props) => {
                         onChange={handleOptionChange}
                       />
                       Start Time & End Time
-                    </label>
+                    </label> */}
                   </div>
                 </div>
                 {editOption === "start" || editOption === "both" ? (
