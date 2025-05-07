@@ -8,6 +8,7 @@ import {
   ShieldCheckIcon,
   Table2Icon,
 } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import QualityLoss from "./QualLoss";
@@ -18,8 +19,6 @@ import Speed from "./SpeedLoss";
 
 function SidebarContent({ isOpen }) {
   const searchParams = useSearchParams();
-  const value = searchParams.get("value");
-  const id = searchParams.get("id");
   const [path, setPath] = useState("");
   const [quantityModal, setQuantityModal] = useState(false);
   const [qualityLossModal, setQualityLossModal] = useState(false);
@@ -190,9 +189,9 @@ function SidebarContent({ isOpen }) {
               item.label !== "Insert Speed Loss";
 
             return (
-              <a
+              <Link
                 key={index}
-                href={item.href}
+                href={item.href || "#"}
                 className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
                 onClick={(e) => {
                   if (item.action) {
@@ -209,7 +208,7 @@ function SidebarContent({ isOpen }) {
                 >
                   {item.label}
                 </span>
-              </a>
+              </Link>
             );
           })}
       </div>
