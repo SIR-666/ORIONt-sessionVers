@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
 
 const Form = (props) => {
@@ -35,7 +35,7 @@ const Form = (props) => {
                 className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
                 style={{ backgroundColor: "#A3D9A5" }}
               >
-                <h3 className="text-black font-semibold text-gray-700">
+                <h3 className="text-black font-semibold">
                   Select Downtime Category
                 </h3>
                 <button

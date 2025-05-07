@@ -3,6 +3,7 @@ import {
   CircleGaugeIcon,
   CircleXIcon,
   ClipboardListIcon,
+  DatabaseIcon,
   HouseIcon,
   ShieldCheckIcon,
   Table2Icon,
@@ -137,6 +138,12 @@ function SidebarContent({ isOpen }) {
       basePath: "/performance",
       show: true,
     },
+    {
+      label: "Master Downtime",
+      href: "../../masterDowntime",
+      basePath: "/masterDowntime",
+      show: true,
+    },
   ];
 
   const renderIcon = (label) => {
@@ -157,6 +164,8 @@ function SidebarContent({ isOpen }) {
         return <Table2Icon className="size-4 mr-4" />;
       case "Performance Report":
         return <Table2Icon className="size-4 mr-4" />;
+      case "Master Downtime":
+        return <DatabaseIcon className="size-4 mr-4" />;
       default:
         return null;
     }
