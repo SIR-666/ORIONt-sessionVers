@@ -489,9 +489,13 @@ const RectangleContainer = ({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
             },
             body: JSON.stringify(body),
           });
+
           if (!response.ok) throw new Error(`Failed to fetch data from ${url}`);
           return response.json();
         };
