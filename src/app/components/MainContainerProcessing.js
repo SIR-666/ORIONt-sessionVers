@@ -242,7 +242,7 @@ const RectangleContainerProcessing = ({
     if (stoppageData) {
       calculateSums(stoppageData);
     }
-  }, [value, stoppageDat, breakdownMachine]);
+  }, [value, stoppageData, breakdownMachine]);
 
   // Get Shift from localStorage
   const getShift = (shift, date) => {
