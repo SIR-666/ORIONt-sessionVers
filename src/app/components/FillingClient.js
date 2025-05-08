@@ -16,7 +16,6 @@ export default function OrderPage({ initialData }) {
   const [filteredData, setFilteredData] = useState(initialData || []);
   const [lineData, setLineData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [clicked, setClicked] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const value = searchParams.get("value");
@@ -55,39 +54,6 @@ export default function OrderPage({ initialData }) {
     }
   }, []);
 
-  const formatDateTime = (dateString) => {
-    if (!dateString || typeof dateString !== "string") {
-      return "";
-    }
-    const validDateString = dateString.replace(" ", "T");
-    const date = new Date(validDateString);
-    return `${date.getUTCDate().toString().padStart(2, "0")}.${(
-      date.getUTCMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}.${date.getUTCFullYear()} ${date
-      .getUTCHours()
-      .toString()
-      .padStart(2, "0")}:${date
-      .getUTCMinutes()
-      .toString()
-      .padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}`;
-  };
-
-  //===== untuk format judul atas Milk Filling Packing - LINE A - SHIFT II - 17-12-2024
-  const formatDateTime2 = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-    const day = String(date.getDate()).padStart(2, "0");
-    // const hours = String(date.getHours()).padStart(2, "0");
-    // const minutes = String(date.getMinutes()).padStart(2, "0");
-    // return `${year}-${month}-${day}T${hours}:${minutes}`;
-    return `${day}-${month}-${year}`;
-  };
-
-  // Retrieve 'dataTime' from localStorage
-  let dataTime = new Date(localStorage.getItem("date"));
-
   const formatDateTime3 = (dateString) => {
     if (!dateString || typeof dateString !== "string") {
       return "";
@@ -107,34 +73,12 @@ export default function OrderPage({ initialData }) {
       .padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}`;
   };
 
-  const formatDateTime4 = (dateString) => {
-    if (!dateString || typeof dateString !== "string") {
-      return "";
-    }
-
-    const [day, month, year] = dateString.split(".");
-    if (!day || !month || !year) {
-      return "";
-    }
-    const date = new Date(Date.UTC(year, month - 1, day));
-    return `${date.getUTCDate().toString().padStart(2, "0")}-${(
-      date.getUTCMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}-${date.getUTCFullYear()}`;
-  };
-
-  //  ====
-
   const getItemById = (id) => {
     const item = data.find((entry) => entry.id === id);
     console.log("Item data: ", item);
     if (item) {
       localStorage.setItem("selectedMaterial", JSON.stringify([item]));
       router.push(`/main?value=${value}&id=${id}`);
-      // setTimeout(() => {
-      //     window.location.reload();
-      // }, 2000);
     }
   };
 
@@ -228,10 +172,6 @@ export default function OrderPage({ initialData }) {
     setStatusFilter(status);
   };
 
-  // const handleBackButton = () => {
-  //   setShowForm1(false);
-  // };
-
   const openStartModal = (id, status) => {
     for (const entry of lineData) {
       if (entry.status === "Active") {
@@ -246,6 +186,18 @@ export default function OrderPage({ initialData }) {
     setShowStart(true);
   };
 
+  const handleNoPoModal = () => {
+    for (const entry of lineData) {
+      if (entry.status === "Active") {
+        alert(
+          `Please stop active Production Order first with the id of ${entry.id}`
+        );
+        return;
+      }
+    }
+    setShowForm2(true);
+  };
+
   const stopPO = (id, status) => {
     setSelectedId(id);
     setSelectedStatus(status);
@@ -256,12 +208,6 @@ export default function OrderPage({ initialData }) {
     setSelectedId(id);
     setSelectedStatus(status);
     setShowEdit(true);
-  };
-
-  const handleTypeButton = (selectedValue, itemData) => {
-    setClickedItemData({ selectedValue, itemData });
-    setShowForm1(false);
-    setShowForm2(true);
   };
 
   return (
@@ -319,12 +265,6 @@ export default function OrderPage({ initialData }) {
                 : ""}{" "}
               - SHIFT {shift} - {date} - {localStorage.getItem("group")}
             </span>
-            {/* <button
-              className="px-2 py-1 rounded-full text-sm font-medium text-indigo-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-indigo-600 hover:border-4 focus:border-4 hover:border-indigo-800 hover:text-indigo-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"
-              onClick={() => setShowModal(true)}
-            >
-              Change Line / Shift
-            </button> */}
             <button
               className={`
                     px-4 py-2 rounded-full text-sm font-medium text-[#6BBF74] bg-white 
@@ -408,7 +348,6 @@ export default function OrderPage({ initialData }) {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            {/* <h2 className="col-span-1 text-black mt-3 ml-3">{plant}</h2> */}
             <div className="col-span-1 relative flex items-center h-12 rounded-full"></div>
           </div>
         </main>
@@ -552,7 +491,7 @@ export default function OrderPage({ initialData }) {
                           </div>
                         ) : row.status === "Completed" ? (
                           <div>
-                            <button
+                            {/* <button
                               className={`
                                 flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium
                                 text-[#6BBF74] bg-white border border-[#6BBF74] shadow-sm
@@ -578,7 +517,7 @@ export default function OrderPage({ initialData }) {
                                 />
                               </svg>
                               Extend
-                            </button>
+                            </button> */}
                             <button
                               className={`
                                 flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium
@@ -690,7 +629,7 @@ export default function OrderPage({ initialData }) {
                 active:bg-[#4F9A5F] active:border-[#4F9A5F]
                 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed
             `}
-          onClick={() => setShowForm2(true)}
+          onClick={() => handleNoPoModal()}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

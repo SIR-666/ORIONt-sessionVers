@@ -1,6 +1,7 @@
 import nominalSpeeds from "@/app/speed";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import url from "../url";
 import {
   calculateAvailableTime,
   calculateMtbf,
@@ -41,7 +42,6 @@ const RectangleContainerProcessing = ({
     TdStyle11: `${TdBaseStyle} bg-[#D0A842]`,
   };
 
-  console.log("All PO : ", allPO);
   const searchParams = useSearchParams();
   const value = searchParams.get("value");
   const id = searchParams.get("id");
@@ -67,8 +67,8 @@ const RectangleContainerProcessing = ({
   const [qualityLossModal, setQualityLossModal] = useState(false);
   const [speedLossModal, setSpeedLossModal] = useState(false);
   const [latestStart, setLatestStart] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [plant, setPlant] = useState(localStorage.getItem("plant"));
+  const [breakdownMachine, setBreakdownMachine] = useState([]);
   // Variables to hold total net and netDisplay
   let totalnet = 0;
   let totalnetDisplay = 0;
@@ -95,7 +95,6 @@ const RectangleContainerProcessing = ({
         const speeds = results
           .map((skuData, index) => {
             if (skuData && typeof skuData[0]?.speed === "number") {
-              // console.log("Speed data: ", skuData[0].speed);
               return skuData[0].speed; // Return valid speed values only
             } else {
               console.warn(`No speed found for SKU ${initialData[index].sku}`);
@@ -113,40 +112,47 @@ const RectangleContainerProcessing = ({
       }
     }
 
-    // console.log("Final speed returned:", speed);
     return speed;
   };
 
-  const handleSpeed2 = async (allPO) => {
-    const speeds = {};
-    if (allPO && allPO.length > 0) {
+  useEffect(() => {
+    const line = localStorage.getItem("line");
+    const controller = new AbortController();
+
+    const fetchData = async () => {
       try {
-        const fetchPromises = allPO.map((entry) =>
-          fetch(`/api/getSpeedSKU`, {
-            method: "POST",
+        const machinesRes = await fetch(
+          `${url.URL}/getMachineDowntime?line=${line}`,
+          {
+            method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ sku: entry.sku }),
-          }).then((response) => response.json())
+            signal: controller.signal,
+          }
         );
 
-        const results = await Promise.all(fetchPromises);
+        if (!machinesRes.ok) {
+          const errorResponse = await machinesRes.json();
+          throw new Error(errorResponse.error || "Failed to get machine data");
+        }
 
-        results.forEach((skuData, index) => {
-          if (skuData && typeof skuData[0]?.speed === "number") {
-            speeds[allPO[index].sku] = skuData[0].speed; // Store by SKU
-          } else {
-            console.warn(`No speed found for SKU ${allPO[index].sku}`);
-            speeds[allPO[index].sku] = null; // indicate that no speed was found
-          }
-        });
+        const machineData = await machinesRes.json();
+        setBreakdownMachine(Array.isArray(machineData) ? machineData : []);
       } catch (error) {
-        console.error("Error fetching SKU nominal speed:", error);
+        if (error.name !== "AbortError") {
+          console.error("Error fetching data:", error);
+        }
       }
-    }
-    return speeds; // Return object with speeds
-  };
+    };
+
+    fetchData();
+
+    // Cleanup fetch if component unmount
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -204,39 +210,17 @@ const RectangleContainerProcessing = ({
         const downtimeEnd = new Date(
           calculateEndTime(entry.Date, entry.Minutes)
         );
-        // console.log("Downtime Start: ", downtimeStart);
-        // console.log("Downtime End: ", downtimeEnd);
 
         const order = (allPO || []).find((o) => o.id === id);
 
         let downtimeDuration = 0;
         downtimeDuration = (downtimeEnd - downtimeStart) / 60000;
-        // console.log("Downtime duration:", downtimeDuration);
 
         if (downtimeDuration > 0) {
           if (entry.Mesin === "Planned Stop") {
             plannedSum += downtimeDuration;
           } else if (
-            [
-              "Unloading",
-              "Separator",
-              "Thermization",
-              "Storage",
-              "Scanima_Mixer",
-              "Breedo",
-              "Flex 1",
-              "Flex 2",
-              "GEA",
-              "Aseptic_Tank1",
-              "Aseptic_Tank2",
-              "Aseptic_Tank3",
-              "Aseptic_Tank4",
-              "CIP_Kitchen1",
-              "CIP_Kitchen2",
-              "CIP_Kitchen3",
-              "CIP_Kitchen4",
-              "Process Failure",
-            ].includes(entry.Mesin)
+            breakdownMachine.map((item) => item.mesin).includes(entry.Mesin)
           ) {
             unplannedSum += downtimeDuration;
           } else if (entry.Mesin === "Unavailable Time") {
@@ -258,13 +242,7 @@ const RectangleContainerProcessing = ({
     if (stoppageData) {
       calculateSums(stoppageData);
     }
-  }, [value, stoppageData]);
-
-  // useEffect(() => {
-  //   if (stoppageData) {
-  //     console.log("Stoppage Data in Container: ", stoppageData);
-  //   }
-  // }, [stoppageData]);
+  }, [value, stoppageDat, breakdownMachine]);
 
   // Get Shift from localStorage
   const getShift = (shift, date) => {
@@ -297,8 +275,6 @@ const RectangleContainerProcessing = ({
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
     }
-    // console.log("Shift start time: ", startTime);
-    // console.log("Shift end time: ", endTime);
 
     return { startTime, endTime };
   };
@@ -345,7 +321,7 @@ const RectangleContainerProcessing = ({
       const shiftTimes = getShift(shift, date);
       const start = new Date(entry.actual_start);
       start.setHours(start.getHours() - 7);
-      // console.log("Start: ", start);
+
       let end;
       if (entry.actual_end) {
         end = new Date(entry.actual_end);
@@ -357,7 +333,6 @@ const RectangleContainerProcessing = ({
           end = shiftTimes.endTime;
         }
       }
-      // console.log("End: ", end);
 
       let startAvailable, endAvailable;
       if (
@@ -400,22 +375,16 @@ const RectangleContainerProcessing = ({
         } else {
           endAvailable = end;
         }
-        // endAvailable = end;
       } else {
         endAvailable = shiftTimes.endTime;
       }
-      // endAvailable = end < shiftTimes.endTime ? shiftTimes.endTime : shiftTimes.endTime;
-      // console.log("Start time: ", startAvailable);
-      // console.log("End time: ", endAvailable);
       return Math.round((endAvailable - startAvailable) / (1000 * 60)); // Duration in minutes
     });
-
-    // console.log("Durations: ", activeDurations);
 
     // Determine endTime
     initialData?.forEach((entry) => {
       let endTime = entry.actual_end ? new Date(entry.actual_end) : currentTime;
-      // console.log("End Time format date time lengkap: ", endTime);
+
       // Calculate endTimeString untuk nilai actual_end null atau existing
       let endTimeString = "";
       if (entry.actual_end) {
@@ -442,7 +411,6 @@ const RectangleContainerProcessing = ({
           .toString()
           .padStart(2, "0")}`;
       }
-      // console.log("End Time to display: ", endTimeString);
       setEndTime(endTimeString); // Set endTime in the state
     });
 
@@ -451,7 +419,7 @@ const RectangleContainerProcessing = ({
       (sum, duration) => sum + duration,
       0
     );
-    // console.log("Total time: ", totalActiveTime);
+
     setTimeDifference(totalActiveTime);
 
     const year = currentTime.getFullYear().toString();
@@ -481,7 +449,6 @@ const RectangleContainerProcessing = ({
             }
 
             const quantityData = await res.json();
-            // console.log("Quantity Data: ", quantityData);
             if (Array.isArray(quantityData) && quantityData.length > 0) {
               return quantityData.reduce(
                 (sum, item) => sum + parseFloat(item.Downtime),
@@ -591,12 +558,10 @@ const RectangleContainerProcessing = ({
   // Cek array existing atau tidak
   useEffect(() => {
     if (!initialData || !Array.isArray(initialData)) {
-      // console.log("Loading initial data...");
       return; // Skip the effect logic if data is not ready
     }
 
     if (!stoppageData || !Array.isArray(stoppageData)) {
-      // console.log("Loading stoppage data...");
       return; // Skip the effect logic if data is not ready
     }
 
@@ -772,7 +737,6 @@ const RectangleContainerProcessing = ({
         }
 
         const result = await response.json();
-        // console.log("Data sent successfully:", result);
       } catch (error) {
         console.error("Error sending data to backend:", error);
       }
@@ -844,13 +808,6 @@ const RectangleContainerProcessing = ({
                   >
                     Performance Indicator (Minutes)
                   </th>
-                  {/* <th
-                    colSpan="1"
-                    style={{ border: "1px white", padding: "8px" }}
-                    className="text-black bg-gray-300"
-                  >
-                    Minutes
-                  </th> */}
                   <th
                     colSpan="1"
                     style={{ border: "1px white", padding: "8px" }}
