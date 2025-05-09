@@ -195,24 +195,9 @@ const RectangleContainerCheese = ({
       let unavailableSum = 0;
       let waitingSum = 0;
 
-      const calculateEndTime = (start, duration) => {
-        const startTime = new Date(start);
-        const durationMinutes = parseInt(duration, 10);
-
-        const endDate = new Date(startTime.getTime() + durationMinutes * 60000);
-        return endDate;
-      };
-
       data.forEach((entry) => {
-        const downtimeStart = new Date(entry.Date);
-        const downtimeEnd = new Date(
-          calculateEndTime(entry.Date, entry.Minutes)
-        );
-
-        const order = (allPO || []).find((o) => o.id === id);
-
         let downtimeDuration = 0;
-        downtimeDuration = (downtimeEnd - downtimeStart) / 60000;
+        downtimeDuration = parseFloat(entry.Minutes);
 
         if (downtimeDuration > 0) {
           if (entry.Mesin === "Planned Stop") {
@@ -847,7 +832,7 @@ const RectangleContainerCheese = ({
                       textAlign: "left",
                     }}
                   >
-                    {durationSums.PlannedStoppages}
+                    {durationSums.PlannedStoppages.toFixed(2)}
                   </th>
                   <th
                     style={{
@@ -887,7 +872,7 @@ const RectangleContainerCheese = ({
                       color: "black",
                     }}
                   >
-                    {durationSums.UnplannedStoppages}
+                    {durationSums.UnplannedStoppages.toFixed(2)}
                   </td>
                   <td
                     style={{
@@ -964,7 +949,7 @@ const RectangleContainerCheese = ({
                       color: "black",
                     }}
                   >
-                    {durationSums.ProcessWaiting}
+                    {durationSums.ProcessWaiting.toFixed(2)}
                   </td>
                   <td
                     style={{
