@@ -338,12 +338,16 @@ const FormFill = (props) => {
   };
 
   const handleDurationChange = (e) => {
-    const newDuration = parseInt(e.target.value, 10) || 0;
-    setDurationData(newDuration);
-    setNewEntry((prev) => ({ ...prev, duration: newDuration }));
+    const val = e.target.value.replace(",", ".");
+    const parsed = parseFloat(val);
+    setDurationData(val); // biar tetap bisa tulis koma
+    setNewEntry((prev) => ({
+      ...prev,
+      duration: isNaN(parsed) ? 0 : parsed,
+    }));
 
-    if (startTime) {
-      calculateEndTime(startTime, newDuration);
+    if (startTime && !isNaN(parsed)) {
+      calculateEndTime(startTime, parsed);
     }
   };
 
@@ -356,10 +360,10 @@ const FormFill = (props) => {
   const handleInputChange = (e) => {
     const { id, value } = e.target;
 
-    // Convert 'duration' value to an integer, and update the rest as is
     setNewEntry((prevEntry) => ({
       ...prevEntry,
-      [id]: id === "duration" ? parseInt(value, 10) || 0 : value,
+      [id]:
+        id === "duration" ? parseFloat(value.replace(",", ".")) || 0 : value,
     }));
   };
 
@@ -525,7 +529,7 @@ const FormFill = (props) => {
                   disabled
                 />
                 <input
-                  type="number"
+                  type="text"
                   name="duration"
                   id="duration"
                   className="block w-full text-black appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-gray-60 mt-5"

@@ -55,6 +55,7 @@ const Modal = (props) => {
     setSelectedPlant(selectedPlant);
     setSelectedLine("");
     setProcessingLines("");
+    setSelectedGroup("");
 
     if (selectedPlant === "Milk Processing") {
       const filteredSubGroups = data
@@ -505,7 +506,8 @@ const Modal = (props) => {
                 {selectedPlant === "" ||
                 selectedLine === "" ||
                 selectedShift === "" ||
-                selectedDate === null ? (
+                selectedDate === null ||
+                selectedGroup === "" ? (
                   <button
                     className="text-white bg-gray-500 px-6 py-3 font-bold uppercase text-sm rounded shadow"
                     type="button"
