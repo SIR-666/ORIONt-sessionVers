@@ -188,7 +188,7 @@ const Modal = (props) => {
 
           // Ambil hanya field `group` dan buat unique list
           const uniqueGroups = [...new Set(jsonData.map((item) => item.group))];
-
+          console.log("group :", uniqueGroups);
           setGroup(uniqueGroups);
         } catch (error) {
           console.error("Error fetching group data:", error);
@@ -277,7 +277,7 @@ const Modal = (props) => {
                 style={{ backgroundColor: "#A3D9A5" }}
               >
                 <h3 className="text-black font-semibold">
-                  Set Plant & Production Line
+                  Set Plant & Production Line2
                 </h3>
                 <button
                   className="bg-transparent border-0 text-black float-right"

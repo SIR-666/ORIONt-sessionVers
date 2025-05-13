@@ -3,7 +3,13 @@ import { getSpeedLoss } from "@/app/dbDowntime";
 export async function POST(req) {
   try {
     const { line, date_start, date_end, plant } = await req.json();
-    console.log("Retrieved Data: \n", line, date_start, date_end, plant);
+    console.log(
+      "Retrieved Data get speedloss: \n",
+      line,
+      date_start,
+      date_end,
+      plant
+    );
 
     if (!line || !date_start || !date_end || !plant) {
       return new Response(

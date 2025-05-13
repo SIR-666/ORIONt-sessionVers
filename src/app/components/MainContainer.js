@@ -534,6 +534,8 @@ const RectangleContainer = ({
         // Set states
         setQualityLoss(totalQualityLoss * 60);
         setSpeedLoss(totalSpeedLoss * 60);
+        console.log("quality loss:", totalQualityLoss);
+
         setQty(totalQuantity);
         setrejectQty(totalRejectSample);
       } catch (error) {
@@ -629,23 +631,27 @@ const RectangleContainer = ({
     net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
   // sent to backend (hours)
   const netDB = (qty - rejectQty) / (skuSpeed || 1);
-  const prodDB =
-    parseFloat(netDB) +
-    durationSums.UnplannedStoppages / 60 +
-    parseFloat(speedLoss) +
-    parseFloat(qualityLoss / 60);
-  const runDB =
-    parseFloat(netDB) + parseFloat(speedLoss) + parseFloat(qualityLoss / 60);
-  const nRDB =
-    (timeDifference / 60 ?? 0) -
-    (prodDB ?? 0) -
-    durationSums.ProcessWaiting / 60 -
-    durationSums.PlannedStoppages / 60 -
-    durationSums.UnavailableTime / 60;
+  // const prodDB =
+  //   parseFloat(netDB) +
+  //   durationSums.UnplannedStoppages / 60 +
+  //   parseFloat(speedLoss / 60) +
+  //   parseFloat(qualityLoss / 60);
+  // const runDB =
+  //   parseFloat(netDB) + parseFloat(speedLoss) + parseFloat(qualityLoss / 60);
+  // const nRDB =
+  //   (timeDifference / 60 ?? 0) -
+  //   (prodDB ?? 0) -
+  //   durationSums.ProcessWaiting / 60 -
+  //   durationSums.PlannedStoppages / 60 -
+  //   durationSums.UnavailableTime / 60;
+  const prodDB = production / 60;
+  const runDB = running / 60;
+  const nRDB = nReported / 60;
   const operationDB = prodDB + durationSums.ProcessWaiting / 60;
-  const availableDB = timeDifference
-    ? timeDifference / 60 - durationSums.UnavailableTime / 60
-    : 0;
+  // const availableDB = timeDifference
+  //   ? timeDifference / 60 - durationSums.UnavailableTime / 60
+  //   : 0;
+  const availableDB = availableTime / 60;
   const breakdownDB = durationSums.UnplannedStoppages / 60;
   const processWaitingDB = durationSums.ProcessWaiting / 60;
   const plannedDB = durationSums.PlannedStoppages / 60;
@@ -737,6 +743,23 @@ const RectangleContainer = ({
             plant: plant,
           }),
         });
+        // const data = JSON.stringify({
+        //   net: netDB,
+        //   running: runDB,
+        //   production: prodDB,
+        //   operation: operationDB,
+        //   nReported: nRDB,
+        //   available: availableDB,
+        //   breakdown: breakdownDB,
+        //   processwait: processWaitingDB,
+        //   planned: plannedDB,
+        //   ut: ut,
+        //   startTime: latestStart,
+        //   line: value,
+        //   group: group,
+        //   plant: plant,
+        // });
+        // console.log("data send:", data);
 
         if (!response.ok) {
           throw new Error("Failed to send data to the server");
