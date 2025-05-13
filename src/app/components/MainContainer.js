@@ -619,7 +619,8 @@ const RectangleContainer = ({
   const oee =
     net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
   // sent to backend (hours)
-  const netDB = (qty - rejectQty) / (skuSpeed || 1);
+  // const netDB = (qty - rejectQty) / (skuSpeed || 1);
+  const netDB = totalnetDisplay / 60;
   // const prodDB =
   //   parseFloat(netDB) +
   //   durationSums.UnplannedStoppages / 60 +
@@ -708,62 +709,65 @@ const RectangleContainer = ({
       plannedDB === null
     )
       return;
-    const sendDataToBackend = async () => {
-      try {
-        const response = await fetch("/api/insertPerformance", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            net: netDB,
-            running: runDB,
-            production: prodDB,
-            operation: operationDB,
-            nReported: nRDB,
-            available: availableDB,
-            breakdown: breakdownDB,
-            processwait: processWaitingDB,
-            planned: plannedDB,
-            ut: ut,
-            startTime: latestStart,
-            line: value,
-            group: group,
-            plant: plant,
-          }),
-        });
-        // const data = JSON.stringify({
-        //   net: netDB,
-        //   running: runDB,
-        //   production: prodDB,
-        //   operation: operationDB,
-        //   nReported: nRDB,
-        //   available: availableDB,
-        //   breakdown: breakdownDB,
-        //   processwait: processWaitingDB,
-        //   planned: plannedDB,
-        //   ut: ut,
-        //   startTime: latestStart,
-        //   line: value,
-        //   group: group,
-        //   plant: plant,
-        // });
-        // console.log("data send:", data);
 
-        if (!response.ok) {
-          throw new Error("Failed to send data to the server");
+    // alert(netDB);
+
+    const timeout = setTimeout(() => {
+      const sendDataToBackend = async () => {
+        try {
+          const response = await fetch("/api/insertPerformance", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              net: netDB,
+              running: runDB,
+              production: prodDB,
+              operation: operationDB,
+              nReported: nRDB,
+              available: availableDB,
+              breakdown: breakdownDB,
+              processwait: processWaitingDB,
+              planned: plannedDB,
+              ut: ut,
+              startTime: latestStart,
+              line: value,
+              group: group,
+              plant: plant,
+            }),
+          });
+
+          if (!response.ok)
+            throw new Error("Failed to send data to the server");
+
+          const result = await response.json();
+          console.log("✅ Data sent:", result);
+        } catch (error) {
+          console.error("❌ Error sending data to backend:", error);
         }
+      };
 
-        const result = await response.json();
-      } catch (error) {
-        console.error("Error sending data to backend:", error);
-      }
-    };
-
-    if (netDB && runDB && prodDB && nRDB) {
       sendDataToBackend();
-    }
-  }, [latestStart, prodDB, runDB, netDB, nRDB, initialData, value]);
+    }, 3000); // Delay 3 detik
+
+    return () => clearTimeout(timeout); // Cleanup saat unmount / rerender
+  }, [
+    latestStart,
+    prodDB,
+    runDB,
+    netDB,
+    nRDB,
+    operationDB,
+    availableDB,
+    breakdownDB,
+    processWaitingDB,
+    plannedDB,
+    ut,
+    value,
+    group,
+    plant,
+  ]);
 
   return (
     <>

@@ -607,24 +607,29 @@ const RectangleContainerProcessing = ({
   const oee =
     net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
   // sent to backend (hours)
-  const netDB = (qty - rejectQty) / (skuSpeed || 1);
-  const prodDB =
-    parseFloat(netDB) +
-    durationSums.UnplannedStoppages / 60 +
-    parseFloat(speedLoss) +
-    parseFloat(qualityLoss / 60);
-  const runDB =
-    parseFloat(netDB) + parseFloat(speedLoss) + parseFloat(qualityLoss / 60);
-  const nRDB =
-    (timeDifference / 60 ?? 0) -
-    (prodDB ?? 0) -
-    durationSums.ProcessWaiting / 60 -
-    durationSums.PlannedStoppages / 60 -
-    durationSums.UnavailableTime / 60;
+  // const netDB = (qty - rejectQty) / (skuSpeed || 1);
+  const netDB = totalnetDisplay / 60;
+  // const prodDB =
+  //   parseFloat(netDB) +
+  //   durationSums.UnplannedStoppages / 60 +
+  //   parseFloat(speedLoss / 60) +
+  //   parseFloat(qualityLoss / 60);
+  // const runDB =
+  //   parseFloat(netDB) + parseFloat(speedLoss) + parseFloat(qualityLoss / 60);
+  // const nRDB =
+  //   (timeDifference / 60 ?? 0) -
+  //   (prodDB ?? 0) -
+  //   durationSums.ProcessWaiting / 60 -
+  //   durationSums.PlannedStoppages / 60 -
+  //   durationSums.UnavailableTime / 60;
+  const prodDB = production / 60;
+  const runDB = running / 60;
+  const nRDB = nReported / 60;
   const operationDB = prodDB + durationSums.ProcessWaiting / 60;
-  const availableDB = timeDifference
-    ? timeDifference / 60 - durationSums.UnavailableTime / 60
-    : 0;
+  // const availableDB = timeDifference
+  //   ? timeDifference / 60 - durationSums.UnavailableTime / 60
+  //   : 0;
+  const availableDB = availableTime / 60;
   const breakdownDB = durationSums.UnplannedStoppages / 60;
   const processWaitingDB = durationSums.ProcessWaiting / 60;
   const plannedDB = durationSums.PlannedStoppages / 60;
@@ -692,45 +697,63 @@ const RectangleContainerProcessing = ({
       plannedDB === null
     )
       return;
-    const sendDataToBackend = async () => {
-      try {
-        const response = await fetch("/api/insertPerformance", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            net: netDB,
-            running: runDB,
-            production: prodDB,
-            operation: operationDB,
-            nReported: nRDB,
-            available: availableDB,
-            breakdown: breakdownDB,
-            processwait: processWaitingDB,
-            planned: plannedDB,
-            ut: ut,
-            startTime: latestStart,
-            line: value,
-            group: group,
-            plant: plant,
-          }),
-        });
 
-        if (!response.ok) {
-          throw new Error("Failed to send data to the server");
+    const timeout = setTimeout(() => {
+      const sendDataToBackend = async () => {
+        try {
+          const response = await fetch("/api/insertPerformance", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              net: netDB,
+              running: runDB,
+              production: prodDB,
+              operation: operationDB,
+              nReported: nRDB,
+              available: availableDB,
+              breakdown: breakdownDB,
+              processwait: processWaitingDB,
+              planned: plannedDB,
+              ut: ut,
+              startTime: latestStart,
+              line: value,
+              group: group,
+              plant: plant,
+            }),
+          });
+
+          if (!response.ok)
+            throw new Error("Failed to send data to the server");
+
+          const result = await response.json();
+          console.log("✅ Data sent:", result);
+        } catch (error) {
+          console.error("❌ Error sending data to backend:", error);
         }
+      };
 
-        const result = await response.json();
-      } catch (error) {
-        console.error("Error sending data to backend:", error);
-      }
-    };
-
-    if (netDB && runDB && prodDB && nRDB) {
       sendDataToBackend();
-    }
-  }, [latestStart, prodDB, runDB, netDB, nRDB, initialData, value]);
+    }, 3000); // Delay 3 detik
+
+    return () => clearTimeout(timeout); // Cleanup saat unmount / rerender
+  }, [
+    latestStart,
+    prodDB,
+    runDB,
+    netDB,
+    nRDB,
+    operationDB,
+    availableDB,
+    breakdownDB,
+    processWaitingDB,
+    plannedDB,
+    ut,
+    value,
+    group,
+    plant,
+  ]);
 
   return (
     <>
