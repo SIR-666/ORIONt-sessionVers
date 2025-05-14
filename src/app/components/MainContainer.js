@@ -67,13 +67,26 @@ const RectangleContainer = ({
   const [qualityLossModal, setQualityLossModal] = useState(false);
   const [speedLossModal, setSpeedLossModal] = useState(false);
   const [latestStart, setLatestStart] = useState(null);
-  const [plant, setPlant] = useState(localStorage.getItem("plant"));
+  const [plant, setPlant] = useState(null);
+  const [currentLine, setCurrentLine] = useState(null);
+  const [currentGroup, setCurrentGroup] = useState(null);
   const [breakdownMachine, setBreakdownMachine] = useState([]);
   // Variables to hold total net and netDisplay
   let totalnet = 0;
   let totalnetDisplay = 0;
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
+
+  useEffect(() => {
+    // Ambil ulang dari localStorage saat komponen sudah mount
+    const storedPlant = localStorage.getItem("plant");
+    const storedLine = localStorage.getItem("line");
+    const storedGroup = localStorage.getItem("group");
+
+    setPlant(storedPlant);
+    setCurrentLine(storedLine);
+    setCurrentGroup(storedGroup);
+  }, []);
 
   // Access the nominal speed from the map
   const handleSpeed = async () => {
@@ -706,11 +719,13 @@ const RectangleContainer = ({
       availableDB === null ||
       breakdownDB === null ||
       processWaitingDB === null ||
-      plannedDB === null
+      plannedDB === null ||
+      ut === null ||
+      currentLine === null ||
+      currentGroup === null ||
+      plant === null
     )
       return;
-
-    // alert(netDB);
 
     const timeout = setTimeout(() => {
       const sendDataToBackend = async () => {
@@ -732,8 +747,8 @@ const RectangleContainer = ({
               planned: plannedDB,
               ut: ut,
               startTime: latestStart,
-              line: value,
-              group: group,
+              line: currentLine,
+              group: currentGroup,
               plant: plant,
             }),
           });
@@ -764,8 +779,8 @@ const RectangleContainer = ({
     processWaitingDB,
     plannedDB,
     ut,
-    value,
-    group,
+    currentLine,
+    currentGroup,
     plant,
   ]);
 

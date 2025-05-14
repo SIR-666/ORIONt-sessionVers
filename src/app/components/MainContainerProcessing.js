@@ -67,11 +67,24 @@ const RectangleContainerProcessing = ({
   const [qualityLossModal, setQualityLossModal] = useState(false);
   const [speedLossModal, setSpeedLossModal] = useState(false);
   const [latestStart, setLatestStart] = useState(null);
-  const [plant, setPlant] = useState(localStorage.getItem("plant"));
+  const [plant, setPlant] = useState(null);
+  const [currentLine, setCurrentLine] = useState(null);
+  const [currentGroup, setCurrentGroup] = useState(null);
   const [breakdownMachine, setBreakdownMachine] = useState([]);
   // Variables to hold total net and netDisplay
   let totalnet = 0;
   let totalnetDisplay = 0;
+
+  useEffect(() => {
+    // Ambil ulang dari localStorage saat komponen sudah mount
+    const storedPlant = localStorage.getItem("plant");
+    const storedLine = localStorage.getItem("line");
+    const storedGroup = localStorage.getItem("group");
+
+    setPlant(storedPlant);
+    setCurrentLine(storedLine);
+    setCurrentGroup(storedGroup);
+  }, []);
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
@@ -694,7 +707,11 @@ const RectangleContainerProcessing = ({
       availableDB === null ||
       breakdownDB === null ||
       processWaitingDB === null ||
-      plannedDB === null
+      plannedDB === null ||
+      ut === null ||
+      currentLine === null ||
+      currentGroup === null ||
+      plant === null
     )
       return;
 
@@ -718,8 +735,8 @@ const RectangleContainerProcessing = ({
               planned: plannedDB,
               ut: ut,
               startTime: latestStart,
-              line: value,
-              group: group,
+              line: currentLine,
+              group: currentGroup,
               plant: plant,
             }),
           });
@@ -750,8 +767,8 @@ const RectangleContainerProcessing = ({
     processWaitingDB,
     plannedDB,
     ut,
-    value,
-    group,
+    currentLine,
+    currentGroup,
     plant,
   ]);
 
