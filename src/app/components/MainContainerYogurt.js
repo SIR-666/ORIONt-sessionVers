@@ -766,10 +766,7 @@ const RectangleContainerYogurt = ({
             {allPO.map((entry, index) => (
               <ul key={entry.id}>
                 <li className="text-2xl font-bold text-black">
-                  Production Order{" "}
-                  {entry.id.toString().length > 12
-                    ? `${entry.id.toString().slice(0, -1)}-${entry.id % 10}`
-                    : entry.id}
+                  Production Order {entry.id}
                 </li>
                 <li className="mt-2 text-black">Status: {entry.status}</li>
                 <li className="mt-2 text-black">Material: {entry.sku}</li>

@@ -452,10 +452,7 @@ function MainPage() {
           <h1 className="text-black text-2xl text-center font-bold">{value}</h1>
           <div className="flex items-center space-x-4">
             <h3 className="text-black font-semibold">
-              {id.toString().length > 12
-                ? `${id.toString().slice(0, -1)}-${id % 10}`
-                : id}{" "}
-              {matchedPO?.sku && `(${matchedPO.sku})`}
+              {id} {matchedPO?.sku && `(${matchedPO.sku})`}
             </h3>
           </div>
           <br></br>

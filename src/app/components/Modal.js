@@ -278,7 +278,7 @@ const Modal = (props) => {
                 style={{ backgroundColor: "#A3D9A5" }}
               >
                 <h3 className="text-black font-semibold">
-                  Set Plant & Production Line2
+                  Set Plant & Production Line
                 </h3>
                 <button
                   className="bg-transparent border-0 text-black float-right"

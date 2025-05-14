@@ -12,7 +12,7 @@ const nominalSpeeds = {
   FLEX_1: 6000,
   FLEX_2: 6000,
   GEA_3: 6000,
-  GEA_4: 6000,
+  GEA_4: 7000,
   GEA_5: 6000,
 
   // Yogurt
