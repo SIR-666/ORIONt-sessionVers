@@ -1,3 +1,4 @@
+import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
@@ -460,9 +461,9 @@ const Modal = (props) => {
                       id="date"
                       value={selectedDate || ""}
                       onChange={handleChange}
+                      max={moment().utcOffset(7).format("YYYY-MM-DD")} // ⛔️ tidak bisa pilih hari besok
                       className="border rounded-md p-2 text-black"
                     />
-                    ;
                   </div>
                   <div className="flex-2">
                     <label

@@ -619,8 +619,9 @@ const RectangleContainer = ({
   );
   const estimated = (
     durationSums.UnplannedStoppages +
+    durationSums.ProcessWaiting +
     parseFloat(speedLoss) +
-    parseFloat(nReported)
+    parseFloat(qualityLoss)
   ).toFixed(2);
 
   const pe = net && production ? ((net / production) * 100).toFixed(2) : "0.00";
@@ -664,6 +665,16 @@ const RectangleContainer = ({
       speedLoss
     );
   const mtbf = calculateMtbf(production, durationSums.UnplannedStoppages);
+  const percentProcessWaiting = (
+    (durationSums.ProcessWaiting / operationDisplay) *
+    100
+  ).toFixed(2);
+  const percentEUPS = (
+    parseFloat(percentBreakdown) +
+    parseFloat(percentProcessWaiting) +
+    parseFloat(percentSpeedLoss) +
+    parseFloat(percentQualLoss)
+  ).toFixed(2);
 
   // Count unavailable time
   let ut,
@@ -860,7 +871,7 @@ const RectangleContainer = ({
                     style={{ border: "1px white", padding: "8px" }}
                     className="text-black bg-gray-300"
                   >
-                    Minutes (%)
+                    Percent (%)
                   </th>
                 </tr>
               </thead>
@@ -901,10 +912,7 @@ const RectangleContainer = ({
                       textAlign: "left",
                     }}
                   >
-                    {(
-                      (durationSums.PlannedStoppages / timeDifference) *
-                      100
-                    ).toFixed(2) || 0.0}
+                    {plannedStop || 0.0}
                   </th>
                 </tr>
                 <tr>
@@ -939,10 +947,7 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    {(
-                      (durationSums.UnplannedStoppages / timeDifference) *
-                      100
-                    ).toFixed(2) || 0.0}
+                    {percentBreakdown || percentBreakdown.toFixed(2)}
                   </td>
                 </tr>
                 {/* Add more rows as needed */}
@@ -980,7 +985,7 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    0.0
+                    {percentSpeedLoss || percentSpeedLoss.toFixed(2)}
                   </td>
                 </tr>
                 {speedLossModal && (
@@ -1016,7 +1021,9 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    0.0
+                    {isNaN(percentProcessWaiting)
+                      ? "0.00"
+                      : percentProcessWaiting}
                   </td>
                 </tr>
                 <tr>
@@ -1085,7 +1092,7 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    {((qualityLoss / timeDifference) * 100).toFixed(2) || 0.0}
+                    {percentQualLoss || percentQualLoss.toFixed(2)}
                   </td>
                 </tr>
                 {qualityLossModal && (
@@ -1121,7 +1128,7 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    {((estimated / timeDifference) * 100).toFixed(2) || 0.0}
+                    {isNaN(percentEUPS) ? "0.00" : percentEUPS}
                   </td>
                 </tr>
               </tbody>
@@ -1157,12 +1164,18 @@ const RectangleContainer = ({
         </div>
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
+            {isNaN(percentProcessWaiting) ? "0.00" : percentProcessWaiting}%
+          </h1>
+          <p className="text-gray-500 text-center">Process Waiting</p>
+        </div>
+        {/* <div className="mb-2">
+          <h1 className="text-black text-4xl text-center font-bold">
             {mtbf || mtbf.toFixed(2)}
           </h1>
           <p className="text-gray-500 text-center">
             Mean Time Between Failures (minutes)
           </p>
-        </div>
+        </div> */}
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
             {percentSpeedLoss || percentSpeedLoss.toFixed(2)}%
@@ -1173,7 +1186,7 @@ const RectangleContainer = ({
       <div className="grid grid-cols-2 gap-2">
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
-            {((estimated / timeDifference) * 100).toFixed(2) || 0.0}%
+            {isNaN(percentEUPS) ? "0.00" : percentEUPS}%
           </h1>
           <p className="text-gray-500 text-center">%EUPS</p>
         </div>
