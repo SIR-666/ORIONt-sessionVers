@@ -105,14 +105,13 @@ const QualLossPasteurizer = ({ onClose }) => {
 
           const start = new Date(element.actual_start);
           start.setHours(start.getHours() - 7);
-          // console.log("start po: ", start);
+
           const end = element.actual_end
             ? new Date(element.actual_end)
             : new Date();
           if (element.actual_end) {
             end.setHours(end.getHours() - 7);
           }
-          // console.log("End: ", end);
 
           startTime =
             start < getShiftTimes.startTime ? getShiftTimes.startTime : start;

@@ -444,7 +444,6 @@ const RectangleContainerYogurt = ({
             }
 
             const quantityData = await res.json();
-            // console.log("Quantity Data: ", quantityData);
             if (Array.isArray(quantityData) && quantityData.length > 0) {
               return quantityData.reduce(
                 (sum, item) => sum + parseFloat(item.Downtime),

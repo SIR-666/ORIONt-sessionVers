@@ -85,8 +85,6 @@ const FormFill = (props) => {
     } else {
       dataTime = current;
     }
-    // console.log("Current Date: ", current);
-    // console.log("Data Date: ", dataTime);
 
     if (props.isEditing && props.editData) {
       props.editData.forEach((entry) => {
@@ -112,10 +110,6 @@ const FormFill = (props) => {
       if (!startTime) setStartTime(dataTime);
     }
   }, [props.isEditing, props.editData, props.clickedItem, value]);
-
-  // useEffect(() => {
-  //   console.log("New entry updated: ", newEntry);
-  // }, [newEntry]);
 
   const getShift = (shift, date) => {
     if (!date || isNaN(new Date(date))) {
@@ -147,8 +141,6 @@ const FormFill = (props) => {
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
     }
-    // console.log("Shift start time: ", startTime);
-    // console.log("Shift end time: ", endTime);
 
     return { startTime, endTime };
   };

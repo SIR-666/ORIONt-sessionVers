@@ -47,8 +47,6 @@ export default function Navbar({ toggleSidebar, transparent }) {
           console.warn("Invalid shift provided.");
           return null; // Handle invalid shift
       }
-      // console.log("Shift start time: ", startTime);
-      // console.log("Shift end time: ", endTime);
 
       return { startTime, endTime };
     };

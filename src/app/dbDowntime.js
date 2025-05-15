@@ -237,7 +237,6 @@ async function getAllStoppages(line, date_start, date_end, plant) {
       }),
     });
     const data = await response.json();
-    // console.log("Retrieved Response: ", data);
     return data;
   } catch (error) {
     console.log(error);
@@ -294,7 +293,6 @@ async function getDowntimeType(type, line) {
 }
 
 async function getDowntimeId(id) {
-  // console.log("Received id from serverless: ", id);
   try {
     const response = await fetch(`${URL.URL}/getDowntimeId/${id}`);
     if (!response.ok) {

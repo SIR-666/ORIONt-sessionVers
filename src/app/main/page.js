@@ -110,8 +110,6 @@ function MainPage() {
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
     }
-    // console.log("Shift start time: ", startTime);
-    // console.log("Shift end time: ", endTime);
 
     return { startTime, endTime };
   };
@@ -177,8 +175,7 @@ function MainPage() {
         );
         setData([]);
       }
-      // console.log("Start Shift times: ", shiftTimes.startTime);
-      // console.log("End Shift times: ", shiftTimes.endTime);
+
       let start, end;
       for (const entry of productionData) {
         setGroup(entry.group);
@@ -199,9 +196,6 @@ function MainPage() {
         );
         const endUTCTime = new Date(endTime.setHours(endTime.getHours() - 7));
 
-        // console.log("Start time PO: ", startUTCTime);
-        // console.log("End time PO: ", endUTCTime);
-
         start =
           startUTCTime < shiftTimes.startTime
             ? shiftTimes.startTime
@@ -210,40 +204,6 @@ function MainPage() {
           endUTCTime < shiftTimes.endTime
             ? shiftTimes.endTime
             : shiftTimes.endTime;
-        // if (start === startUTCTime && end === endUTCTime) {
-        //   console.log("Switching shift based on localTime.");
-
-        //   let localTime = startTime.getUTCHours();
-        //   if (localTime >= 6 && localTime < 14) {
-        //     // Shift I: 6:00 AM to 2:00 PM
-        //     start = new Date(startTime);
-        //     start.setUTCHours(6, 0, 0, 0); // Set start to 6:00 AM
-        //     end = new Date(startTime);
-        //     end.setUTCHours(14, 0, 0, 0); // Set end to 2:00 PM
-        //   } else if (localTime >= 14 && localTime < 22) {
-        //     // Shift II: 2:00 PM to 10:00 PM
-        //     start = new Date(startTime);
-        //     start.setUTCHours(14, 0, 0, 0); // Set start to 2:00 PM
-        //     end = new Date(startTime);
-        //     end.setUTCHours(22, 0, 0, 0); // Set end to 10:00 PM
-        //   } else if (localTime >= 22 || localTime < 6) {
-        //     // Shift III: 10:00 PM to 6:00 AM
-        //     start = new Date(startTime);
-        //     start.setUTCHours(22, 0, 0, 0); // Set start to 10:00 PM
-        //     end = new Date(startTime);
-        //     if (localTime >= 22) {
-        //       end.setDate(end.getDate() + 1); // Next day
-        //     } else {
-        //       start.setDate(start.getDate() - 1); // Previous day
-        //     }
-        //     end.setUTCHours(6, 0, 0, 0); // Set end to 6:00 AM
-        //   } else {
-        //     console.warn("Unhandled localTime value:", localTime);
-        //     continue; // Skip this entry
-        //   }
-        // } else {
-        //   console.log("Skipping shift switching as start or end differ from UTC times.");
-        // }
 
         console.log(
           "Sent data for fetching: ",
@@ -306,8 +266,7 @@ function MainPage() {
         const currentShift = localStorage.getItem("shift");
         const currentDate = localStorage.getItem("date");
         const shiftTimes = getShift(currentShift, currentDate);
-        // console.log("Start Shift times: ", shiftTimes.startTime);
-        // console.log("End Shift times: ", shiftTimes.endTime);
+
         let start, end;
         for (const entry of data) {
           let startTime = new Date(entry.actual_start);

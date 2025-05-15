@@ -77,8 +77,6 @@ const End = (props) => {
     } else {
       dataTime = current; // Fallback if no date is in localStorage
     }
-    // console.log("Current Date: ", current);
-    // console.log("Data Date: ", dataTime);
 
     setCurrentTime(current);
     if (!time) setTime(dataTime);

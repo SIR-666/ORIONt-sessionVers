@@ -59,8 +59,6 @@ const RectangleChart = ({ initialData, localTime, allPO }) => {
         console.warn("Invalid shift provided.");
         return null; // Handle invalid shift
     }
-    // console.log("Shift start time: ", startTime);
-    // console.log("Shift end time: ", endTime);
 
     return { startTime, endTime };
   };
@@ -190,8 +188,6 @@ const RectangleChart = ({ initialData, localTime, allPO }) => {
       (a, b) => new Date(a.actual_start) - new Date(b.actual_start)
     );
 
-    // console.log("Sorted Shift PO: ", sortedShiftPOs);
-
     // Initialize unavailable time data
     const unavailableTimes = [];
     let previousPOEnd = getShiftTimes.startTime;
@@ -296,19 +292,9 @@ const RectangleChart = ({ initialData, localTime, allPO }) => {
         orderEndTime,
       });
     }
-
-    // console.log("Selected PO Unavailabilities:", sortedDowntimes);
-
-    // console.log("Filtered Downtime:", filteredDowntimes);
   });
 
   const mappedOrders = Array.from(groupedOrdersMap.values());
-
-  // useEffect(() => {
-  //   if (mappedOrders) {
-  //     console.log("Mapped Orders: ", mappedOrders);
-  //   }
-  // }, [mappedOrders]);
 
   const calculateStartPercentage = (startTime, startDate, endDate) => {
     if (!startTime || !startDate || !endDate) return 0;
@@ -519,9 +505,6 @@ const RectangleChart = ({ initialData, localTime, allPO }) => {
       startDate.setHours(startHours, startMinutes, startSeconds, 0);
       endDate.setHours(endHours, endMinutes, endSeconds, 0);
 
-      // console.log("Start time: ", startDate);
-      // console.log("End time: ", endDate);
-
       // Handle cross-day end time (e.g., shift 3 ends at 6 AM next day)
       if (shift === 3) {
         const localHour = new Date(referenceDate).getUTCHours();
@@ -545,15 +528,8 @@ const RectangleChart = ({ initialData, localTime, allPO }) => {
         shiftTimes.startTime
       );
 
-      // console.log("current shift", currentShift);
-      // console.log("start date", shiftStart.toISOString());
-      // console.log("end date", shiftEnd.toISOString());
-
       const endTime = actual_end ? actual_end : localTime;
-
       let orderBarColor = "#4CAF50";
-
-      // console.log("Downtimes: ", downtimes);
 
       if (!downtimes || downtimes.length === 0) {
         return (
@@ -629,8 +605,6 @@ const RectangleChart = ({ initialData, localTime, allPO }) => {
               } else if (downtime.Downtime_Category === "Process Waiting") {
                 barColor = "#E92CF9";
               }
-
-              // console.log(`Downtime Category: ${downtime.Downtime_Category}, Assigned Bar Color: ${barColor}`);
 
               return (
                 <div

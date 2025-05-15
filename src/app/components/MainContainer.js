@@ -411,7 +411,6 @@ const RectangleContainer = ({
           .toString()
           .padStart(2, "0")}`;
       }
-      // console.log("End Time to display: ", endTimeString);
       setEndTime(endTimeString); // Set endTime in the state
     });
 
@@ -420,7 +419,6 @@ const RectangleContainer = ({
       (sum, duration) => sum + duration,
       0
     );
-    // console.log("Total time: ", totalActiveTime);
     setTimeDifference(totalActiveTime);
 
     const year = currentTime.getFullYear().toString();
@@ -450,7 +448,6 @@ const RectangleContainer = ({
             }
 
             const quantityData = await res.json();
-            // console.log("Quantity Data: ", quantityData);
             if (Array.isArray(quantityData) && quantityData.length > 0) {
               return quantityData.reduce(
                 (sum, item) => sum + parseFloat(item.Downtime),
@@ -566,12 +563,10 @@ const RectangleContainer = ({
   // Cek array existing atau tidak
   useEffect(() => {
     if (!initialData || !Array.isArray(initialData)) {
-      // console.log("Loading initial data...");
       return; // Skip the effect logic if data is not ready
     }
 
     if (!stoppageData || !Array.isArray(stoppageData)) {
-      // console.log("Loading stoppage data...");
       return; // Skip the effect logic if data is not ready
     }
 
