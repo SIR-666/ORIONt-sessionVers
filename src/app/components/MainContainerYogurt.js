@@ -57,6 +57,7 @@ const RectangleContainerYogurt = ({
   const [qty, setQty] = useState(0);
   const [rejectQty, setrejectQty] = useState(0);
   const [qtyPO, setQtyPO] = useState([]);
+  const [productIds, setProductIds] = useState([]);
   const [calendarMinutes, setCalendarMinutes] = useState(0);
   const [skuSpeed, setSKUSpeed] = useState(null);
   const [skuSpeeds, setSkuSpeeds] = useState({});
@@ -74,6 +75,8 @@ const RectangleContainerYogurt = ({
   let totalnet = 0;
   let totalnetDisplay = 0;
 
+  const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
+
   useEffect(() => {
     // Ambil ulang dari localStorage saat komponen sudah mount
     const storedPlant = localStorage.getItem("plant");
@@ -84,8 +87,6 @@ const RectangleContainerYogurt = ({
     setCurrentLine(storedLine);
     setCurrentGroup(storedGroup);
   }, []);
-
-  const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
   // Access the nominal speed from the map
   const handleSpeed = async () => {
@@ -177,6 +178,7 @@ const RectangleContainerYogurt = ({
         // Ambil semua product_id dari allPO
         const productIds = allPO.map((entry) => entry.product_id);
         if (productIds.length > 0) {
+          setProductIds(productIds);
           const response = await fetch(
             `/api/getProducts?ids=${productIds.join(",")}`
           );
@@ -213,16 +215,19 @@ const RectangleContainerYogurt = ({
         downtimeDuration = parseFloat(entry.Minutes);
 
         if (downtimeDuration > 0) {
-          if (entry.Mesin === "Planned Stop") {
+          const mesin = entry.Mesin.trim();
+          if (mesin === "Planned Stop") {
             plannedSum += downtimeDuration;
           } else if (
-            breakdownMachine.map((item) => item.mesin).includes(entry.Mesin)
+            breakdownMachine.map((item) => item.mesin).includes(mesin)
           ) {
             unplannedSum += downtimeDuration;
-          } else if (entry.Mesin === "Unavailable Time") {
+          } else if (mesin === "Unavailable Time") {
             unavailableSum += downtimeDuration;
-          } else if (entry.Mesin === "Process Waiting") {
+          } else if (mesin === "Process Waiting") {
             waitingSum += downtimeDuration;
+          } else {
+            console.log("entry mesin:", mesin);
           }
         }
       });
@@ -371,6 +376,7 @@ const RectangleContainerYogurt = ({
         } else {
           endAvailable = end;
         }
+        // endAvailable = end;
       } else {
         endAvailable = shiftTimes.endTime;
       }
@@ -380,8 +386,6 @@ const RectangleContainerYogurt = ({
     // Determine endTime
     initialData?.forEach((entry) => {
       let endTime = entry.actual_end ? new Date(entry.actual_end) : currentTime;
-
-      // Calculate endTimeString untuk nilai actual_end null atau existing
       let endTimeString = "";
       if (entry.actual_end) {
         endTimeString = `${endTime
@@ -480,9 +484,13 @@ const RectangleContainerYogurt = ({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
             },
             body: JSON.stringify(body),
           });
+
           if (!response.ok) throw new Error(`Failed to fetch data from ${url}`);
           return response.json();
         };
@@ -525,6 +533,8 @@ const RectangleContainerYogurt = ({
         // Set states
         setQualityLoss(totalQualityLoss * 60);
         setSpeedLoss(totalSpeedLoss * 60);
+        console.log("quality loss:", totalQualityLoss);
+
         setQty(totalQuantity);
         setrejectQty(totalRejectSample);
       } catch (error) {
@@ -568,14 +578,12 @@ const RectangleContainerYogurt = ({
     timeDifference,
     durationSums.UnavailableTime
   );
-  const { net, netDisplay } = calculateNet(qty, rejectQty, skuSpeed || 1);
   {
     allPO.map((entry, index) => {
-      let skuSpeed = skuSpeeds[entry.sku] || 1; // Default to 1 if no speed found
       let { net, netDisplay } = calculateNet(
-        entry.qty,
+        qtyPO[index],
         rejectQty,
-        skuSpeed || 1
+        skuSpeeds[productIds[index]] || 1
       );
       console.log("totalnetDisplay", netDisplay);
       // Accumulate totals
@@ -583,7 +591,9 @@ const RectangleContainerYogurt = ({
       totalnetDisplay += netDisplay;
     });
   }
+  const net = totalnet;
   totalnetDisplay = totalnet.toFixed(2);
+  console.log("totalnetDisplay", totalnetDisplay);
 
   const { production, productionDisplay } = calculateProduction(
     net,
@@ -619,7 +629,7 @@ const RectangleContainerYogurt = ({
     net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
   // sent to backend (hours)
   // const netDB = (qty - rejectQty) / (skuSpeed || 1);
-  const netDB = netDisplay / 60;
+  const netDB = totalnetDisplay / 60;
   // const prodDB =
   //   parseFloat(netDB) +
   //   durationSums.UnplannedStoppages / 60 +
@@ -838,6 +848,13 @@ const RectangleContainerYogurt = ({
                   >
                     Performance Indicator (Minutes)
                   </th>
+                  {/* <th
+                    colSpan="1"
+                    style={{ border: "1px white", padding: "8px" }}
+                    className="text-black bg-gray-300"
+                  >
+                    Minutes
+                  </th> */}
                   <th
                     colSpan="1"
                     style={{ border: "1px white", padding: "8px" }}
@@ -1086,7 +1103,7 @@ const RectangleContainerYogurt = ({
                       color: "black",
                     }}
                   >
-                    {netDisplay}
+                    {totalnetDisplay}
                   </td>
                   <td className={TdStyle.TdStyle11}>
                     Estimated Unplanned Stoppage
