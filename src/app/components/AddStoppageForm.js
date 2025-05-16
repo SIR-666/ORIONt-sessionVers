@@ -364,57 +364,104 @@ const FormFill = (props) => {
       alert("Please add start of downtime");
       return;
     }
+
     if (!newEntry.comments) {
       alert("Please enter your comments.");
-      return; // Prevent submission
+      return;
     }
 
+    // ===== VALIDASI SHIFT TIME SESUAI SHIFT =====
+    try {
+      const shift = localStorage.getItem("shift");
+      const shiftDate = localStorage.getItem("date");
+      const parsedStart = new Date(startTime);
+      const parsedEnd = new Date(endTime);
+
+      if (!shift || !shiftDate || isNaN(parsedStart) || isNaN(parsedEnd)) {
+        alert("Shift atau tanggal tidak valid.");
+        return;
+      }
+
+      const { startTime: shiftStart, endTime: shiftEnd } = getShift(
+        shift,
+        new Date(shiftDate)
+      );
+
+      if (parsedStart < shiftStart || parsedStart > shiftEnd) {
+        const shiftLabel =
+          shift === "I"
+            ? "06:00–14:00"
+            : shift === "II"
+            ? "14:00–22:00"
+            : "22:00–06:00 (next day)";
+        alert(
+          `Start time must be within ${shiftDate} shift ${shift} ${shiftLabel}`
+        );
+        return;
+      }
+
+      if (parsedEnd < shiftStart || parsedEnd > shiftEnd) {
+        const shiftLabel =
+          shift === "I"
+            ? "06:00–14:00"
+            : shift === "II"
+            ? "14:00–22:00"
+            : "22:00–06:00 (next day)";
+        alert(
+          `End time must be within ${shiftDate} shift ${shift} ${shiftLabel}`
+        );
+        return;
+      }
+    } catch (err) {
+      console.error("Shift validation error:", err);
+      alert("Terjadi kesalahan saat validasi waktu shift.");
+      return;
+    }
+
+    // ===== SUBMIT DATA =====
     try {
       isLoading(true);
       const endpoint = props.isEditing
         ? "/api/updateDowntime"
         : "/api/createStoppage";
-
-      console.log("newEntry: ", newEntry);
-
       const method = props.isEditing ? "PUT" : "POST";
+
       const dataToSend = {
         ...newEntry,
         startTime,
         endTime,
         id: id || undefined,
-        group: localStorage.getItem("group") || undefined, // Use id from props if it exists (for editing)
+        group: localStorage.getItem("group") || undefined,
         plant: localStorage.getItem("plant") || undefined,
       };
-      console.log("Data to send: ", dataToSend);
-      console.log("Endpoint: ", endpoint);
-      console.log("Method: ", method);
+
       const response = await fetch(endpoint, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        method,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
       });
 
       const result = await response.json();
+
       if (result.error) {
         setError(result.message);
         return;
-      } else if (result.success) {
-        const message = props.isEditing
-          ? `Stoppage updated successfully with ID: ${result.id}`
-          : `Stoppage created successfully with ID: ${result.id}`;
-        setSuccess(message);
+      }
+
+      if (result.success) {
+        setSuccess(
+          props.isEditing
+            ? `Stoppage updated successfully with ID: ${result.id}`
+            : `Stoppage created successfully with ID: ${result.id}`
+        );
       } else {
         setError(
-          "The entry overlaps with other entries. Please change the start time"
-        ); // Placeholder for now
+          "The entry overlaps with other entries. Please change the start time."
+        );
         return;
       }
-      console.log("Stoppage Entry:", result);
 
-      // Reset input fields after successful submission
+      // Reset form
       setNewEntry({
         machine: "",
         code: "",
@@ -428,9 +475,7 @@ const FormFill = (props) => {
       });
 
       props.setShowForm2(false);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       console.error("Error creating stoppage entry:", error);
       throw error;
