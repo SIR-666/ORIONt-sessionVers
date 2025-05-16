@@ -223,7 +223,9 @@ async function updateTimeStamps(
   actual_start,
   actual_end,
   poStart,
-  poEnd
+  poEnd,
+  plant,
+  line
 ) {
   console.log(
     "Received and sent data from serverless: ",
@@ -247,6 +249,8 @@ async function updateTimeStamps(
         actual_end,
         poStart,
         poEnd,
+        plant,
+        line,
       }),
     });
 
@@ -262,9 +266,18 @@ async function updateTimeStamps(
   }
 }
 
-async function updatePO(id, date, line, status, group, groupSelection, plant) {
+async function updatePO(
+  id,
+  date,
+  line,
+  status,
+  group,
+  groupSelection,
+  plant,
+  startTime // optional
+) {
   console.log(
-    "Received and sent data: ",
+    "Received and sent data:",
     id,
     date,
     line,
@@ -273,6 +286,22 @@ async function updatePO(id, date, line, status, group, groupSelection, plant) {
     groupSelection,
     plant
   );
+
+  let date_week = "";
+
+  if (startTime) {
+    if (typeof startTime === "string" || startTime instanceof String) {
+      startTime = new Date(startTime);
+    }
+
+    const oneJan = new Date(startTime.getFullYear(), 0, 1);
+    const numberOfDays = Math.floor(
+      (startTime - oneJan) / (24 * 60 * 60 * 1000) + 1
+    );
+    const weekNumber = Math.ceil(numberOfDays / 7);
+    date_week = weekNumber.toString();
+  }
+
   if (status === "Release SAP" || status === "Release") {
     try {
       const response = await fetch(`${URL.URL}/createPO`, {
@@ -280,7 +309,14 @@ async function updatePO(id, date, line, status, group, groupSelection, plant) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: String(id), date, line, group, plant }),
+        body: JSON.stringify({
+          id: String(id),
+          date,
+          line,
+          group,
+          plant,
+          date_week, // bisa kosong string kalau tidak dihitung
+        }),
       });
 
       if (response.status === 400) {

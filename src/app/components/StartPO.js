@@ -11,6 +11,8 @@ const Start = (props) => {
   const [group, setGroup] = useState("");
   const [groupMessage, setGroupMessage] = useState("");
   const [groupData, setGroupData] = useState(null);
+  const shift = localStorage.getItem("shift");
+  const date = localStorage.getItem("date");
   const params = useSearchParams();
   const value = params.get("value");
   const { id, status } = props;
@@ -229,6 +231,12 @@ const Start = (props) => {
     if (userConfirmed) {
       setLoading(true);
       try {
+        const shiftTime = getShift(shift, date);
+        let startTime;
+        const start = new Date(time);
+        start.setHours(start.getHours() - 7);
+        startTime = start < shiftTime.startTime ? shiftTime.startTime : start;
+
         const response = await fetch("/api/updatePO", {
           method: "POST",
           headers: {
@@ -241,6 +249,7 @@ const Start = (props) => {
             status,
             group,
             plant,
+            startTime: toLocalISO(startTime),
           }),
         });
 

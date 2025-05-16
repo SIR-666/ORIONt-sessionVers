@@ -13,6 +13,7 @@ export async function POST(req) {
     poStart,
     poEnd,
     plant,
+    startTime,
   } = await req.json();
   console.log(
     "Received data: \n",
@@ -49,7 +50,9 @@ export async function POST(req) {
         actual_start,
         actual_end,
         poStart,
-        poEnd
+        poEnd,
+        plant,
+        line
       );
       return new Response(JSON.stringify({ success: true, rowsAffected }), {
         status: 200,
@@ -63,7 +66,8 @@ export async function POST(req) {
         status,
         group,
         groupSelection,
-        plant
+        plant,
+        startTime
       );
       return new Response(
         JSON.stringify({ success: true, rowsAffected, id: updatedId }), // ✅ tambahkan `id`

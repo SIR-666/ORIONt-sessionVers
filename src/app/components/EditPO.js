@@ -9,14 +9,17 @@ const Edit = (props) => {
   const [currentTime, setCurrentTime] = useState("");
   const [data, setData] = useState([]);
   const [group, setGroup] = useState("");
+  const [plant, setPlant] = useState("");
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [loading, setLoading] = useState(false);
   const params = useSearchParams();
   const value = params.get("value");
   const { id, status } = props;
+
   useEffect(() => {
     // You can fetch the specific data if needed here using the `id`
+    setPlant(localStorage.getItem("plant"));
     console.log(`Editing item with ID: ${props.id}`);
   }, [props.id]);
 
@@ -311,6 +314,7 @@ const Edit = (props) => {
           id,
           date: time,
           line: value,
+          plant: plant,
           status,
           group,
           actual_start: time,
