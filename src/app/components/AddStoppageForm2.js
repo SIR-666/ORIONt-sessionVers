@@ -54,7 +54,7 @@ const FormFill2 = (props) => {
   const formatDateForInput = (date) => {
     if (!date) return "";
     const parsedDate = new Date(date);
-    return parsedDate.toISOString().slice(0, 16); // For datetime-local input
+    return parsedDate.toISOString().slice(0, 19); // Include seconds
   };
 
   useEffect(() => {
@@ -183,13 +183,16 @@ const FormFill2 = (props) => {
     }
 
     const diffInMs = endDate - startDate;
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    // Convert to decimal minutes instead of flooring
+    const diffInMinutes = diffInMs / (1000 * 60);
+    // Round to 2 decimal places for better display
+    const roundedDiffInMinutes = Math.round(diffInMinutes * 100) / 100;
 
-    setMinutesDifference(diffInMinutes);
+    setMinutesDifference(roundedDiffInMinutes);
 
     setNewEntry((prevEntry) => ({
       ...prevEntry,
-      duration: diffInMinutes,
+      duration: roundedDiffInMinutes,
     }));
   };
 
@@ -208,8 +211,9 @@ const FormFill2 = (props) => {
       const date = String(calculatedEndTime.getDate()).padStart(2, "0");
       const hours = String(calculatedEndTime.getHours()).padStart(2, "0");
       const minutes = String(calculatedEndTime.getMinutes()).padStart(2, "0");
+      const seconds = String(calculatedEndTime.getSeconds()).padStart(2, "0");
 
-      const formattedEndTime = `${year}-${month}-${date}T${hours}:${minutes}`; // Local time format
+      const formattedEndTime = `${year}-${month}-${date}T${hours}:${minutes}:${seconds}`;
       console.log("Formatted End Time: ", formattedEndTime);
       setEndTime(formattedEndTime);
       calculateDifference(start, formattedEndTime);
@@ -517,6 +521,7 @@ const FormFill2 = (props) => {
                   value={endTime}
                   onChange={handleEndTimeChange}
                   className="border border-gray-300 px-3 py-2 text-black mt-6"
+                  step="1"
                 />
 
                 {/* Duration (readonly) */}
@@ -526,6 +531,7 @@ const FormFill2 = (props) => {
                   id="duration"
                   className="block w-full text-black appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-gray-60 mt-5"
                   value={minuteDifference}
+                  step="0.01"
                   readOnly
                 />
                 {getOptions().map((option) => (
