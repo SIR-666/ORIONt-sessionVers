@@ -92,11 +92,11 @@ const MainModal = (props) => {
     }
     const validDateString = dateString.replace(" ", "T");
     const date = new Date(validDateString);
-    return `${date.getUTCDate().toString().padStart(2, "0")}.${(
+    return `${date.getUTCDate().toString().padStart(2, "0")}-${(
       date.getUTCMonth() + 1
     )
       .toString()
-      .padStart(2, "0")}.${date.getUTCFullYear()} ${date
+      .padStart(2, "0")}-${date.getUTCFullYear()} ${date
       .getUTCHours()
       .toString()
       .padStart(2, "0")}:${date
@@ -508,9 +508,9 @@ const MainModal = (props) => {
                       <th scope="col" className="py-3 px-3">
                         Actual Start/End Time
                       </th>
-                      <th scope="col" className="py-3 px-3">
+                      {/* <th scope="col" className="py-3 px-3">
                         Planned Start/End Time
-                      </th>
+                      </th> */}
                       <th scope="col" className="py-3 px-3">
                         Actions
                       </th>
@@ -532,10 +532,10 @@ const MainModal = (props) => {
                           <p>{formatDateTime(item.actual_start)}</p>
                           <p>{formatDateTime(item.actual_end)}</p>
                         </td>
-                        <td className="py-4 px-3 text-black text-center">
+                        {/* <td className="py-4 px-3 text-black text-center">
                           <p>{formatDateTime(item.date_start)}</p>
                           <p>{formatDateTime(item.date_end)}</p>
-                        </td>
+                        </td> */}
                         <td className="py-4 px-3 text-center">
                           <>
                             <button
