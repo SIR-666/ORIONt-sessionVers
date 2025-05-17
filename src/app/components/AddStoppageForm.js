@@ -329,17 +329,41 @@ const FormFill = (props) => {
     }
   };
 
-  const handleDurationChange = (e) => {
-    const val = e.target.value.replace(",", ".");
-    const parsed = parseFloat(val);
-    setDurationData(val); // biar tetap bisa tulis koma
-    setNewEntry((prev) => ({
-      ...prev,
-      duration: isNaN(parsed) ? 0 : parsed,
-    }));
+  // const handleDurationChange = (e) => {
+  //   const val = e.target.value.replace(",", ".");
+  //   const parsed = parseFloat(val);
+  //   setDurationData(val); // biar tetap bisa tulis koma
+  //   setNewEntry((prev) => ({
+  //     ...prev,
+  //     duration: isNaN(parsed) ? 0 : parsed,
+  //   }));
 
-    if (startTime && !isNaN(parsed)) {
-      calculateEndTime(startTime, parsed);
+  //   if (startTime && !isNaN(parsed)) {
+  //     calculateEndTime(startTime, parsed);
+  //   }
+  // };
+
+  const handleDurationChange = (e) => {
+    let val = e.target.value;
+
+    // Ganti koma dengan titik
+    val = val.replace(",", ".");
+
+    // Cek jika match dengan pola angka desimal (misalnya "123", "1.5", ".5")
+    const isValid = /^(\d+(\.\d*)?|\.\d*)?$/.test(val);
+
+    if (isValid) {
+      setDurationData(e.target.value); // biar tetap tampilkan input asli
+      const parsed = parseFloat(val);
+
+      setNewEntry((prev) => ({
+        ...prev,
+        duration: isNaN(parsed) ? 0 : parsed,
+      }));
+
+      if (startTime && !isNaN(parsed)) {
+        calculateEndTime(startTime, parsed);
+      }
     }
   };
 
@@ -567,6 +591,7 @@ const FormFill = (props) => {
                 />
                 <input
                   type="text"
+                  inputMode="decimal"
                   name="duration"
                   id="duration"
                   className="block w-full text-black appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-gray-60 mt-5"
