@@ -324,7 +324,11 @@ const QualityLoss = ({ onClose }) => {
               <div className="relative p-6 flex-auto w-full flex flex-col">
                 <div className="grid grid-cols-4">
                   <div className="relative col-span-1 items-center justify-center w-full flex flex-col h-full">
-                    <h2 className="text-black px-3 py-2">Reject Filling: </h2>
+                    <h2 className="text-black px-3 py-2">
+                      {plant === "Cheese"
+                        ? "Reject Vacuum: "
+                        : "Reject Filling: "}
+                    </h2>
                     <br></br>
                     <h2 className="text-black px-3 py-2">Reject Packing: </h2>
                     <br></br>

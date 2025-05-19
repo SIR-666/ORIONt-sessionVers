@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import Draggable from "react-draggable";
 
 const FormType = (props) => {
   const [types, setTypes] = useState([]);
   const [search, setSearch] = useState("");
   const searchParams = useSearchParams();
-  const value = searchParams.get('value');
+  const value = searchParams.get("value");
   const [expandedGroups, setExpandedGroups] = useState({});
   const handleItemClick = (itemData, machine) => {
     props.onItemClick(itemData, machine);
@@ -65,9 +65,7 @@ const FormType = (props) => {
               className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
               style={{ backgroundColor: "#A3D9A5" }}
             >
-              <h3 className="text-black font-semibold text-gray-700">
-                Select Downtime
-              </h3>
+              <h3 className="text-black font-semibol">Select Downtime</h3>
               <button
                 className="bg-transparent border-0 text-black float-right"
                 onClick={() => props.setShowForm1(false)}
@@ -125,7 +123,7 @@ const FormType = (props) => {
             >
               <table className="w-full text-sm text-left text-gray-500">
                 <tbody>
-                {Object.entries(groupedMachines).map(
+                  {Object.entries(groupedMachines).map(
                     ([mesin, downtimes], index) => (
                       <React.Fragment key={index}>
                         {/* Header Row for Each Machine */}
@@ -136,7 +134,8 @@ const FormType = (props) => {
                           <td className="py-2 px-4 font-bold">
                             {mesin}
                             <span className="ml-2 text-xs text-gray-400">
-                              {expandedGroups[mesin] ? "▲" : "▼"} {/* Indicator */}
+                              {expandedGroups[mesin] ? "▲" : "▼"}{" "}
+                              {/* Indicator */}
                             </span>
                           </td>
                         </tr>
@@ -150,8 +149,8 @@ const FormType = (props) => {
                             >
                               <td
                                 className="py-4 px-6"
-                                onClick={() =>
-                                  handleItemClick(downtime, mesin) // Handle click
+                                onClick={
+                                  () => handleItemClick(downtime, mesin) // Handle click
                                 }
                               >
                                 {downtime}
