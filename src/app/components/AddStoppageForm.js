@@ -58,6 +58,13 @@ const FormFill = (props) => {
   };
 
   useEffect(() => {
+    const parsed = parseFloat(durationData?.replace(",", "."));
+    if (startTime && !isNaN(parsed)) {
+      calculateEndTime(startTime, parsed);
+    }
+  }, [startTime, durationData]);
+
+  useEffect(() => {
     const formatDateTime = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
@@ -88,22 +95,33 @@ const FormFill = (props) => {
 
     if (props.isEditing && props.editData) {
       props.editData.forEach((entry) => {
+        // const initialDuration = entry.Minutes ?? 0;
+        const initialDuration = parseFloat(
+          (entry.Minutes ?? "0").toString().replace(",", ".")
+        );
+        setDurationData(String(initialDuration));
         setNewEntry({
           machine: entry.Mesin || "",
           code: entry.Jenis || "",
           startTime: formatDateForInput(entry.Date),
-          duration: durationData,
+          duration: parseFloat(initialDuration),
           comments: entry.Keterangan || "",
           shift: localStorage.getItem("shift"),
           line: value,
         });
         setStartTime(formatDateForInput(entry.Date));
+        // Hitung endTime otomatis
+        if (!isNaN(initialDuration)) {
+          calculateEndTime(formatDateForInput(entry.Date), initialDuration);
+        }
       });
+      console.log("masuk 1");
     } else if (props.clickedItem) {
+      console.log("masuk 2");
       setNewEntry({
         machine: props.clickedItem.machineName || "",
         code: props.clickedItem.itemData || "",
-        duration: durationData,
+        duration: 0,
         shift: localStorage.getItem("shift"),
         line: value,
       });
@@ -176,31 +194,58 @@ const FormFill = (props) => {
 
     const startDate = new Date(start);
     console.log("Start Time:", startDate);
+    console.log("props.po:", props.po);
 
-    props.po.forEach((entry) => {
-      const dateStart = parseISOToLocal(entry.actual_start);
-      const dateEnd = entry.actual_end
-        ? parseISOToLocal(entry.actual_end)
-        : new Date();
-      const localTime = dateStart.getHours();
+    // props.po.forEach((entry) => {
+    //   const dateStart = parseISOToLocal(entry.actual_start);
+    //   const dateEnd = entry.actual_end
+    //     ? parseISOToLocal(entry.actual_end)
+    //     : new Date();
+    //   const localTime = dateStart.getHours();
 
-      const shift = localStorage.getItem("shift");
-      const date = localStorage.getItem("date");
+    //   const shift = localStorage.getItem("shift");
+    //   const date = localStorage.getItem("date");
 
-      const shiftDate = getShift(shift, date);
+    //   const shiftDate = getShift(shift, date);
 
-      console.log(
-        "Shift Start Time: ",
-        shiftDate.startTime,
-        "Shift End Time: ",
-        shiftDate.endTime
-      );
+    //   console.log(
+    //     "Shift Start Time: ",
+    //     shiftDate.startTime,
+    //     "Shift End Time: ",
+    //     shiftDate.endTime
+    //   );
 
-      if (startDate < shiftDate.startTime || startDate > shiftDate.endTime) {
-        alert("Start Time must be within the operational shift time");
-        return;
-      }
-    });
+    //   if (startDate < shiftDate.startTime || startDate > shiftDate.endTime) {
+    //     alert("Start Time must be within the operational shift time");
+    //     return;
+    //   }
+    // });
+    if (Array.isArray(props.po)) {
+      props.po.forEach((entry) => {
+        const dateStart = parseISOToLocal(entry.actual_start);
+        const dateEnd = entry.actual_end
+          ? parseISOToLocal(entry.actual_end)
+          : new Date();
+        const localTime = dateStart.getHours();
+
+        const shift = localStorage.getItem("shift");
+        const date = localStorage.getItem("date");
+
+        const shiftDate = getShift(shift, date);
+
+        console.log(
+          "Shift Start Time: ",
+          shiftDate.startTime,
+          "Shift End Time: ",
+          shiftDate.endTime
+        );
+
+        if (startDate < shiftDate.startTime || startDate > shiftDate.endTime) {
+          alert("Start Time must be within the operational shift time");
+          return;
+        }
+      });
+    }
 
     if (!end) return;
 

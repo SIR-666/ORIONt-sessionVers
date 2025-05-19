@@ -58,6 +58,13 @@ const FormFill2 = (props) => {
   };
 
   useEffect(() => {
+    const parsed = parseFloat(durationData?.replace(",", "."));
+    if (startTime && !isNaN(parsed)) {
+      calculateEndTime(startTime, parsed);
+    }
+  }, [startTime, durationData]);
+
+  useEffect(() => {
     const formatDateTime = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
@@ -88,22 +95,30 @@ const FormFill2 = (props) => {
 
     if (props.isEditing && props.editData) {
       props.editData.forEach((entry) => {
+        const initialDuration = parseFloat(
+          (entry.Minutes ?? "0").toString().replace(",", ".")
+        );
+        setDurationData(String(initialDuration));
         setNewEntry({
           machine: entry.Mesin || "",
           code: entry.Jenis || "",
           startTime: formatDateForInput(entry.Date),
-          duration: durationData,
+          duration: parseFloat(initialDuration),
           comments: entry.Keterangan || "",
           shift: localStorage.getItem("shift"),
           line: value,
         });
         setStartTime(formatDateForInput(entry.Date));
+
+        if (!isNaN(initialDuration)) {
+          calculateEndTime(formatDateForInput(entry.Date), initialDuration);
+        }
       });
     } else if (props.clickedItem) {
       setNewEntry({
         machine: props.clickedItem.machineName || "",
         code: props.clickedItem.itemData || "",
-        duration: durationData,
+        duration: 0,
         shift: localStorage.getItem("shift"),
         line: value,
       });
