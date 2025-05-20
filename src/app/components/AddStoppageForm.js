@@ -291,7 +291,7 @@ const FormFill = (props) => {
   const calculateEndTime = (start, dur) => {
     const startDateTime = new Date(start);
     console.log("Start Date: ", startDateTime);
-    const durationMinutes = parseInt(dur, 10);
+    const durationMinutes = parseFloat(dur);
 
     if (!isNaN(startDateTime.getTime()) && !isNaN(durationMinutes)) {
       const calculatedEndTime = new Date(

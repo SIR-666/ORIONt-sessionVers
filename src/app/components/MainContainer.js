@@ -71,6 +71,11 @@ const RectangleContainer = ({
   const [currentLine, setCurrentLine] = useState(null);
   const [currentGroup, setCurrentGroup] = useState(null);
   const [breakdownMachine, setBreakdownMachine] = useState([]);
+  const [loading1, setloading1] = useState(false);
+  const [loading2, setloading2] = useState(false);
+  const [loading3, setloading3] = useState(false);
+  const [loading4, setloading4] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   // Variables to hold total net and netDisplay
   let totalnet = 0;
   let totalnetDisplay = 0;
@@ -152,6 +157,7 @@ const RectangleContainer = ({
 
         const machineData = await machinesRes.json();
         setBreakdownMachine(Array.isArray(machineData) ? machineData : []);
+        setloading1(true);
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Error fetching data:", error);
@@ -193,6 +199,7 @@ const RectangleContainer = ({
 
           console.log("Setting SKU speeds to:", speedsMap);
           setSkuSpeeds(speedsMap);
+          setloading2(true);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -458,13 +465,14 @@ const RectangleContainer = ({
           })
         );
         setQtyPO(results); // Update qtyPO with an array of downtimes
+        setloading3(true);
       };
 
       fetchData().catch((error) =>
         console.error("Error fetching quantity data: ", error)
       );
     }
-  }, [allPO]);
+  }, [allPO, retryCount]);
 
   // Fetch Quality Loss, Speed Loss, and total quantity
   useEffect(() => {
@@ -537,6 +545,7 @@ const RectangleContainer = ({
 
         setQty(totalQuantity);
         setrejectQty(totalRejectSample);
+        setloading4(false);
       } catch (error) {
         console.error(
           "Error fetching downtime data in MainContainer.js:",
@@ -548,7 +557,7 @@ const RectangleContainer = ({
     if (allPO) {
       fetchQualityLoss();
     }
-  }, [allPO]);
+  }, [allPO, retryCount]);
 
   // Dapatkan menit dalam 1 tahun untuk calendar time
   const getMinutesInYear = (year) => {
@@ -574,6 +583,7 @@ const RectangleContainer = ({
   }, [initialData, stoppageData]);
 
   // calculations
+
   const availableTime = calculateAvailableTime(
     timeDifference,
     durationSums.UnavailableTime
@@ -585,7 +595,7 @@ const RectangleContainer = ({
         rejectQty,
         skuSpeeds[productIds[index]] || 1
       );
-      console.log("totalnetDisplay", netDisplay);
+      // console.log("totalnetDisplay", netDisplay);
       // Accumulate totals
       totalnet += net;
       totalnetDisplay += netDisplay;
@@ -593,7 +603,7 @@ const RectangleContainer = ({
   }
   const net = totalnet;
   totalnetDisplay = totalnet.toFixed(2);
-  console.log("totalnetDisplay", totalnetDisplay);
+  // console.log("totalnetDisplay", totalnetDisplay);
 
   const { production, productionDisplay } = calculateProduction(
     net,
@@ -610,6 +620,15 @@ const RectangleContainer = ({
     production,
     durationSums.ProcessWaiting
   );
+
+  useEffect(() => {
+    if (isNaN(operation) || isNaN(operationDisplay)) {
+      console.warn("NaN detected. Retrying...");
+      setRetryCount((prev) => prev + 1);
+      return;
+    }
+  }, [operationDisplay, operation]);
+
   const { nReported, nReportedDisplay } = calculateNReported(
     timeDifference,
     production,
@@ -624,11 +643,6 @@ const RectangleContainer = ({
     parseFloat(qualityLoss)
   ).toFixed(2);
 
-  const pe = net && production ? ((net / production) * 100).toFixed(2) : "0.00";
-  const oee =
-    net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
-  // sent to backend (hours)
-  // const netDB = (qty - rejectQty) / (skuSpeed || 1);
   const netDB = totalnetDisplay / 60;
   // const prodDB =
   //   parseFloat(netDB) +
@@ -664,6 +678,12 @@ const RectangleContainer = ({
       qualityLoss,
       speedLoss
     );
+  const pe = net && production ? ((net / production) * 100).toFixed(2) : "0.00";
+  const oee =
+    net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
+  // sent to backend (hours)
+  // const netDB = (qty - rejectQty) / (skuSpeed || 1);
+
   const mtbf = calculateMtbf(production, durationSums.UnplannedStoppages);
   const percentProcessWaiting = (
     (durationSums.ProcessWaiting / operationDisplay) *
@@ -695,25 +715,6 @@ const RectangleContainer = ({
 
   ut = unavailableTimeInMinutes / 60;
 
-  // Set latest start untuk kirim data ke backend
-  useEffect(() => {
-    let calculatedStart = null;
-    const shift = localStorage.getItem("shift");
-    const date = localStorage.getItem("date");
-    const shiftTimes = getShift(shift, date);
-    initialData?.forEach((entry) => {
-      const start = new Date(entry.actual_start);
-      start.setHours(start.getHours() - 7);
-
-      calculatedStart =
-        start < shiftTimes.startTime
-          ? shiftTimes.startTime
-          : shiftTimes.startTime;
-    });
-    setLatestStart(toLocalISO(calculatedStart));
-  }, [initialData]);
-
-  // Insert calculation to back-end
   useEffect(() => {
     if (
       latestStart === null ||
@@ -732,6 +733,8 @@ const RectangleContainer = ({
       plant === null
     )
       return;
+
+    if (!loading1 || !loading2 || !loading3) return;
 
     const timeout = setTimeout(() => {
       const sendDataToBackend = async () => {
@@ -769,6 +772,7 @@ const RectangleContainer = ({
         }
       };
 
+      console.log("masuk sini");
       sendDataToBackend();
     }, 3000); // Delay 3 detik
 
@@ -788,7 +792,30 @@ const RectangleContainer = ({
     currentLine,
     currentGroup,
     plant,
+    loading1,
+    loading2,
+    loading3,
   ]);
+
+  // Set latest start untuk kirim data ke backend
+  useEffect(() => {
+    let calculatedStart = null;
+    const shift = localStorage.getItem("shift");
+    const date = localStorage.getItem("date");
+    const shiftTimes = getShift(shift, date);
+    initialData?.forEach((entry) => {
+      const start = new Date(entry.actual_start);
+      start.setHours(start.getHours() - 7);
+
+      calculatedStart =
+        start < shiftTimes.startTime
+          ? shiftTimes.startTime
+          : shiftTimes.startTime;
+    });
+    setLatestStart(toLocalISO(calculatedStart));
+  }, [initialData]);
+
+  // Insert calculation to back-end
 
   return (
     <>

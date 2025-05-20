@@ -274,11 +274,11 @@ const ReportPerformance = () => {
         </div>
         <div className="relative w-full h-128 rounded-xl bg-white shadow-xl">
           <div
-            className="relative w-full overflow-y-auto flex flex-col h-full px-5 py-4"
+            className="relative w-full overflow-y-auto flex flex-col h-full px-5"
             style={{ maxHeight: "350px", overflowY: "auto" }}
           >
             <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+              <thead className="py-3 text-xs text-gray-700 uppercase bg-blue-300 sticky top-0 z-20">
                 <tr>
                   <th>Date</th>
                   <th>Shift</th>
@@ -291,8 +291,8 @@ const ReportPerformance = () => {
                   <th>NPT</th>
                   <th>Loss Speed</th>
                   <th>Quality Loss</th>
-                  <th>Breakdown</th>
                   <th>Waiting</th>
+                  <th>Breakdown</th>
                   <th>EUPS</th>
                   <th>OEE</th>
                 </tr>
