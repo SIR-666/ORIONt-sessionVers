@@ -214,7 +214,7 @@ const FormFill2 = (props) => {
   const calculateEndTime = (start, dur) => {
     const startDateTime = new Date(start);
     console.log("Start Date: ", startDateTime);
-    const durationMinutes = parseInt(dur, 10);
+    const durationMinutes = parseFloat(dur);
 
     if (!isNaN(startDateTime.getTime()) && !isNaN(durationMinutes)) {
       const calculatedEndTime = new Date(
@@ -300,12 +300,18 @@ const FormFill2 = (props) => {
   };
 
   const handleDurationChange = (e) => {
-    const newDuration = parseInt(e.target.value, 10) || 0;
-    setDurationData(newDuration);
-    setNewEntry((prev) => ({ ...prev, duration: newDuration }));
+    const val = e.target.value.replace(",", ".");
+    const parsed = parseFloat(val);
+    console.log("downtime : ", parsed);
+    setDurationData(val); // tetap simpan string asli supaya user bisa input koma
 
-    if (startTime) {
-      calculateEndTime(startTime, newDuration);
+    setNewEntry((prev) => ({
+      ...prev,
+      duration: isNaN(parsed) ? 0 : parsed,
+    }));
+
+    if (startTime && !isNaN(parsed)) {
+      calculateEndTime(startTime, parsed);
     }
   };
 

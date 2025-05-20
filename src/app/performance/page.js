@@ -188,8 +188,8 @@ const ReportPerformance = () => {
       NetProduction: parseFloat(row.NPT || 0).toFixed(2),
       LossSpeed: parseFloat(row.LossSpeed || 0).toFixed(2),
       QualityLoss: parseFloat(row.QualityLosses || 0).toFixed(2),
-      DowntimeExt: parseFloat(row.TotalDowntimeExt || 0).toFixed(2),
-      DowntimeInt: parseFloat(row.TotalDowntimeInt || 0).toFixed(2),
+      Waiting: parseFloat(row.TotalDowntimeExt || 0).toFixed(2),
+      Breakdown: parseFloat(row.TotalDowntimeInt || 0).toFixed(2),
       PE: parseFloat(row.PE || 0).toFixed(2),
       OE: parseFloat(row.OE || 0).toFixed(2),
     }));
@@ -284,17 +284,17 @@ const ReportPerformance = () => {
                   <th>Shift</th>
                   <th>Group</th>
                   <th>Line</th>
-                  <th>Available</th>
-                  <th>Production</th>
-                  <th>Running</th>
-                  <th>Operational</th>
-                  <th>Net Production</th>
+                  <th>AT</th>
+                  <th>PT</th>
+                  <th>RT</th>
+                  <th>OT</th>
+                  <th>NPT</th>
                   <th>Loss Speed</th>
                   <th>Quality Loss</th>
-                  <th>Downtime Int</th>
-                  <th>Downtime Eks</th>
-                  <th>PE</th>
-                  <th>OE</th>
+                  <th>Breakdown</th>
+                  <th>Waiting</th>
+                  <th>EUPS</th>
+                  <th>OEE</th>
                 </tr>
               </thead>
               <tbody>
@@ -342,7 +342,20 @@ const ReportPerformance = () => {
                           ? parseFloat(row.TotalDowntimeInt).toFixed(2)
                           : "0"}
                       </td>
-                      <td>{row.PE ? parseFloat(row.PE).toFixed(2) : "0"}</td>
+                      <td>
+                        {row.AvailableTime &&
+                        parseFloat(row.AvailableTime) !== 0
+                          ? (
+                              ((parseFloat(row.LossSpeed || 0) +
+                                parseFloat(row.QualityLosses || 0) +
+                                parseFloat(row.TotalDowntimeInt || 0) +
+                                parseFloat(row.TotalDowntimeExt || 0)) /
+                                parseFloat(row.AvailableTime)) *
+                              100
+                            ).toFixed(2)
+                          : "0.00"}
+                      </td>
+
                       <td>{row.OE ? parseFloat(row.OE).toFixed(2) : "0"}</td>
                     </tr>
                   ))
