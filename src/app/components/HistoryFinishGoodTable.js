@@ -3,12 +3,17 @@ import url from "../url";
 
 const HistoryFinishGoodTable = () => {
   const [historyData, setHistoryData] = useState([]);
+  const [plant, setPlant] = useState("");
+  const [line, setLine] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const plant = localStorage.getItem("plant");
         const line = localStorage.getItem("line");
+
+        setPlant(plant || "");
+        setLine(line || "");
 
         const queryParams = new URLSearchParams({
           plant: plant || "",
@@ -34,6 +39,9 @@ const HistoryFinishGoodTable = () => {
     fetchData();
   }, []);
 
+  const showRejectColumns =
+    plant !== "Milk Processing" && line !== "PASTEURIZER" ? true : false;
+
   return (
     <div className="relative w-full rounded-xl bg-white shadow-xl">
       <div className="relative w-full overflow-y-auto flex flex-col h-full px-5 py-4">
@@ -52,6 +60,19 @@ const HistoryFinishGoodTable = () => {
               <th scope="col" className="py-3 px-6">
                 Quantity
               </th>
+              {showRejectColumns && (
+                <>
+                  <th scope="col" className="py-3 px-6">
+                    Reject Filling
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Reject Packing
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Sample
+                  </th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -60,7 +81,14 @@ const HistoryFinishGoodTable = () => {
                 <td className="py-4 px-6">{item.tanggal}</td>
                 <td className="py-4 px-6">{item.productSku}</td>
                 <td className="py-4 px-6">{item.group}</td>
-                <td className="py-4 px-6">{item.downtime}</td>
+                <td className="py-4 px-6">{item.quantity}</td>
+                {showRejectColumns && (
+                  <>
+                    <td className="py-4 px-6">{item.rejectFilling}</td>
+                    <td className="py-4 px-6">{item.rejectPacking}</td>
+                    <td className="py-4 px-6">{item.sample}</td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
