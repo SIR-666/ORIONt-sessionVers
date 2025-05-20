@@ -78,7 +78,7 @@ const ReportPerformance = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3001/getAllPerformance?plant=${plant}&line=${line}`
+        `http://10.24.0.81:3001/getAllPerformance?plant=${plant}&line=${line}`
       );
       const newData = await response.json();
       console.log("data :", newData);
