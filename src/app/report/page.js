@@ -117,10 +117,16 @@ const ReportTable = () => {
 
   const handleExport = () => {
     const formattedData = filteredData.map((row) => {
-      const { Date, ...rest } = row;
+      const { Date, Minutes, ...rest } = row;
+
+      // Konversi Minutes jadi angka bersih
+      let cleanedMinutes = parseFloat(String(Minutes).replace(/[^0-9.]/g, ""));
+      cleanedMinutes = isNaN(cleanedMinutes) ? 0 : cleanedMinutes;
+
       return {
         ...rest,
         issuedDate: formatDateOnly(Date),
+        Minutes: cleanedMinutes,
       };
     });
 
