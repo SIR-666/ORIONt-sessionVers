@@ -11,8 +11,44 @@ const ReportPerformance = () => {
   const [filterField, setFilterField] = useState("All"); // New state for the filter field
 
   const [loading, setLoading] = useState(false);
-  const [plant, setPlant] = useState(null);
+  const [plant, setPlant] = useState("");
   const [line, setLine] = useState(null);
+
+  const displayedColumns = [
+    { key: "Tanggal2", label: "Tanggal" },
+    { key: "FirstShift", label: "Shift" },
+    { key: "GroupShift", label: "Group" },
+    { key: "LINE", label: "Line" },
+    { key: "AvailableTime", label: "Available" },
+    { key: "ProductionTime", label: "Production" },
+    { key: "RT", label: "Running" },
+    { key: "OT", label: "Operational" },
+    { key: "NPT", label: "Net Production" },
+    { key: "LossSpeed", label: "Loss Speed" },
+    { key: "QualityLosses", label: "Quality Loss" },
+    { key: "TotalDowntimeInt", label: "Downtime Int" },
+    { key: "TotalDowntimeExt", label: "Downtime Eks" },
+    { key: "PE", label: "PE" },
+    { key: "OE", label: "OE" },
+  ];
+
+  const columnLabels = {
+    Tanggal2: "Tanggal",
+    FirstShift: "Shift",
+    GroupShift: "Group",
+    LINE: "Line",
+    AvailableTime: "Available",
+    ProductionTime: "Production",
+    RT: "Running",
+    OT: "Operational",
+    NPT: "Net Production",
+    LossSpeed: "Loss Speed",
+    QualityLosses: "Quality Loss",
+    TotalDowntimeInt: "Downtime Int",
+    TotalDowntimeExt: "Downtime Eks",
+    PE: "PE",
+    OE: "OE",
+  };
 
   const formatDateTime = (dateString) => {
     if (!dateString || typeof dateString !== "string") {
@@ -42,11 +78,17 @@ const ReportPerformance = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/getAllPerformance?plant=${plant}&line=${line}`
+        `http://localhost:3001/getAllPerformance?plant=${plant}&line=${line}`
       );
       const newData = await response.json();
-      setTableData(newData);
-      setFilteredData(newData);
+      console.log("data :", newData);
+      const normalizedData = newData.map((item) => ({
+        ...item,
+        Shift: item.FirstShift,
+        Tanggal: item.Tanggal2,
+      }));
+      setTableData(normalizedData);
+      setFilteredData(normalizedData);
     } catch (error) {
       console.error("Error fetching performance data:", error);
       setTableData([]);
@@ -57,9 +99,9 @@ const ReportPerformance = () => {
   };
 
   useEffect(() => {
-    const storedPlant = localStorage.getItem("plant");
+    // const storedPlant = localStorage.getItem("plant");
     const storedLine = localStorage.getItem("line");
-    setPlant(storedPlant);
+    // setPlant(storedPlant);
     setLine(storedLine);
   }, []);
 
@@ -134,84 +176,27 @@ const ReportPerformance = () => {
   };
 
   const handleExport = () => {
-    const formattedData = filteredData.map((row) => {
-      const {
-        ID,
-        Tanggal,
-        ProductionTime,
-        OperationTime,
-        NPT,
-        RunningTime,
-        AvailableTime,
-        Breakdown,
-        Planned,
-        ProcessWaiting,
-        QualityLoss,
-        SpeedLoss,
-        DowntimeGroup,
-        UnavailableTime,
-      } = row;
-
-      const formatWithComma = (num) => {
-        if (num === null || num === undefined) return 0; // Default to 0 for null/undefined
-        const parsed = parseFloat(num);
-        if (isNaN(parsed)) return 0; // Ensure it's a valid number
-
-        // Force two decimal places for display
-        const numericValue = Number(parsed.toFixed(2));
-        return {
-          display: parsed.toFixed(2).replace(".", ","), // Replace period with comma
-          numeric: numericValue, // Keep as a number for Excel
-        };
-      };
-
-      const Shift = handleShift(Tanggal);
-      const Line = handleLine(ID);
-
-      return {
-        ID: ID,
-        Date: formatDateTime(Tanggal),
-        Shift:
-          Shift === "I"
-            ? "I"
-            : Shift === "II"
-            ? "II"
-            : Shift === "III"
-            ? "III"
-            : 0,
-        Group: DowntimeGroup,
-        Line: Line.replace("Line ", ""),
-        AvailableTime: formatWithComma(AvailableTime),
-        UnavailableTime: formatWithComma(UnavailableTime),
-        ProductionTime: formatWithComma(ProductionTime),
-        OperationTime: formatWithComma(OperationTime),
-        RunningTime: formatWithComma(RunningTime),
-        NPT: formatWithComma(NPT),
-        Planned: formatWithComma(Planned),
-        Breakdown: formatWithComma(Breakdown),
-        ProcessWaiting: formatWithComma(ProcessWaiting),
-        QualityLoss: formatWithComma(QualityLoss),
-        SpeedLoss: formatWithComma(SpeedLoss),
-      };
-    });
-
-    const excelData = formattedData.map((row) => ({
-      ...row,
-      ProductionTime: row.ProductionTime.numeric,
-      OperationTime: row.OperationTime.numeric,
-      NPT: row.NPT.numeric,
-      RunningTime: row.RunningTime.numeric,
-      Planned: row.Planned.numeric,
-      Breakdown: row.Breakdown.numeric,
-      ProcessWaiting: row.ProcessWaiting.numeric,
-      QualityLoss: row.QualityLoss.numeric,
-      SpeedLoss: row.SpeedLoss.numeric,
-      UnavailableTime: row.UnavailableTime.numeric,
+    const excelData = filteredData.map((row) => ({
+      Tanggal: row.Tanggal2 || "",
+      Shift: row.FirstShift?.replace("Shift ", "") || "",
+      Group: row.GroupShift || "",
+      Line: row.LINE || "",
+      Available: parseFloat(row.AvailableTime || 0).toFixed(2),
+      Production: parseFloat(row.ProductionTime || 0).toFixed(2),
+      Running: parseFloat(row.RT || 0).toFixed(2),
+      Operational: parseFloat(row.OT || 0).toFixed(2),
+      NetProduction: parseFloat(row.NPT || 0).toFixed(2),
+      LossSpeed: parseFloat(row.LossSpeed || 0).toFixed(2),
+      QualityLoss: parseFloat(row.QualityLosses || 0).toFixed(2),
+      DowntimeExt: parseFloat(row.TotalDowntimeExt || 0).toFixed(2),
+      DowntimeInt: parseFloat(row.TotalDowntimeInt || 0).toFixed(2),
+      PE: parseFloat(row.PE || 0).toFixed(2),
+      OE: parseFloat(row.OE || 0).toFixed(2),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Performance Report");
 
     XLSX.writeFile(workbook, "performance_export.xlsx");
   };
@@ -228,20 +213,32 @@ const ReportPerformance = () => {
           style={{ display: "flex", alignItems: "center", margin: "10px 0" }}
         >
           <select
+            className="text-black rounded-lg bg-gray-100 focus:ring-blue-500 focus:border-blue-500 block p-2.5 mr-4"
+            value={plant}
+            onChange={(e) => setPlant(e.target.value)}
+          >
+            <option value="">Pilih Plant</option>
+            <option value="Milk Processing">Milk Processing</option>
+            <option value="Milk Filling Packing">Milk Filling Packing</option>
+            <option value="Cheese">Cheese</option>
+            <option value="Yogurt">Yogurt</option>
+            <option value="Pasteurize Yogurt">Pasteurize Yogurt</option>
+          </select>
+
+          <select
             id="line"
             className="text-black rounded-lg bg-gray-100 focus:ring-blue-500 focus:border-blue-500 block p-2.5"
             value={filterField}
             onChange={handleFilterFieldChange}
           >
-            <option value="all">All</option>
-            {Object.keys(tableData[0] || {})
-              .filter((key) => key !== "Picture")
-              .map((field) => (
-                <option key={field} value={field}>
-                  {field}
-                </option>
-              ))}
+            <option value="All">All</option>
+            {displayedColumns.map((col) => (
+              <option key={col.key} value={col.key}>
+                {col.label}
+              </option>
+            ))}
           </select>
+
           <div className="relative flex items-center h-12 rounded-full focus-within:shadow-lg bg-gray-100 overflow-hidden ml-10">
             <div className="grid place-items-center h-full w-12 text-gray-300 px-4">
               <svg
@@ -283,57 +280,21 @@ const ReportPerformance = () => {
             <table className="w-full text-sm text-left text-gray-500">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                 <tr>
-                  <th scope="col" className="py-3 px-6">
-                    ID
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Date
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Resources
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Shift
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Group
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Line
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Available Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Unavailable Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Production Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Operational Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Running Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Net Production Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Planned Stop
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Breakdown/Minor Stop/Process Failure
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Process Waiting
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Quality Loss
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Speed Loss
-                  </th>
+                  <th>Date</th>
+                  <th>Shift</th>
+                  <th>Group</th>
+                  <th>Line</th>
+                  <th>Available</th>
+                  <th>Production</th>
+                  <th>Running</th>
+                  <th>Operational</th>
+                  <th>Net Production</th>
+                  <th>Loss Speed</th>
+                  <th>Quality Loss</th>
+                  <th>Downtime Int</th>
+                  <th>Downtime Eks</th>
+                  <th>PE</th>
+                  <th>OE</th>
                 </tr>
               </thead>
               <tbody>
@@ -344,69 +305,45 @@ const ReportPerformance = () => {
                 ) : filteredData.length > 0 ? (
                   filteredData.map((row) => (
                     <tr className="bg-white border-b" key={row.ID}>
-                      <td className="py-4 px-6">{row.ID}</td>
-                      <td className="py-4 px-6">
-                        {formatDateTime(row.Tanggal)}
+                      <td>{row.Tanggal2}</td>
+                      <td>{row.FirstShift?.replace("Shift ", "")}</td>
+                      <td>{row.GroupShift}</td>
+                      <td>{row.LINE}</td>
+                      <td>
+                        {row.AvailableTime
+                          ? parseFloat(row.AvailableTime).toFixed(2)
+                          : "0"}
                       </td>
-                      <td className="py-4 px-6">Milk Filling Packing</td>
-                      <td className="py-4 px-6">{handleShift(row.Tanggal)}</td>
-                      <td className="py-4 px-6">
-                        {handleGroup(row.DowntimeGroup)}
-                      </td>
-                      <td className="py-4 px-6">{handleLine(row.ID)}</td>
-                      <td className="py-4 px-6">
-                        {row.UnavailableTime
-                          ? parseFloat(row.AvailableTime).toFixed(3)
-                          : "N/A"}
-                      </td>
-                      <td className="py-4 px-6">
-                        {row.UnavailableTime
-                          ? parseFloat(row.UnavailableTime).toFixed(3)
-                          : "N/A"}
-                      </td>
-                      <td className="py-4 px-6">
+                      <td>
                         {row.ProductionTime
-                          ? parseFloat(row.ProductionTime).toFixed(3)
-                          : "N/A"}
+                          ? parseFloat(row.ProductionTime).toFixed(2)
+                          : "0"}
                       </td>
-                      <td className="py-4 px-6">
-                        {row.OperationTime
-                          ? parseFloat(row.OperationTime).toFixed(3)
-                          : "N/A"}
+                      <td>{row.RT ? parseFloat(row.RT).toFixed(2) : "0"}</td>
+                      <td>{row.OT ? parseFloat(row.OT).toFixed(2) : "0"}</td>
+                      <td>{row.NPT ? parseFloat(row.NPT).toFixed(2) : "0"}</td>
+                      <td>
+                        {row.LossSpeed
+                          ? parseFloat(row.LossSpeed).toFixed(2)
+                          : "0"}
                       </td>
-                      <td className="py-4 px-6">
-                        {row.RunningTime
-                          ? parseFloat(row.RunningTime).toFixed(3)
-                          : "N/A"}
+                      <td>
+                        {row.QualityLosses
+                          ? parseFloat(row.QualityLosses).toFixed(2)
+                          : "0"}
                       </td>
-                      <td className="py-4 px-6">
-                        {row.NPT ? parseFloat(row.NPT).toFixed(3) : "N/A"}
+                      <td>
+                        {row.TotalDowntimeExt
+                          ? parseFloat(row.TotalDowntimeExt).toFixed(2)
+                          : "0"}
                       </td>
-                      <td className="py-4 px-6">
-                        {row.Planned
-                          ? parseFloat(row.Planned).toFixed(3)
-                          : "N/A"}
+                      <td>
+                        {row.TotalDowntimeInt
+                          ? parseFloat(row.TotalDowntimeInt).toFixed(2)
+                          : "0"}
                       </td>
-                      <td className="py-4 px-6">
-                        {row.Breakdown
-                          ? parseFloat(row.Breakdown).toFixed(3)
-                          : "N/A"}
-                      </td>
-                      <td className="py-4 px-6">
-                        {row.ProcessWaiting
-                          ? parseFloat(row.ProcessWaiting).toFixed(3)
-                          : "N/A"}
-                      </td>
-                      <td className="py-4 px-6">
-                        {row.QualityLoss
-                          ? parseFloat(row.QualityLoss).toFixed(3)
-                          : "N/A"}
-                      </td>
-                      <td className="py-4 px-6">
-                        {row.SpeedLoss
-                          ? parseFloat(row.SpeedLoss).toFixed(3)
-                          : "N/A"}
-                      </td>
+                      <td>{row.PE ? parseFloat(row.PE).toFixed(2) : "0"}</td>
+                      <td>{row.OE ? parseFloat(row.OE).toFixed(2) : "0"}</td>
                     </tr>
                   ))
                 ) : (
