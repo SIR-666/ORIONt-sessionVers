@@ -71,6 +71,11 @@ const RectangleContainerProcessing = ({
   const [currentLine, setCurrentLine] = useState(null);
   const [currentGroup, setCurrentGroup] = useState(null);
   const [breakdownMachine, setBreakdownMachine] = useState([]);
+  const [loading1, setloading1] = useState(false);
+  const [loading2, setloading2] = useState(false);
+  const [loading3, setloading3] = useState(false);
+  const [loading4, setloading4] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   // Variables to hold total net and netDisplay
   let totalnet = 0;
   let totalnetDisplay = 0;
@@ -152,6 +157,7 @@ const RectangleContainerProcessing = ({
 
         const machineData = await machinesRes.json();
         setBreakdownMachine(Array.isArray(machineData) ? machineData : []);
+        setloading1(true);
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Error fetching data:", error);
@@ -193,6 +199,7 @@ const RectangleContainerProcessing = ({
 
           console.log("Setting SKU speeds to:", speedsMap);
           setSkuSpeeds(speedsMap);
+          setloading2(true);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -457,13 +464,14 @@ const RectangleContainerProcessing = ({
           })
         );
         setQtyPO(results); // Update qtyPO with an array of downtimes
+        setloading3(true);
       };
 
       fetchData().catch((error) =>
         console.error("Error fetching quantity data: ", error)
       );
     }
-  }, [allPO]);
+  }, [allPO, retryCount]);
 
   // Fetch Quality Loss, Speed Loss, and total quantity
   useEffect(() => {
@@ -541,7 +549,7 @@ const RectangleContainerProcessing = ({
     if (allPO) {
       fetchQualityLoss();
     }
-  }, [allPO]);
+  }, [allPO, retryCount]);
 
   // Dapatkan menit dalam 1 tahun untuk calendar time
   const getMinutesInYear = (year) => {
@@ -603,6 +611,15 @@ const RectangleContainerProcessing = ({
     production,
     durationSums.ProcessWaiting
   );
+  useEffect(() => {
+    if (isNaN(operation) || isNaN(operationDisplay)) {
+      console.warn("NaN detected. Retrying...");
+      console.log("NaN detected. Retrying...");
+      setRetryCount((prev) => prev + 1);
+      return;
+    }
+  }, [operationDisplay, operation]);
+
   const { nReported, nReportedDisplay } = calculateNReported(
     timeDifference,
     production,
@@ -726,6 +743,7 @@ const RectangleContainerProcessing = ({
     )
       return;
 
+    if (!loading1 || !loading2 || !loading3) return;
     const timeout = setTimeout(() => {
       const sendDataToBackend = async () => {
         try {
@@ -761,7 +779,7 @@ const RectangleContainerProcessing = ({
           console.error("❌ Error sending data to backend:", error);
         }
       };
-
+      console.log("masuk sini");
       sendDataToBackend();
     }, 3000); // Delay 3 detik
 
@@ -781,6 +799,9 @@ const RectangleContainerProcessing = ({
     currentLine,
     currentGroup,
     plant,
+    loading1,
+    loading2,
+    loading3,
   ]);
 
   return (

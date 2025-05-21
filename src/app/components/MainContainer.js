@@ -624,6 +624,7 @@ const RectangleContainer = ({
   useEffect(() => {
     if (isNaN(operation) || isNaN(operationDisplay)) {
       console.warn("NaN detected. Retrying...");
+      console.log("NaN detected. Retrying...");
       setRetryCount((prev) => prev + 1);
       return;
     }
