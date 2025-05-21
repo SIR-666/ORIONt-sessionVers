@@ -19,9 +19,9 @@ const Speed = ({ onClose }) => {
   const params = useSearchParams();
   const value = params.get("value");
   const id = params.get("id");
-  const shift = localStorage.getItem("shift");
-  const date = localStorage.getItem("date");
-  const plant = localStorage.getItem("plant");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
+  const plant = sessionStorage.getItem("plant");
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 

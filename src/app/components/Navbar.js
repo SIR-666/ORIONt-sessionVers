@@ -11,8 +11,8 @@ export default function Navbar({ toggleSidebar, transparent }) {
   const pathname = usePathname();
 
   const handleLogout = () => {
-    const shift = localStorage.getItem("shift");
-    const date = localStorage.getItem("date");
+    const shift = sessionStorage.getItem("shift");
+    const date = sessionStorage.getItem("date");
 
     let shiftStart = null;
     let shiftEnd = null;
@@ -64,17 +64,17 @@ export default function Navbar({ toggleSidebar, transparent }) {
 
     console.log("Shift Start:", shiftStart, "Shift End:", shiftEnd);
 
-    localStorage.removeItem("profile");
-    localStorage.removeItem("user");
-    localStorage.removeItem("plant");
-    localStorage.removeItem("tank");
-    localStorage.removeItem("line");
-    localStorage.removeItem("selectedMaterial");
-    localStorage.removeItem("materialData");
-    localStorage.removeItem("shift");
-    localStorage.removeItem("date");
-    localStorage.removeItem("id");
-    localStorage.removeItem("group");
+    sessionStorage.removeItem("profile");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("plant");
+    sessionStorage.removeItem("tank");
+    sessionStorage.removeItem("line");
+    sessionStorage.removeItem("selectedMaterial");
+    sessionStorage.removeItem("materialData");
+    sessionStorage.removeItem("shift");
+    sessionStorage.removeItem("date");
+    sessionStorage.removeItem("id");
+    sessionStorage.removeItem("group");
 
     // Clear specific data from local storage
     router.push("/login");

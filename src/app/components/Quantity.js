@@ -10,9 +10,9 @@ const Quantity = ({ onClose }) => {
   const params = useSearchParams();
   const id = params.get("id");
   const value = params.get("value");
-  const shift = localStorage.getItem("shift");
-  const date = localStorage.getItem("date");
-  const plant = localStorage.getItem("plant");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
+  const plant = sessionStorage.getItem("plant");
 
   function getLocalISOString() {
     const now = new Date();

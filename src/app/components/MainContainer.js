@@ -16,6 +16,7 @@ import QualityLoss from "./QualLoss";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
+import groupMaster from "./../groupmaster";
 
 const RectangleContainer = ({
   initialData,
@@ -83,14 +84,17 @@ const RectangleContainer = ({
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
   useEffect(() => {
-    // Ambil ulang dari localStorage saat komponen sudah mount
-    const storedPlant = localStorage.getItem("plant");
-    const storedLine = localStorage.getItem("line");
-    const storedGroup = localStorage.getItem("group");
-
+    // Ambil ulang dari sessionStorage saat komponen sudah mount
+    const storedPlant = sessionStorage.getItem("plant");
+    const storedLine = sessionStorage.getItem("line");
+    const storedGroup = sessionStorage.getItem("idgroup");
+    // const storedLine = sessionStorage.getItem("line");
+    // const storedGroup = sessionStorage.getItem("group");
+    console.log("nama group : ", storedGroup);
     setPlant(storedPlant);
     setCurrentLine(storedLine);
-    setCurrentGroup(storedGroup);
+    setCurrentGroup(groupMaster[storedGroup] || "UNKNOWN");
+    // setCurrentGroup(storedGroup);
   }, []);
 
   // Access the nominal speed from the map
@@ -134,7 +138,7 @@ const RectangleContainer = ({
   };
 
   useEffect(() => {
-    const line = localStorage.getItem("line");
+    const line = sessionStorage.getItem("line");
     const controller = new AbortController();
 
     const fetchData = async () => {
@@ -252,7 +256,7 @@ const RectangleContainer = ({
     }
   }, [value, stoppageData, breakdownMachine]);
 
-  // Get Shift from localStorage
+  // Get Shift from sessionStorage
   const getShift = (shift, date) => {
     if (!date || isNaN(new Date(date))) {
       console.error("Invalid date provided.");
@@ -324,8 +328,8 @@ const RectangleContainer = ({
     const currentTime = new Date();
 
     const activeDurations = initialData.map((entry) => {
-      const shift = localStorage.getItem("shift");
-      const date = localStorage.getItem("date");
+      const shift = sessionStorage.getItem("shift");
+      const date = sessionStorage.getItem("date");
       const shiftTimes = getShift(shift, date);
       const start = new Date(entry.actual_start);
       start.setHours(start.getHours() - 7);
@@ -478,8 +482,8 @@ const RectangleContainer = ({
   useEffect(() => {
     const fetchQualityLoss = async () => {
       try {
-        const shift = localStorage.getItem("shift");
-        const date = localStorage.getItem("date");
+        const shift = sessionStorage.getItem("shift");
+        const date = sessionStorage.getItem("date");
         const getShiftTimes = getShift(shift, date);
 
         // Extract shift start and end times
@@ -700,8 +704,8 @@ const RectangleContainer = ({
   // Count unavailable time
   let ut,
     totalGapTime = 0;
-  const shift = localStorage.getItem("shift");
-  const date = localStorage.getItem("date");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
   const shiftData = getShift(shift, date) || {};
   const { startTime: shiftStart = null, endTime: shiftEnd = null } = shiftData;
   const { unavailableTime, unavailableTimeInMinutes } =
@@ -801,8 +805,8 @@ const RectangleContainer = ({
   // Set latest start untuk kirim data ke backend
   useEffect(() => {
     let calculatedStart = null;
-    const shift = localStorage.getItem("shift");
-    const date = localStorage.getItem("date");
+    const shift = sessionStorage.getItem("shift");
+    const date = sessionStorage.getItem("date");
     const shiftTimes = getShift(shift, date);
     initialData?.forEach((entry) => {
       const start = new Date(entry.actual_start);

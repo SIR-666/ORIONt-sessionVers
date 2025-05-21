@@ -31,7 +31,7 @@ const ProdFill = (props) => {
 
     const now = new Date();
     const current = formatDateTime(now);
-    let dataTime = localStorage.getItem("date");
+    let dataTime = sessionStorage.getItem("date");
 
     if (dataTime) {
       const parsedDate = new Date(dataTime);
@@ -118,7 +118,7 @@ const ProdFill = (props) => {
     }
   };
 
-  const plant = localStorage.getItem("plant");
+  const plant = sessionStorage.getItem("plant");
 
   useEffect(() => {
     const getGroup = async () => {
@@ -273,7 +273,7 @@ const ProdFill = (props) => {
       alert("New No-PO entry created");
       await props.onUpdate();
       props.setShowForm2(false);
-      localStorage.setItem("id", result.id);
+      sessionStorage.setItem("id", result.id);
       router.push(`/main?value=${selectedLine}&id=${result.id}`);
     } catch (error) {
       console.error("Error creating PO entry:", error);

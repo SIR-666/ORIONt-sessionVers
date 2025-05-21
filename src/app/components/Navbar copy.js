@@ -8,16 +8,16 @@ export default function Navbar({ toggleSidebar, transparent }) {
 
   const handleLogout = () => {
     // Clear specific data from local storage
-    localStorage.removeItem("profile");
-    localStorage.removeItem("user");
-    localStorage.removeItem("plant");
-    localStorage.removeItem("tank");
-    localStorage.removeItem("line");
-    localStorage.removeItem("selectedMaterial");
-    localStorage.removeItem("materialData");
-    localStorage.removeItem("shift");
-    localStorage.removeItem("date");
-    localStorage.removeItem("group");
+    sessionStorage.removeItem("profile");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("plant");
+    sessionStorage.removeItem("tank");
+    sessionStorage.removeItem("line");
+    sessionStorage.removeItem("selectedMaterial");
+    sessionStorage.removeItem("materialData");
+    sessionStorage.removeItem("shift");
+    sessionStorage.removeItem("date");
+    sessionStorage.removeItem("group");
 
     // Redirect to login page after logout
     router.push("/login");

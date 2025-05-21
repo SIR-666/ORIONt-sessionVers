@@ -26,8 +26,8 @@ const RectangleChart = ({ initialData, localTime, allPO }) => {
 
   let downtimeEndTime = "";
 
-  const currentShift = localStorage.getItem("shift");
-  const currentDate = localStorage.getItem("date");
+  const currentShift = sessionStorage.getItem("shift");
+  const currentDate = sessionStorage.getItem("date");
 
   const getShift = (shift, date) => {
     if (!date || isNaN(new Date(date))) {

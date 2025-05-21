@@ -25,7 +25,7 @@ export default function LoginPage() {
   // resetting local storage so that the modal is shown
   useEffect(() => {
     // Clear the modal flag when the login page is loaded
-    localStorage.removeItem("hasShownModal");
+    sessionStorage.removeItem("hasShownModal");
   });
 
   //declaring the router
@@ -56,9 +56,9 @@ export default function LoginPage() {
         setLoader(false); // Stop the loader
         setResponseData(response.data); // Set response data
 
-        // Store token and username in localStorage
-        localStorage.setItem("token", JSON.stringify(response.data.token));
-        localStorage.setItem("email", email);
+        // Store token and username in sessionStorage
+        sessionStorage.setItem("token", JSON.stringify(response.data.token));
+        sessionStorage.setItem("email", email);
 
         console.log("Token saved:", response.data.token);
         router.push("../order");
@@ -96,14 +96,14 @@ export default function LoginPage() {
 
       if (res.ok) {
         const responseData = await res.json();
-        localStorage.setItem("user", responseData.user.email);
+        sessionStorage.setItem("user", responseData.user.email);
         const userData = {
           email: responseData.user.email,
           password: "null",
           username: responseData.user.username,
           profile: "user",
         };
-        localStorage.setItem("profile", JSON.stringify(userData));
+        sessionStorage.setItem("profile", JSON.stringify(userData));
         router.push("../order");
       } else {
         const errorData = await res.json();

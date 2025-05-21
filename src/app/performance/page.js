@@ -99,8 +99,8 @@ const ReportPerformance = () => {
   };
 
   useEffect(() => {
-    // const storedPlant = localStorage.getItem("plant");
-    const storedLine = localStorage.getItem("line");
+    // const storedPlant = sessionStorage.getItem("plant");
+    const storedLine = sessionStorage.getItem("line");
     // setPlant(storedPlant);
     setLine(storedLine);
   }, []);

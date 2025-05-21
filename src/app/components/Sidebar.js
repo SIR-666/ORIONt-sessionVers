@@ -25,17 +25,17 @@ function SidebarContent({ isOpen }) {
   const [speedLossModal, setSpeedLossModal] = useState(false);
   const [lineValue, setLineValue] = useState(null);
   const [lineId, setLineId] = useState(null);
-  const line = localStorage.getItem("line");
-  const shift = localStorage.getItem("shift");
-  const date = localStorage.getItem("date");
-  const plant = localStorage.getItem("plant");
-  const po = localStorage.getItem("selectedMaterial");
-  const storedId = localStorage.getItem("id");
+  const line = sessionStorage.getItem("line");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
+  const plant = sessionStorage.getItem("plant");
+  const po = sessionStorage.getItem("selectedMaterial");
+  const storedId = sessionStorage.getItem("id");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setLineValue(searchParams.get("value") || localStorage.getItem("line"));
-      setLineId(searchParams.get("id") || localStorage.getItem("id"));
+      setLineValue(searchParams.get("value") || sessionStorage.getItem("line"));
+      setLineId(searchParams.get("id") || sessionStorage.getItem("id"));
       setPath(window.location.pathname);
     }
   }, [searchParams]);

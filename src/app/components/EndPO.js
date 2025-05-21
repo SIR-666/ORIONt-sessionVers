@@ -62,8 +62,8 @@ const End = (props) => {
     const now = new Date();
     const current = formatDateTime(now);
 
-    let dataTime = localStorage.getItem("date");
-    const shiftLocal = localStorage.getItem("shift");
+    let dataTime = sessionStorage.getItem("date");
+    const shiftLocal = sessionStorage.getItem("shift");
 
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
@@ -75,7 +75,7 @@ const End = (props) => {
       }
       dataTime = formatDateTime(parsedDate);
     } else {
-      dataTime = current; // Fallback if no date is in localStorage
+      dataTime = current; // Fallback if no date is in sessionStorage
     }
 
     setCurrentTime(current);
@@ -116,7 +116,7 @@ const End = (props) => {
     }
   }, [id, value]);
 
-  const plant = localStorage.getItem("plant");
+  const plant = sessionStorage.getItem("plant");
 
   useEffect(() => {
     const getGroup = async () => {

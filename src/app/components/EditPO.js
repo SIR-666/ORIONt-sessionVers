@@ -19,7 +19,7 @@ const Edit = (props) => {
 
   useEffect(() => {
     // You can fetch the specific data if needed here using the `id`
-    setPlant(localStorage.getItem("plant"));
+    setPlant(sessionStorage.getItem("plant"));
     console.log(`Editing item with ID: ${props.id}`);
   }, [props.id]);
 
@@ -63,8 +63,8 @@ const Edit = (props) => {
     const now = new Date();
     const current = formatDateTime(now);
 
-    let dataTime = localStorage.getItem("date");
-    const shiftLocal = localStorage.getItem("shift");
+    let dataTime = sessionStorage.getItem("date");
+    const shiftLocal = sessionStorage.getItem("shift");
 
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
@@ -78,7 +78,7 @@ const Edit = (props) => {
       }
       dataTime = formatDateTime(parsedDate);
     } else {
-      dataTime = current; // Fallback if no date is in localStorage
+      dataTime = current; // Fallback if no date is in sessionStorage
     }
 
     setCurrentTime(current);
@@ -100,8 +100,8 @@ const Edit = (props) => {
           productionData
         );
 
-        const dataTime = localStorage.getItem("date");
-        const shiftLocal = localStorage.getItem("shift");
+        const dataTime = sessionStorage.getItem("date");
+        const shiftLocal = sessionStorage.getItem("shift");
         let parsedDate = new Date(dataTime);
         if (shiftLocal === "I") {
           parsedDate.setHours(6, 0, 0, 0);

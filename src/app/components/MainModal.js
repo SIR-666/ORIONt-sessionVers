@@ -137,11 +137,11 @@ const MainModal = (props) => {
 
   useEffect(() => {
     if (data.length > 0) {
-      const storedPlant = localStorage.getItem("plant");
-      const storedLine = localStorage.getItem("line");
-      const storedShift = localStorage.getItem("shift");
-      const storedDate = localStorage.getItem("date");
-      const storedGroup = localStorage.getItem("group");
+      const storedPlant = sessionStorage.getItem("plant");
+      const storedLine = sessionStorage.getItem("line");
+      const storedShift = sessionStorage.getItem("shift");
+      const storedDate = sessionStorage.getItem("date");
+      const storedGroup = sessionStorage.getItem("group");
       if (storedPlant) {
         setSelectedPlant(storedPlant);
         handleSelectPlant({ target: { value: storedPlant } });
@@ -151,33 +151,40 @@ const MainModal = (props) => {
       if (storedDate) setSelectedDate(storedDate);
       if (storedGroup) setSelectedGroup(storedGroup);
       if (storedPlant === "Milk Processing")
-        setSelectedTank(localStorage.getItem("tank"));
+        setSelectedTank(sessionStorage.getItem("tank"));
       if (storedPlant === "Yogurt" && storedLine === "PASTEURIZER")
-        setSelectedFermentor(localStorage.getItem("fermentor"));
+        setSelectedFermentor(sessionStorage.getItem("fermentor"));
     }
   }, [data]);
 
   const getItemById = (id) => {
     const item = PO.find((entry) => entry.id === id);
+    console.log("item : ", item);
     if (item) {
+      console.log("id group :", item.group);
       const existingData =
-        JSON.parse(localStorage.getItem("materialData")) || [];
+        JSON.parse(sessionStorage.getItem("materialData")) || [];
       if (!existingData.some((entry) => entry.id === item.id)) {
         const filteredData = existingData.filter(
           (entry) => entry.id !== item.id
         );
         filteredData.push(item);
-        localStorage.setItem("selectedMaterial", JSON.stringify(filteredData));
+        sessionStorage.setItem(
+          "selectedMaterial",
+          JSON.stringify(filteredData)
+        );
       }
-      localStorage.setItem("line", selectedLine);
-      localStorage.setItem("plant", selectedPlant);
-      localStorage.setItem("shift", selectedShift);
-      localStorage.setItem("date", selectedDate);
-      localStorage.setItem("group", selectedGroup);
+      sessionStorage.setItem("line", selectedLine);
+      console.log("line :", selectedLine);
+      sessionStorage.setItem("plant", selectedPlant);
+      sessionStorage.setItem("shift", selectedShift);
+      sessionStorage.setItem("date", selectedDate);
+      // sessionStorage.setItem("group", selectedGroup);
+      sessionStorage.setItem("idgroup", item.group);
       if (selectedPlant === "Milk Processing")
-        localStorage.setItem("tank", selectedTank);
+        sessionStorage.setItem("tank", selectedTank);
       if (selectedPlant === "Yogurt" && selectedLine === "PASTEURIZER") {
-        localStorage.setItem("fermentor", selectedFermentor);
+        sessionStorage.setItem("fermentor", selectedFermentor);
       }
       router.push(`/main?value=${selectedLine}&id=${id}`);
       props.setShowModal(false);
@@ -258,6 +265,7 @@ const MainModal = (props) => {
       }
 
       const latestData = await response.json();
+      console.log("get shift PO : ", latestData);
       setPO(latestData);
     } catch (error) {
       console.error("Error fetching production order data:", error);

@@ -47,9 +47,9 @@ export default function OrderPage({ initialData }) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedData = localStorage.getItem("plant");
+      const storedData = sessionStorage.getItem("plant");
       setPlant(storedData ? storedData.replace(/["']/g, "") : "");
-      const storedLine = localStorage.getItem("line");
+      const storedLine = sessionStorage.getItem("line");
       setLine(storedLine);
     }
   }, []);
@@ -77,7 +77,12 @@ export default function OrderPage({ initialData }) {
     const item = data.find((entry) => entry.id === id);
     console.log("Item data: ", item);
     if (item) {
-      localStorage.setItem("selectedMaterial", JSON.stringify([item]));
+      sessionStorage.setItem("selectedMaterial", JSON.stringify([item]));
+      console.log("value: ", value);
+      console.log("id: ", id);
+      console.log("group: ", item.group);
+      sessionStorage.setItem("idgroup", item.group);
+      sessionStorage.setItem("line", value);
       router.push(`/main?value=${value}&id=${id}`);
     }
   };
@@ -96,10 +101,12 @@ export default function OrderPage({ initialData }) {
 
       // Update component state
       setData(latestData);
+      console.log("data : ", latestData);
       setFilteredData(latestData);
 
-      // Store the latest data in localStorage for offline use
-      localStorage.setItem("materialData", JSON.stringify(latestData));
+      // Store the latest data in sessionStorage for offline use
+      // sessionStorage.setItem("materialData", JSON.stringify(latestData));
+      sessionStorage.setItem("materialData", JSON.stringify(latestData));
 
       return latestData; // Return data if needed elsewhere
     } catch (error) {
@@ -258,12 +265,12 @@ export default function OrderPage({ initialData }) {
             <span style={styles.mainText}>
               {plant} - {value.toUpperCase()}{" "}
               {plant === "Milk Processing"
-                ? `- ${localStorage.getItem("tank")}`
+                ? `- ${sessionStorage.getItem("tank")}`
                 : ""}{" "}
               {plant === "Yogurt" && value === "PASTEURIZER"
-                ? `- ${localStorage.getItem("fermentor")}`
+                ? `- ${sessionStorage.getItem("fermentor")}`
                 : ""}{" "}
-              - SHIFT {shift} - {date} - {localStorage.getItem("group")}
+              - SHIFT {shift} - {date} - {sessionStorage.getItem("group")}
             </span>
             <button
               className={`

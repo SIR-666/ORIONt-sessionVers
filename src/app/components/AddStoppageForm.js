@@ -77,8 +77,8 @@ const FormFill = (props) => {
     const now = new Date();
     const current = formatDateTime(now);
 
-    let dataTime = localStorage.getItem("date");
-    const shiftLocal = localStorage.getItem("shift");
+    let dataTime = sessionStorage.getItem("date");
+    const shiftLocal = sessionStorage.getItem("shift");
 
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
@@ -106,7 +106,7 @@ const FormFill = (props) => {
           startTime: formatDateForInput(entry.Date),
           duration: parseFloat(initialDuration),
           comments: entry.Keterangan || "",
-          shift: localStorage.getItem("shift"),
+          shift: sessionStorage.getItem("shift"),
           line: value,
         });
         setStartTime(formatDateForInput(entry.Date));
@@ -122,7 +122,7 @@ const FormFill = (props) => {
         machine: props.clickedItem.machineName || "",
         code: props.clickedItem.itemData || "",
         duration: 0,
-        shift: localStorage.getItem("shift"),
+        shift: sessionStorage.getItem("shift"),
         line: value,
       });
       if (!startTime) setStartTime(dataTime);
@@ -203,8 +203,8 @@ const FormFill = (props) => {
     //     : new Date();
     //   const localTime = dateStart.getHours();
 
-    //   const shift = localStorage.getItem("shift");
-    //   const date = localStorage.getItem("date");
+    //   const shift = sessionStorage.getItem("shift");
+    //   const date = sessionStorage.getItem("date");
 
     //   const shiftDate = getShift(shift, date);
 
@@ -228,8 +228,8 @@ const FormFill = (props) => {
           : new Date();
         const localTime = dateStart.getHours();
 
-        const shift = localStorage.getItem("shift");
-        const date = localStorage.getItem("date");
+        const shift = sessionStorage.getItem("shift");
+        const date = sessionStorage.getItem("date");
 
         const shiftDate = getShift(shift, date);
 
@@ -441,8 +441,8 @@ const FormFill = (props) => {
 
     // ===== VALIDASI SHIFT TIME SESUAI SHIFT =====
     try {
-      const shift = localStorage.getItem("shift");
-      const shiftDate = localStorage.getItem("date");
+      const shift = sessionStorage.getItem("shift");
+      const shiftDate = sessionStorage.getItem("date");
       const parsedStart = new Date(startTime);
       const parsedEnd = new Date(endTime);
 
@@ -500,8 +500,8 @@ const FormFill = (props) => {
         startTime,
         endTime,
         id: id || undefined,
-        group: localStorage.getItem("group") || undefined,
-        plant: localStorage.getItem("plant") || undefined,
+        group: sessionStorage.getItem("group") || undefined,
+        plant: sessionStorage.getItem("plant") || undefined,
       };
 
       const response = await fetch(endpoint, {

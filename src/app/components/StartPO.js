@@ -11,8 +11,8 @@ const Start = (props) => {
   const [group, setGroup] = useState("");
   const [groupMessage, setGroupMessage] = useState("");
   const [groupData, setGroupData] = useState(null);
-  const shift = localStorage.getItem("shift");
-  const date = localStorage.getItem("date");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
   const params = useSearchParams();
   const value = params.get("value");
   const { id, status } = props;
@@ -27,8 +27,8 @@ const Start = (props) => {
     }
   }, [group, currentGroup]);
 
-  const currentShift = localStorage.getItem("shift");
-  const currentDate = localStorage.getItem("date");
+  const currentShift = sessionStorage.getItem("shift");
+  const currentDate = sessionStorage.getItem("date");
 
   const getShift = (shift, date) => {
     if (!date || isNaN(new Date(date))) {
@@ -93,10 +93,13 @@ const Start = (props) => {
     const now = new Date();
     const current = formatDateTime(now);
 
-    // Retrieve 'dataTime' from localStorage
-    let dataTime = localStorage.getItem("date");
-    const shiftLocal = localStorage.getItem("shift");
-    setCurrentGroup(localStorage.getItem("group"));
+    // Retrieve 'dataTime' from sessionStorage
+    let dataTime = sessionStorage.getItem("date");
+    const shiftLocal = sessionStorage.getItem("shift");
+    // setCurrentGroup(sessionStorage.getItem("group"));
+    setCurrentGroup(
+      groupMaster[sessionStorage.getItem("idgroup")] || "UNKNOWN"
+    );
 
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
@@ -110,7 +113,7 @@ const Start = (props) => {
       }
       dataTime = formatDateTime(parsedDate);
     } else {
-      dataTime = current; // Fallback if no date is in localStorage
+      dataTime = current; // Fallback if no date is in sessionStorage
     }
 
     // Update states
@@ -118,7 +121,7 @@ const Start = (props) => {
     if (!time) setTime(dataTime);
   }, []);
 
-  const plant = localStorage.getItem("plant");
+  const plant = sessionStorage.getItem("plant");
 
   useEffect(() => {
     const getGroup = async () => {
@@ -263,7 +266,7 @@ const Start = (props) => {
         await props.onUpdate();
         props.setShowStart(false);
         // props.onSubmit(props.id);
-        localStorage.setItem("id", data.id);
+        sessionStorage.setItem("id", data.id);
         router.push(`/main?value=${value}&id=${data.id}`);
       } catch (error) {
         console.error("Error:", error);

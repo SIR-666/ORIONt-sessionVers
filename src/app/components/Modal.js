@@ -98,18 +98,18 @@ const Modal = (props) => {
 
     if (window.location.pathname === "/order") {
       if (previousPage.includes("/login")) {
-        // Clear localStorage if the previous page is login
-        localStorage.removeItem("profile");
-        localStorage.removeItem("user");
-        localStorage.removeItem("plant");
-        localStorage.removeItem("line");
-        localStorage.removeItem("selectedMaterial");
-        localStorage.removeItem("materialData");
-        localStorage.removeItem("shift");
-        localStorage.removeItem("date");
-        localStorage.removeItem("group");
-        localStorage.removeItem("tank");
-        localStorage.removeItem("fermentor");
+        // Clear sessionStorage if the previous page is login
+        sessionStorage.removeItem("profile");
+        sessionStorage.removeItem("user");
+        sessionStorage.removeItem("plant");
+        sessionStorage.removeItem("line");
+        sessionStorage.removeItem("selectedMaterial");
+        sessionStorage.removeItem("materialData");
+        sessionStorage.removeItem("shift");
+        sessionStorage.removeItem("date");
+        sessionStorage.removeItem("group");
+        sessionStorage.removeItem("tank");
+        sessionStorage.removeItem("fermentor");
 
         // Redirect to login page
         router.push("/login");
@@ -154,11 +154,11 @@ const Modal = (props) => {
 
   useEffect(() => {
     if (data.length > 0) {
-      const storedPlant = localStorage.getItem("plant");
-      const storedLine = localStorage.getItem("line");
-      const storedShift = localStorage.getItem("shift");
-      const storedDate = localStorage.getItem("date");
-      const storedGroup = localStorage.getItem("group");
+      const storedPlant = sessionStorage.getItem("plant");
+      const storedLine = sessionStorage.getItem("line");
+      const storedShift = sessionStorage.getItem("shift");
+      const storedDate = sessionStorage.getItem("date");
+      const storedGroup = sessionStorage.getItem("group");
       if (storedPlant) {
         setSelectedPlant(storedPlant);
         handleSelectPlant({ target: { value: storedPlant } });
@@ -168,9 +168,9 @@ const Modal = (props) => {
       if (storedDate) setSelectedDate(storedDate);
       if (storedGroup) setSelectedGroup(storedGroup);
       if (storedPlant === "Milk Processing")
-        setSelectedTank(localStorage.getItem("tank"));
+        setSelectedTank(sessionStorage.getItem("tank"));
       if (storedPlant === "Yogurt" && storedLine === "PASTEURIZER")
-        setSelectedFermentor(localStorage.getItem("fermentor"));
+        setSelectedFermentor(sessionStorage.getItem("fermentor"));
     }
   }, [data]);
 
@@ -231,22 +231,22 @@ const Modal = (props) => {
     console.log("Selected Plant:", selectedPlant);
 
     // Simpan data
-    localStorage.setItem("plant", selectedPlant);
-    localStorage.setItem("line", selectedLine);
-    localStorage.setItem("shift", selectedShift);
-    localStorage.setItem("date", selectedDate);
-    localStorage.setItem("group", selectedGroup);
+    sessionStorage.setItem("plant", selectedPlant);
+    sessionStorage.setItem("line", selectedLine);
+    sessionStorage.setItem("shift", selectedShift);
+    sessionStorage.setItem("date", selectedDate);
+    sessionStorage.setItem("group", selectedGroup);
     if (selectedPlant === "Milk Processing") {
-      localStorage.setItem("tank", selectedTank);
+      sessionStorage.setItem("tank", selectedTank);
     }
     if (selectedPlant === "Yogurt" && selectedLine === "PASTEURIZER") {
-      localStorage.setItem("fermentor", selectedFermentor);
+      sessionStorage.setItem("fermentor", selectedFermentor);
     }
 
     // Bersihkan jika ada
-    if (localStorage.getItem("selectedMaterial")) {
-      localStorage.removeItem("selectedMaterial");
-      console.log("ID removed from localStorage");
+    if (sessionStorage.getItem("selectedMaterial")) {
+      sessionStorage.removeItem("selectedMaterial");
+      console.log("ID removed from sessionStorage");
     }
 
     // Navigasi

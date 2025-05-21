@@ -73,14 +73,14 @@ const RegisterPage = () => {
       //   });
       //     if (res.ok) {
       //         const responseData = await res.json();
-      //         localStorage.setItem("user", responseData.user.email);
+      //         sessionStorage.setItem("user", responseData.user.email);
       //         const userData = {
       //           email: responseData.user.email,
       //           password: "null",
       //           username: responseData.user.username,
       //           profile: "user",
       //         };
-      //         localStorage.setItem("profile", JSON.stringify(userData));
+      //         sessionStorage.setItem("profile", JSON.stringify(userData));
       //         router.push("../login");
       //     } else {
       //       const errorData = await res.json();

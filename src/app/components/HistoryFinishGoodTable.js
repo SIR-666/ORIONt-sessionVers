@@ -9,8 +9,8 @@ const HistoryFinishGoodTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const plant = localStorage.getItem("plant");
-        const line = localStorage.getItem("line");
+        const plant = sessionStorage.getItem("plant");
+        const line = sessionStorage.getItem("line");
 
         setPlant(plant || "");
         setLine(line || "");

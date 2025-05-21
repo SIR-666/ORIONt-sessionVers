@@ -105,10 +105,10 @@ function StoppagePage() {
   }
 
   useEffect(() => {
-    const shift = localStorage.getItem("shift");
-    const date = localStorage.getItem("date");
-    const plant = localStorage.getItem("plant");
-    const line = localStorage.getItem("line");
+    const shift = sessionStorage.getItem("shift");
+    const date = sessionStorage.getItem("date");
+    const plant = sessionStorage.getItem("plant");
+    const line = sessionStorage.getItem("line");
 
     // Panggil getShift dan simpan hasilnya
     const shiftData = getShift(shift, date);
@@ -122,7 +122,7 @@ function StoppagePage() {
 
     const fetchData = async () => {
       try {
-        setGroup(localStorage.getItem("group"));
+        setGroup(sessionStorage.getItem("group"));
 
         const stoppagesRes = await fetch(`/api/getStoppages`, {
           method: "POST",
@@ -196,11 +196,11 @@ function StoppagePage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedData = localStorage.getItem("plant");
-      const storedShift = localStorage.getItem("shift");
-      const storedDate = localStorage.getItem("date");
-      const storedGroup = localStorage.getItem("group");
-      const storedLine = localStorage.getItem("line");
+      const storedData = sessionStorage.getItem("plant");
+      const storedShift = sessionStorage.getItem("shift");
+      const storedDate = sessionStorage.getItem("date");
+      const storedGroup = sessionStorage.getItem("group");
+      const storedLine = sessionStorage.getItem("line");
       setPlant(storedData);
       setShift(storedShift);
       setDate(storedDate);
@@ -426,12 +426,12 @@ function StoppagePage() {
             <span style={styles.mainText}>
               {plant} - {value.toUpperCase()}{" "}
               {plant === "Milk Processing"
-                ? `- ${localStorage.getItem("tank")}`
+                ? `- ${sessionStorage.getItem("tank")}`
                 : ""}{" "}
               {plant === "Yogurt" && value === "PASTEURIZER"
-                ? `- ${localStorage.getItem("fermentor")}`
+                ? `- ${sessionStorage.getItem("fermentor")}`
                 : ""}{" "}
-              - SHIFT {shift} - {date} - {localStorage.getItem("group")}
+              - SHIFT {shift} - {date} - {sessionStorage.getItem("group")}
             </span>
             <span style={styles.dateText} suppressHydrationWarning>
               {time

@@ -13,6 +13,7 @@ import RectangleContainerYogurt from "../components/MainContainerYogurt";
 import MainModal from "../components/MainModal";
 import MainLayout from "../mainLayout";
 import styles from "../styles";
+import groupMaster from "./../groupmaster";
 
 function MainPage() {
   const [time, setTime] = useState(new Date());
@@ -58,13 +59,13 @@ function MainPage() {
   };
 
   // Retrieve 'dataTime' from localStorage
-  let dataTime = new Date(localStorage.getItem("date"));
+  let dataTime = new Date(sessionStorage.getItem("date"));
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedData = localStorage.getItem("plant");
-      const storedShift = localStorage.getItem("shift");
-      const storedLine = localStorage.getItem("line");
+      const storedData = sessionStorage.getItem("plant");
+      const storedShift = sessionStorage.getItem("shift");
+      const storedLine = sessionStorage.getItem("line");
       setPlant(storedData ? storedData.replace(/["']/g, "") : "");
       setLine(storedLine);
       setShift(storedShift);
@@ -141,8 +142,8 @@ function MainPage() {
 
       console.log("Retrieved PO from backend: ", productionData);
 
-      const currentShift = localStorage.getItem("shift");
-      const currentDate = localStorage.getItem("date");
+      const currentShift = sessionStorage.getItem("shift");
+      const currentDate = sessionStorage.getItem("date");
       const shiftTimes = getShift(currentShift, currentDate);
       // Sort and set the production order data
       if (Array.isArray(productionData)) {
@@ -220,7 +221,7 @@ function MainPage() {
             line: value,
             date_start: toLocalISO(start),
             date_end: toLocalISO(end) || getLocalISOString(),
-            plant: localStorage.getItem("plant"),
+            plant: sessionStorage.getItem("plant"),
           }),
         });
         const stoppageData = await stoppagesRes.json();
@@ -263,8 +264,8 @@ function MainPage() {
   useEffect(() => {
     const fetchAndStoreData = async () => {
       try {
-        const currentShift = localStorage.getItem("shift");
-        const currentDate = localStorage.getItem("date");
+        const currentShift = sessionStorage.getItem("shift");
+        const currentDate = sessionStorage.getItem("date");
         const shiftTimes = getShift(currentShift, currentDate);
 
         let start, end;
@@ -362,12 +363,14 @@ function MainPage() {
             <span style={styles.mainText}>
               {plant} - {value.toUpperCase()}{" "}
               {plant === "Milk Processing"
-                ? `- ${localStorage.getItem("tank")}`
+                ? `- ${sessionStorage.getItem("tank")}`
                 : ""}{" "}
               {plant === "Yogurt" && value === "PASTEURIZER"
-                ? `- ${localStorage.getItem("fermentor")}`
+                ? `- ${sessionStorage.getItem("fermentor")}`
                 : ""}{" "}
-              - SHIFT {shift} - {date} - {localStorage.getItem("group")}
+              - SHIFT {shift} - {date} -{" "}
+              {groupMaster[sessionStorage.getItem("idgroup")] ||
+                sessionStorage.getItem("idgroup")}
               {shiftMismatch && (
                 <span style={{ color: "red", fontWeight: "bold" }}>
                   {" "}

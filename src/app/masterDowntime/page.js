@@ -133,9 +133,9 @@ function MasterDowntimePage() {
   };
 
   useEffect(() => {
-    const shift = localStorage.getItem("shift");
-    const date = localStorage.getItem("date");
-    const line = localStorage.getItem("line");
+    const shift = sessionStorage.getItem("shift");
+    const date = sessionStorage.getItem("date");
+    const line = sessionStorage.getItem("line");
 
     // Panggil getShift dan simpan hasilnya
     const shiftData = getShift(shift, date);
@@ -183,13 +183,13 @@ function MasterDowntimePage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedData = localStorage.getItem("plant");
-      const storedShift = localStorage.getItem("shift");
-      const storedDate = localStorage.getItem("date");
-      const storedGroup = localStorage.getItem("group");
-      const storedLine = localStorage.getItem("line");
-      const storedTank = localStorage.getItem("tank");
-      const storedFermentor = localStorage.getItem("fermentor");
+      const storedData = sessionStorage.getItem("plant");
+      const storedShift = sessionStorage.getItem("shift");
+      const storedDate = sessionStorage.getItem("date");
+      const storedGroup = sessionStorage.getItem("group");
+      const storedLine = sessionStorage.getItem("line");
+      const storedTank = sessionStorage.getItem("tank");
+      const storedFermentor = sessionStorage.getItem("fermentor");
       setPlant(storedData);
       setShift(storedShift);
       setDate(storedDate);

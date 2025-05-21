@@ -76,10 +76,10 @@ const RectangleContainerPasteurizer = ({
   let totalnetDisplay = 0;
 
   useEffect(() => {
-    // Ambil ulang dari localStorage saat komponen sudah mount
-    const storedPlant = localStorage.getItem("plant");
-    const storedLine = localStorage.getItem("line");
-    const storedGroup = localStorage.getItem("group");
+    // Ambil ulang dari sessionStorage saat komponen sudah mount
+    const storedPlant = sessionStorage.getItem("plant");
+    const storedLine = sessionStorage.getItem("line");
+    const storedGroup = sessionStorage.getItem("group");
 
     setPlant(storedPlant);
     setCurrentLine(storedLine);
@@ -129,7 +129,7 @@ const RectangleContainerPasteurizer = ({
   };
 
   useEffect(() => {
-    const line = localStorage.getItem("line");
+    const line = sessionStorage.getItem("line");
     const controller = new AbortController();
 
     const fetchData = async () => {
@@ -242,7 +242,7 @@ const RectangleContainerPasteurizer = ({
     }
   }, [value, stoppageData, breakdownMachine]);
 
-  // Get Shift from localStorage
+  // Get Shift from sessionStorage
   const getShift = (shift, date) => {
     if (!date || isNaN(new Date(date))) {
       console.error("Invalid date provided.");
@@ -314,8 +314,8 @@ const RectangleContainerPasteurizer = ({
     const currentTime = new Date();
 
     const activeDurations = initialData.map((entry) => {
-      const shift = localStorage.getItem("shift");
-      const date = localStorage.getItem("date");
+      const shift = sessionStorage.getItem("shift");
+      const date = sessionStorage.getItem("date");
       const shiftTimes = getShift(shift, date);
       const start = new Date(entry.actual_start);
       start.setHours(start.getHours() - 7);
@@ -468,8 +468,8 @@ const RectangleContainerPasteurizer = ({
   useEffect(() => {
     const fetchQualityLoss = async () => {
       try {
-        const shift = localStorage.getItem("shift");
-        const date = localStorage.getItem("date");
+        const shift = sessionStorage.getItem("shift");
+        const date = sessionStorage.getItem("date");
         const getShiftTimes = getShift(shift, date);
 
         // Extract shift start and end times
@@ -671,8 +671,8 @@ const RectangleContainerPasteurizer = ({
   // Count unavailable time
   let ut,
     totalGapTime = 0;
-  const shift = localStorage.getItem("shift");
-  const date = localStorage.getItem("date");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
   const shiftData = getShift(shift, date) || {};
   const { startTime: shiftStart = null, endTime: shiftEnd = null } = shiftData;
   const { unavailableTime, unavailableTimeInMinutes } =
@@ -690,8 +690,8 @@ const RectangleContainerPasteurizer = ({
   // Set latest start untuk kirim data ke backend
   useEffect(() => {
     let calculatedStart = null;
-    const shift = localStorage.getItem("shift");
-    const date = localStorage.getItem("date");
+    const shift = sessionStorage.getItem("shift");
+    const date = sessionStorage.getItem("date");
     const shiftTimes = getShift(shift, date);
     initialData?.forEach((entry) => {
       const start = new Date(entry.actual_start);

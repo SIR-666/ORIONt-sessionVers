@@ -16,11 +16,11 @@ const QualLossProcessing = ({ onClose }) => {
   const params = useSearchParams();
   const id = params.get("id");
   const value = params.get("value");
-  const shift = localStorage.getItem("shift");
-  const date = localStorage.getItem("date");
-  const plant = localStorage.getItem("plant");
-  const line = localStorage.getItem("line");
-  const tank = localStorage.getItem("tank");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
+  const plant = sessionStorage.getItem("plant");
+  const line = sessionStorage.getItem("line");
+  const tank = sessionStorage.getItem("tank");
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
