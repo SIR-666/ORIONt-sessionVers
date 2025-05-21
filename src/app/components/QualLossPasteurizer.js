@@ -259,10 +259,7 @@ const QualLossPasteurizer = ({ onClose }) => {
       // Calculate quality loss
       const totalRejects =
         blowAwalValue + drainAkhirValue + sirkulasiValue + unplannedCIPValue;
-      if (totalRejects === 0) {
-        alert("At least one of the inputs must be greater than 0.");
-        return;
-      }
+
       const qual = (totalRejects / (skuSpeed || 1)) * 60;
       if (isNaN(qual) || !isFinite(qual)) {
         console.error("Invalid qual calculation");
