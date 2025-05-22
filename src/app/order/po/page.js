@@ -62,7 +62,7 @@ function SearchParamsWrapper() {
   if (!value || !shift || !date || !plant) {
     // Redirect to the login page if any of the required parameters are missing
     router.push("/login");
-    return null; // Render nothing while redirecting
+    return; // Render nothing while redirecting
   }
 
   return (

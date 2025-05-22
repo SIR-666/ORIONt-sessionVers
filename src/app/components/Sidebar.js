@@ -34,7 +34,7 @@ function SidebarContent({ isOpen }) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setLineValue(searchParams.get("value") || sessionStorage.getItem("line"));
+      setLineValue(sessionStorage.getItem("line"));
       setLineId(searchParams.get("id") || sessionStorage.getItem("id"));
       setPath(window.location.pathname);
     }
@@ -67,15 +67,7 @@ function SidebarContent({ isOpen }) {
       label: "Manage Orders",
       action: () => {
         if (line && shift && date) {
-          if (plant === "Milk Filling Packing") {
-            window.location.href = `../../order/filling?value=${line}&shift=${shift}&date=${date}`;
-          } else if (plant === "Milk Processing") {
-            window.location.href = `../../order/processing?value=${line}&shift=${shift}&date=${date}`;
-          } else if (plant === "Yogurt") {
-            window.location.href = `../../order/yogurt?value=${line}&shift=${shift}&date=${date}`;
-          } else if (plant === "Cheese") {
-            window.location.href = `../../order/cheese?value=${line}&shift=${shift}&date=${date}`;
-          }
+          window.location.href = `../../order/po?value=${line}&shift=${shift}&date=${date}`;
         } else {
           window.location.href = "../../order";
         }
@@ -85,7 +77,7 @@ function SidebarContent({ isOpen }) {
     },
     {
       label: "Manage Downtime",
-      href: `../../stoppage?value=${lineValue}&id=${lineId || ident}`,
+      href: `../../stoppage?value=${lineValue}`,
       basePath: "/stoppage",
       show: true,
     },

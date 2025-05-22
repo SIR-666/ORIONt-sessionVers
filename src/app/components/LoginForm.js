@@ -104,6 +104,7 @@ export default function LoginPage() {
           profile: "user",
         };
         sessionStorage.setItem("profile", JSON.stringify(userData));
+        document.cookie = `profile=${userData}; path=/`;
         router.push("../order");
       } else {
         const errorData = await res.json();

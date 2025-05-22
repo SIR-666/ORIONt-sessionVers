@@ -202,33 +202,13 @@ const Modal = (props) => {
   }, [selectedPlant]);
 
   const handleSubmit = () => {
-    let route = "";
     const encodedParams = `value=${encodeURIComponent(
       selectedLine
     )}&shift=${encodeURIComponent(selectedShift)}&date=${encodeURIComponent(
       selectedDate
     )}`;
 
-    switch (selectedPlant) {
-      case "Milk Filling Packing":
-        route = `../order/filling?${encodedParams}`;
-        break;
-      case "Milk Processing":
-        route = `../order/processing?${encodedParams}`;
-        break;
-      case "Yogurt":
-        route = `../order/yogurt?${encodedParams}`;
-        break;
-      case "Cheese":
-        route = `../order/cheese?${encodedParams}`;
-        break;
-      default:
-        alert("Invalid route");
-        return;
-    }
-
-    console.log("Routing to:", route);
-    console.log("Selected Plant:", selectedPlant);
+    const route = `../order/po?${encodedParams}`;
 
     // Simpan data
     sessionStorage.setItem("plant", selectedPlant);

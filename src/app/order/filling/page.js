@@ -1,7 +1,7 @@
 "use client";
 import OrderPage from "@/app/components/FillingClient";
 import LoadingSpinner from "@/app/components/loading";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 function DataFetcher({ value, shift, date, plant }) {
@@ -53,11 +53,17 @@ export default function APICall() {
 }
 
 function SearchParamsWrapper() {
-  const router = useSearchParams();
-  const value = router.get("value");
-  const shift = router.get("shift");
-  const date = router.get("date");
-  const plant = "Milk Filling Packing"; // Hardcoded plant value
+  const value = sessionStorage.getItem("line");
+  const shift = sessionStorage.getItem("shift");
+  const date = sessionStorage.getItem("date");
+  const plant = sessionStorage.getItem("plant");
+  const router = useRouter();
+
+  if (!value || !shift || !date || !plant) {
+    // Redirect to the login page if any of the required parameters are missing
+    router.push("/login");
+    return null; // Render nothing while redirecting
+  }
 
   return (
     <Suspense fallback={<p className="text-white">Loading...</p>}>

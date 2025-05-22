@@ -58,17 +58,22 @@ function MainPage() {
     return `${day}-${month}-${year}`;
   };
 
-  // Retrieve 'dataTime' from localStorage
   let dataTime = new Date(sessionStorage.getItem("date"));
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedData = sessionStorage.getItem("plant");
-      const storedShift = sessionStorage.getItem("shift");
-      const storedLine = sessionStorage.getItem("line");
-      setPlant(storedData ? storedData.replace(/["']/g, "") : "");
-      setLine(storedLine);
-      setShift(storedShift);
+      // const storedPlant = sessionStorage.getItem("plant");
+      // const storedShift = sessionStorage.getItem("shift");
+      // const storedLine = sessionStorage.getItem("line");
+
+      // if (!storedLine || !storedShift || !storedPlant) {
+      //   // Redirect to the login page if any of the required parameters are missing
+      //   router.push("/login");
+      // }
+
+      // setPlant(storedPlant);
+      // setLine(storedLine);
+      // setShift(storedShift);
       setCurrentDate(formatDateTime2(dataTime));
     }
   }, []);
@@ -256,10 +261,24 @@ function MainPage() {
   };
 
   useEffect(() => {
+    const storedPlant = sessionStorage.getItem("plant");
+    const storedShift = sessionStorage.getItem("shift");
+    const storedLine = sessionStorage.getItem("line");
+
+    if (storedLine === null || storedShift === null || storedPlant === null) {
+      router.push("/login");
+      return;
+    }
+
+    setPlant(storedPlant);
+    setLine(storedLine);
+    setShift(storedShift);
+    setCurrentDate(formatDateTime2(dataTime));
+
     if (id && value) {
       fetchData(id, value); // Only fetch when `id` is available
     }
-  }, [id, value]);
+  }, []);
 
   useEffect(() => {
     const fetchAndStoreData = async () => {

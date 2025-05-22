@@ -1,6 +1,7 @@
 "use client";
 import Button2 from "@/app/components/Button2";
 import LoadingSpinner from "@/app/components/loading";
+import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import MasterDowntimeModal from "../components/MasterDowntimeModal";
 import MainLayout from "../mainLayout";
@@ -23,6 +24,7 @@ function MasterDowntimePage() {
   const [deletingItems, setDeletingItems] = useState({});
   const [showDowntimeModal, setShowDowntimeModal] = useState(false);
   const [editDowntimeData, setEditDowntimeData] = useState(null);
+  const router = useRouter();
 
   const downtimeCategories = [
     "Breakdown/Minor Stop",
@@ -133,12 +135,30 @@ function MasterDowntimePage() {
   };
 
   useEffect(() => {
-    const shift = sessionStorage.getItem("shift");
-    const date = sessionStorage.getItem("date");
-    const line = sessionStorage.getItem("line");
+    const storedPlant = sessionStorage.getItem("plant");
+    const storedShift = sessionStorage.getItem("shift");
+    const storedDate = sessionStorage.getItem("date");
+    const storedGroup = sessionStorage.getItem("group");
+    const storedLine = sessionStorage.getItem("line");
+    const storedTank = sessionStorage.getItem("tank");
+    const storedFermentor = sessionStorage.getItem("fermentor");
+
+    if (!storedPlant || !storedShift || !storedDate || !storedLine) {
+      // Redirect to the login page if any of the required parameters are missing
+      router.push("/login");
+      return; // Render nothing while redirecting
+    }
+
+    setPlant(storedPlant);
+    setShift(storedShift);
+    setDate(storedDate);
+    setGroup(storedGroup);
+    setLine(storedLine);
+    setTank(storedTank);
+    setFermentor(storedFermentor);
 
     // Panggil getShift dan simpan hasilnya
-    const shiftData = getShift(shift, date);
+    const shiftData = getShift(storedShift, storedDate);
 
     if (!shiftData) {
       console.error("Invalid shift data");
@@ -148,7 +168,7 @@ function MasterDowntimePage() {
     const fetchData = async () => {
       try {
         const stoppagesRes = await fetch(
-          `${url.URL}/getMasterDowntime?line=${line}`,
+          `${url.URL}/getMasterDowntime?line=${storedLine}`,
           {
             method: "GET",
             headers: {
@@ -179,25 +199,6 @@ function MasterDowntimePage() {
 
     // Clean up the timer on component unmount
     return () => clearInterval(timerId);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedData = sessionStorage.getItem("plant");
-      const storedShift = sessionStorage.getItem("shift");
-      const storedDate = sessionStorage.getItem("date");
-      const storedGroup = sessionStorage.getItem("group");
-      const storedLine = sessionStorage.getItem("line");
-      const storedTank = sessionStorage.getItem("tank");
-      const storedFermentor = sessionStorage.getItem("fermentor");
-      setPlant(storedData);
-      setShift(storedShift);
-      setDate(storedDate);
-      setGroup(storedGroup);
-      setLine(storedLine);
-      setTank(storedTank);
-      setFermentor(storedFermentor);
-    }
   }, []);
 
   const deleteItemById = async (id, plant, line) => {
