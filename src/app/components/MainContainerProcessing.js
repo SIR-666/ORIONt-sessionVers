@@ -16,6 +16,7 @@ import QualityLossProcessing from "./QualLossProcessing";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
+import groupMaster from "./../groupmaster";
 
 const RectangleContainerProcessing = ({
   initialData,
