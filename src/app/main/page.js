@@ -60,24 +60,6 @@ function MainPage() {
 
   let dataTime = new Date(sessionStorage.getItem("date"));
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      // const storedPlant = sessionStorage.getItem("plant");
-      // const storedShift = sessionStorage.getItem("shift");
-      // const storedLine = sessionStorage.getItem("line");
-
-      // if (!storedLine || !storedShift || !storedPlant) {
-      //   // Redirect to the login page if any of the required parameters are missing
-      //   router.push("/login");
-      // }
-
-      // setPlant(storedPlant);
-      // setLine(storedLine);
-      // setShift(storedShift);
-      setCurrentDate(formatDateTime2(dataTime));
-    }
-  }, []);
-
   function getLocalISOString() {
     const now = new Date();
     const tzOffsetMs = now.getTimezoneOffset() * 60 * 1000; // Convert offset to milliseconds
@@ -278,7 +260,7 @@ function MainPage() {
     if (id && value) {
       fetchData(id, value); // Only fetch when `id` is available
     }
-  }, []);
+  }, [id, value]);
 
   useEffect(() => {
     const fetchAndStoreData = async () => {
