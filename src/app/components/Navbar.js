@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React from "react";
 import Logo from "../../app/favicon.png"; // Path ke logo
 import LogoGreenfields from "../../app/logo-greenfield-black.png";
@@ -8,75 +8,16 @@ export default function Navbar({ toggleSidebar, transparent }) {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
 
   const router = useRouter();
-  const pathname = usePathname();
 
   const handleLogout = () => {
-    const shift = sessionStorage.getItem("shift");
-    const date = sessionStorage.getItem("date");
+    // Clear specific data from sessionStorage
+    sessionStorage.clear();
 
-    let shiftStart = null;
-    let shiftEnd = null;
+    // Clear specific data from cookies
+    document.cookie =
+      "profile=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
 
-    const getShift = (shift, date) => {
-      if (!date || isNaN(new Date(date))) {
-        console.error("Invalid date provided.");
-        return null;
-      }
-      let startTime, endTime;
-      switch (shift) {
-        case "I":
-          startTime = new Date(date);
-          startTime.setHours(6, 0, 0, 0);
-          endTime = new Date(date);
-          endTime.setHours(14, 0, 0, 0);
-          break;
-        case "II":
-          startTime = new Date(date);
-          startTime.setHours(14, 0, 0, 0);
-          endTime = new Date(date);
-          endTime.setHours(22, 0, 0, 0);
-          break;
-        case "III":
-          startTime = new Date(date);
-          startTime.setHours(22, 0, 0, 0);
-          endTime = new Date(date);
-          endTime.setDate(endTime.getDate() + 1); // Move to the next day
-          endTime.setHours(6, 0, 0, 0);
-          break;
-        default:
-          console.warn("Invalid shift provided.");
-          return null; // Handle invalid shift
-      }
-
-      return { startTime, endTime };
-    };
-
-    // Only try to get shift data if `shift` and `date` are valid
-    if (shift && date) {
-      const shiftData = getShift(shift, date);
-      if (shiftData) {
-        shiftStart = shiftData.startTime;
-        shiftEnd = shiftData.endTime;
-      } else {
-        console.warn("No shift data found for the given shift and date.");
-      }
-    }
-
-    console.log("Shift Start:", shiftStart, "Shift End:", shiftEnd);
-
-    sessionStorage.removeItem("profile");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("plant");
-    sessionStorage.removeItem("tank");
-    sessionStorage.removeItem("line");
-    sessionStorage.removeItem("selectedMaterial");
-    sessionStorage.removeItem("materialData");
-    sessionStorage.removeItem("shift");
-    sessionStorage.removeItem("date");
-    sessionStorage.removeItem("id");
-    sessionStorage.removeItem("group");
-
-    // Clear specific data from local storage
+    // Redirect to login page
     router.push("/login");
   };
 
