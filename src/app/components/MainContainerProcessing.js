@@ -84,11 +84,11 @@ const RectangleContainerProcessing = ({
     // Ambil ulang dari sessionStorage saat komponen sudah mount
     const storedPlant = sessionStorage.getItem("plant");
     const storedLine = sessionStorage.getItem("line");
-    const storedGroup = sessionStorage.getItem("group");
+    const storedGroup = sessionStorage.getItem("idgroup");
 
     setPlant(storedPlant);
     setCurrentLine(storedLine);
-    setCurrentGroup(storedGroup);
+    setCurrentGroup(groupMaster[storedGroup] || "UNKNOWN");
   }, []);
 
   const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
