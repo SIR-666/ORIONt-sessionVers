@@ -1,7 +1,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
-import groupMaster from "../groupmaster";
 
 const Start = (props) => {
   const [time, setTime] = useState("");
@@ -98,9 +97,7 @@ const Start = (props) => {
     let dataTime = sessionStorage.getItem("date");
     const shiftLocal = sessionStorage.getItem("shift");
     // setCurrentGroup(sessionStorage.getItem("group"));
-    setCurrentGroup(
-      groupMaster[sessionStorage.getItem("idgroup")] || "UNKNOWN"
-    );
+    setCurrentGroup(sessionStorage.getItem("group"));
 
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
