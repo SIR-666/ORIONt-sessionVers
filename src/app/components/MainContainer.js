@@ -2,6 +2,7 @@ import nominalSpeeds from "@/app/speed";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import url from "../url";
+import groupMaster from "./../groupmaster";
 import {
   calculateAvailableTime,
   calculateMtbf,
@@ -16,7 +17,6 @@ import QualityLoss from "./QualLoss";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
-import groupMaster from "./../groupmaster";
 
 const RectangleContainer = ({
   initialData,
@@ -62,6 +62,7 @@ const RectangleContainer = ({
   const [calendarMinutes, setCalendarMinutes] = useState(0);
   const [skuSpeed, setSKUSpeed] = useState(null);
   const [skuSpeeds, setSkuSpeeds] = useState({});
+  const [skuVolumes, setSkuVolumes] = useState({});
   const [qualityLoss, setQualityLoss] = useState(0);
   const [speedLoss, setSpeedLoss] = useState(0);
   const [qtyModal, setQtyModal] = useState(false);
@@ -196,13 +197,16 @@ const RectangleContainer = ({
 
           // Buat objek dengan key = product_id dan value = speed
           const speedsMap = {};
+          const volumesMap = {};
           data.forEach((product) => {
             speedsMap[product.id] =
               product.speed || nominalSpeeds[formattedLineName];
+            volumesMap[product.id] = product.volume;
           });
 
           console.log("Setting SKU speeds to:", speedsMap);
           setSkuSpeeds(speedsMap);
+          setSkuVolumes(volumesMap);
           setloading2(true);
         }
       } catch (error) {
@@ -692,7 +696,7 @@ const RectangleContainer = ({
 
   const mtbf = calculateMtbf(production, durationSums.UnplannedStoppages);
   const percentProcessWaiting = (
-    (durationSums.ProcessWaiting / operationDisplay) *
+    (durationSums.ProcessWaiting / availableTime) *
     100
   ).toFixed(2);
   const percentEUPS = (
@@ -853,6 +857,14 @@ const RectangleContainer = ({
                 >
                   Finish Good: {qtyPO[index] || 0} pcs
                 </li>
+                <p className="mt-2 text-black">
+                  Finish Good (Liter):{" "}
+                  {skuVolumes[entry.product_id]
+                    ? `${
+                        (qtyPO[index] * skuVolumes[entry.product_id]) / 1000
+                      } liter`
+                    : "Loading..."}
+                </p>
                 <li className="mt-2 text-black">
                   Total Produced in Current Shift: {qty} pcs
                 </li>
@@ -899,13 +911,6 @@ const RectangleContainer = ({
                   >
                     Minutes
                   </th>
-                  <th
-                    colSpan="1"
-                    style={{ border: "1px white", padding: "8px" }}
-                    className="text-black bg-gray-300"
-                  >
-                    Percent (%)
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -936,17 +941,6 @@ const RectangleContainer = ({
                   >
                     {durationSums.PlannedStoppages.toFixed(2)}
                   </th>
-                  <th
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                      fontWeight: "normal",
-                      textAlign: "left",
-                    }}
-                  >
-                    {plannedStop || 0.0}
-                  </th>
                 </tr>
                 <tr>
                   <td className={TdStyle.TdStyle}>Available Time</td>
@@ -973,20 +967,11 @@ const RectangleContainer = ({
                   >
                     {durationSums.UnplannedStoppages.toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {percentBreakdown || percentBreakdown.toFixed(2)}
-                  </td>
                 </tr>
                 {/* Add more rows as needed */}
                 <tr>
-                  <td className={TdStyle.TdStyle2}>Operational Time</td>
-                  {/* Production Time = NPT + Total breakdown + Total Speed Loss + Quality Losses */}
+                  <td className={TdStyle.TdStyleG}>Unavailable Time</td>
+                  {/* Unavailable time isi dari form atau retrieve dari db */}
                   <td
                     style={{
                       border: "1px solid black",
@@ -994,7 +979,7 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    {operationDisplay}
+                    {unavailableTimeInMinutes.toFixed(2)}
                   </td>
                   <td
                     className={TdStyle.TdStyle7}
@@ -1011,22 +996,12 @@ const RectangleContainer = ({
                   >
                     {parseFloat(speedLoss).toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {percentSpeedLoss || percentSpeedLoss.toFixed(2)}
-                  </td>
                 </tr>
                 {speedLossModal && (
                   <Speed onClose={() => setSpeedLossModal(false)} />
                 )}
                 <tr>
-                  <td className={TdStyle.TdStyle3}>Production Time</td>
-                  {/* Running Time = Production Time - Breakdown/Process Failure Duration */}
+                  <td className={TdStyle.TdStyle4}>NPT</td>
                   <td
                     style={{
                       border: "1px solid black",
@@ -1034,7 +1009,7 @@ const RectangleContainer = ({
                       color: "black",
                     }}
                   >
-                    {productionDisplay}
+                    {totalnetDisplay}
                   </td>
                   <td className={TdStyle.TdStyle8}>Process Waiting</td>
                   {/* Buat tabel baru? */}
@@ -1047,29 +1022,8 @@ const RectangleContainer = ({
                   >
                     {durationSums.ProcessWaiting.toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {isNaN(percentProcessWaiting)
-                      ? "0.00"
-                      : percentProcessWaiting}
-                  </td>
                 </tr>
                 <tr>
-                  <td className={TdStyle.TdStyleGr}>Running Time</td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {runningDisplay}
-                  </td>
                   <td className={TdStyle.TdStyle9}>Not Reported</td>
                   {/* Not Reported = 60 - (Production Time + Total Process Waiting + Planned Stop + Unavailable Time) */}
                   <td
@@ -1080,28 +1034,6 @@ const RectangleContainer = ({
                     }}
                   >
                     {nReportedDisplay}
-                  </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    0.0
-                  </td>
-                </tr>
-                <tr>
-                  <td className={TdStyle.TdStyleG}>Unavailable Time</td>
-                  {/* Unavailable time isi dari form atau retrieve dari db */}
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {unavailableTimeInMinutes.toFixed(2)}
                   </td>
                   <td
                     className={TdStyle.TdStyle10}
@@ -1118,33 +1050,12 @@ const RectangleContainer = ({
                   >
                     {parseFloat(qualityLoss).toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {percentQualLoss || percentQualLoss.toFixed(2)}
-                  </td>
                 </tr>
                 {qualityLossModal && (
                   <QualityLoss onClose={() => setQualityLossModal(false)} />
                 )}
                 <tr>
-                  <td className={TdStyle.TdStyle4}>NPT</td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {totalnetDisplay}
-                  </td>
-                  <td className={TdStyle.TdStyle11}>
-                    Estimated Unplanned Stoppage
-                  </td>
+                  <td className={TdStyle.TdStyle11}>Unplanned Stoppage</td>
                   <td
                     style={{
                       border: "1px solid black",
@@ -1154,15 +1065,14 @@ const RectangleContainer = ({
                   >
                     {estimated}
                   </td>
+                  <td className={TdStyle.TdStyle11}></td>
                   <td
                     style={{
                       border: "1px solid black",
                       padding: "8px",
                       color: "black",
                     }}
-                  >
-                    {isNaN(percentEUPS) ? "0.00" : percentEUPS}
-                  </td>
+                  ></td>
                 </tr>
               </tbody>
             </table>
@@ -1174,13 +1084,7 @@ const RectangleContainer = ({
         Current Shift KPI
       </h1>
       <br></br>
-      <div className="grid grid-cols-5 gap-4">
-        <div className="mb-2">
-          <h1 className="text-black text-4xl text-center font-bold">
-            {plannedStop || 0.0}%
-          </h1>
-          <p className="text-gray-500 text-center">Planned stops</p>
-        </div>
+      <div className="grid grid-cols-4 gap-4">
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
             {percentBreakdown || percentBreakdown.toFixed(2)}%
@@ -1216,7 +1120,13 @@ const RectangleContainer = ({
           <p className="text-gray-500 text-center">Speed Loss</p>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
+        <div className="mb-2">
+          <h1 className="text-black text-4xl text-center font-bold">
+            {plannedStop || 0.0}%
+          </h1>
+          <p className="text-gray-500 text-center">Planned stops</p>
+        </div>
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
             {isNaN(percentEUPS) ? "0.00" : percentEUPS}%

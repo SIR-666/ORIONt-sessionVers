@@ -97,9 +97,7 @@ const Start = (props) => {
     let dataTime = sessionStorage.getItem("date");
     const shiftLocal = sessionStorage.getItem("shift");
     // setCurrentGroup(sessionStorage.getItem("group"));
-    setCurrentGroup(
-      groupMaster[sessionStorage.getItem("idgroup")] || "UNKNOWN"
-    );
+    setCurrentGroup(sessionStorage.getItem("group"));
 
     // If dataTime exists, format it to match 'current' format
     if (dataTime) {
