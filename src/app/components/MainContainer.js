@@ -599,7 +599,8 @@ const RectangleContainer = ({
         rejectQty,
         skuSpeeds[productIds[index]] || 1
       );
-      // console.log("totalnetDisplay", netDisplay);
+      console.log("qtyPO[index]", qtyPO[index]);
+      console.log("totalnet", net);
       // Accumulate totals
       totalnet += net;
       totalnetDisplay += netDisplay;
@@ -607,7 +608,7 @@ const RectangleContainer = ({
   }
   const net = totalnet;
   totalnetDisplay = totalnet.toFixed(2);
-  // console.log("totalnetDisplay", totalnetDisplay);
+  console.log("totalnetDisplay", totalnetDisplay);
 
   const { production, productionDisplay } = calculateProduction(
     net,
