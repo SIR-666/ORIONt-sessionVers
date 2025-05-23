@@ -67,12 +67,12 @@ export function calculatePercentages(
       : 0.0;
   const percentBreakdown =
     production > 0
-      ? ((durationSums.UnplannedStoppages / production) * 100).toFixed(2)
+      ? ((durationSums.UnplannedStoppages / availableTime) * 100).toFixed(2)
       : 0.0;
   const percentQualLoss =
-    running > 0 ? ((qualityLoss / running) * 100).toFixed(2) : 0.0;
+    running > 0 ? ((qualityLoss / availableTime) * 100).toFixed(2) : 0.0;
   const percentSpeedLoss =
-    running > 0 ? ((speedLoss / running) * 100).toFixed(2) : 0.0;
+    running > 0 ? ((speedLoss / availableTime) * 100).toFixed(2) : 0.0;
   return { plannedStop, percentBreakdown, percentQualLoss, percentSpeedLoss };
 }
 

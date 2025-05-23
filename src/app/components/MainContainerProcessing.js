@@ -2,6 +2,7 @@ import nominalSpeeds from "@/app/speed";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import url from "../url";
+import groupMaster from "./../groupmaster";
 import {
   calculateAvailableTime,
   calculateMtbf,
@@ -16,7 +17,6 @@ import QualityLossProcessing from "./QualLossProcessing";
 import Quantity from "./Quantity";
 import Speed from "./SpeedLoss";
 import { calculateUnavailableTime } from "./UnavailableTime";
-import groupMaster from "./../groupmaster";
 
 const RectangleContainerProcessing = ({
   initialData,
@@ -81,18 +81,21 @@ const RectangleContainerProcessing = ({
   let totalnet = 0;
   let totalnetDisplay = 0;
 
+  const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
+
   useEffect(() => {
     // Ambil ulang dari sessionStorage saat komponen sudah mount
     const storedPlant = sessionStorage.getItem("plant");
     const storedLine = sessionStorage.getItem("line");
     const storedGroup = sessionStorage.getItem("idgroup");
-
+    // const storedLine = sessionStorage.getItem("line");
+    // const storedGroup = sessionStorage.getItem("group");
+    console.log("nama group : ", storedGroup);
     setPlant(storedPlant);
     setCurrentLine(storedLine);
     setCurrentGroup(groupMaster[storedGroup] || "UNKNOWN");
+    // setCurrentGroup(storedGroup);
   }, []);
-
-  const formattedLineName = value.replace(/\s+/g, "_").toUpperCase();
 
   // Access the nominal speed from the map
   const handleSpeed = async () => {
@@ -223,16 +226,19 @@ const RectangleContainerProcessing = ({
         downtimeDuration = parseFloat(entry.Minutes);
 
         if (downtimeDuration > 0) {
-          if (entry.Mesin === "Planned Stop") {
+          const mesin = entry.Mesin.trim();
+          if (mesin === "Planned Stop") {
             plannedSum += downtimeDuration;
           } else if (
-            breakdownMachine.map((item) => item.mesin).includes(entry.Mesin)
+            breakdownMachine.map((item) => item.mesin).includes(mesin)
           ) {
             unplannedSum += downtimeDuration;
-          } else if (entry.Mesin === "Unavailable Time") {
+          } else if (mesin === "Unavailable Time") {
             unavailableSum += downtimeDuration;
-          } else if (entry.Mesin === "Process Waiting") {
+          } else if (mesin === "Process Waiting") {
             waitingSum += downtimeDuration;
+          } else {
+            console.log("entry mesin:", mesin);
           }
         }
       });
@@ -381,6 +387,7 @@ const RectangleContainerProcessing = ({
         } else {
           endAvailable = end;
         }
+        // endAvailable = end;
       } else {
         endAvailable = shiftTimes.endTime;
       }
@@ -390,8 +397,6 @@ const RectangleContainerProcessing = ({
     // Determine endTime
     initialData?.forEach((entry) => {
       let endTime = entry.actual_end ? new Date(entry.actual_end) : currentTime;
-
-      // Calculate endTimeString untuk nilai actual_end null atau existing
       let endTimeString = "";
       if (entry.actual_end) {
         endTimeString = `${endTime
@@ -425,7 +430,6 @@ const RectangleContainerProcessing = ({
       (sum, duration) => sum + duration,
       0
     );
-
     setTimeDifference(totalActiveTime);
 
     const year = currentTime.getFullYear().toString();
@@ -492,9 +496,13 @@ const RectangleContainerProcessing = ({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
             },
             body: JSON.stringify(body),
           });
+
           if (!response.ok) throw new Error(`Failed to fetch data from ${url}`);
           return response.json();
         };
@@ -537,8 +545,11 @@ const RectangleContainerProcessing = ({
         // Set states
         setQualityLoss(totalQualityLoss * 60);
         setSpeedLoss(totalSpeedLoss * 60);
+        console.log("quality loss:", totalQualityLoss);
+
         setQty(totalQuantity);
         setrejectQty(totalRejectSample);
+        setloading4(false);
       } catch (error) {
         console.error(
           "Error fetching downtime data in MainContainer.js:",
@@ -576,18 +587,19 @@ const RectangleContainerProcessing = ({
   }, [initialData, stoppageData]);
 
   // calculations
+
   const availableTime = calculateAvailableTime(
     timeDifference,
     durationSums.UnavailableTime
   );
   {
-    allPO.map((_, index) => {
+    allPO.map((entry, index) => {
       let { net, netDisplay } = calculateNet(
         qtyPO[index],
         rejectQty,
         skuSpeeds[productIds[index]] || 1
       );
-      console.log("totalnetDisplay", netDisplay);
+      // console.log("totalnetDisplay", netDisplay);
       // Accumulate totals
       totalnet += net;
       totalnetDisplay += netDisplay;
@@ -595,7 +607,7 @@ const RectangleContainerProcessing = ({
   }
   const net = totalnet;
   totalnetDisplay = totalnet.toFixed(2);
-  console.log("totalnetDisplay", totalnetDisplay);
+  // console.log("totalnetDisplay", totalnetDisplay);
 
   const { production, productionDisplay } = calculateProduction(
     net,
@@ -612,6 +624,7 @@ const RectangleContainerProcessing = ({
     production,
     durationSums.ProcessWaiting
   );
+
   useEffect(() => {
     if (isNaN(operation) || isNaN(operationDisplay)) {
       console.warn("NaN detected. Retrying...");
@@ -635,11 +648,6 @@ const RectangleContainerProcessing = ({
     parseFloat(qualityLoss)
   ).toFixed(2);
 
-  const pe = net && production ? ((net / production) * 100).toFixed(2) : "0.00";
-  const oee =
-    net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
-  // sent to backend (hours)
-  // const netDB = (qty - rejectQty) / (skuSpeed || 1);
   const netDB = totalnetDisplay / 60;
   // const prodDB =
   //   parseFloat(netDB) +
@@ -675,9 +683,15 @@ const RectangleContainerProcessing = ({
       qualityLoss,
       speedLoss
     );
+  const pe = net && production ? ((net / production) * 100).toFixed(2) : "0.00";
+  const oee =
+    net && availableTime ? ((net / availableTime) * 100).toFixed(2) : "0.00";
+  // sent to backend (hours)
+  // const netDB = (qty - rejectQty) / (skuSpeed || 1);
+
   const mtbf = calculateMtbf(production, durationSums.UnplannedStoppages);
   const percentProcessWaiting = (
-    (durationSums.ProcessWaiting / operationDisplay) *
+    (durationSums.ProcessWaiting / availableTime) *
     100
   ).toFixed(2);
   const percentEUPS = (
@@ -706,25 +720,6 @@ const RectangleContainerProcessing = ({
 
   ut = unavailableTimeInMinutes / 60;
 
-  // Set latest start untuk kirim data ke backend
-  useEffect(() => {
-    let calculatedStart = null;
-    const shift = sessionStorage.getItem("shift");
-    const date = sessionStorage.getItem("date");
-    const shiftTimes = getShift(shift, date);
-    initialData?.forEach((entry) => {
-      const start = new Date(entry.actual_start);
-      start.setHours(start.getHours() - 7);
-
-      calculatedStart =
-        start < shiftTimes.startTime
-          ? shiftTimes.startTime
-          : shiftTimes.startTime;
-    });
-    setLatestStart(toLocalISO(calculatedStart));
-  }, [initialData]);
-
-  // Insert calculation to back-end
   useEffect(() => {
     if (
       latestStart === null ||
@@ -745,6 +740,7 @@ const RectangleContainerProcessing = ({
       return;
 
     if (!loading1 || !loading2 || !loading3) return;
+
     const timeout = setTimeout(() => {
       const sendDataToBackend = async () => {
         try {
@@ -780,6 +776,7 @@ const RectangleContainerProcessing = ({
           console.error("❌ Error sending data to backend:", error);
         }
       };
+
       console.log("masuk sini");
       sendDataToBackend();
     }, 3000); // Delay 3 detik
@@ -805,6 +802,26 @@ const RectangleContainerProcessing = ({
     loading3,
   ]);
 
+  // Set latest start untuk kirim data ke backend
+  useEffect(() => {
+    let calculatedStart = null;
+    const shift = sessionStorage.getItem("shift");
+    const date = sessionStorage.getItem("date");
+    const shiftTimes = getShift(shift, date);
+    initialData?.forEach((entry) => {
+      const start = new Date(entry.actual_start);
+      start.setHours(start.getHours() - 7);
+
+      calculatedStart =
+        start < shiftTimes.startTime
+          ? shiftTimes.startTime
+          : shiftTimes.startTime;
+    });
+    setLatestStart(toLocalISO(calculatedStart));
+  }, [initialData]);
+
+  // Insert calculation to back-end
+
   return (
     <>
       <div className="relative w-full h-128 rounded-xl bg-white shadow-xl">
@@ -818,7 +835,7 @@ const RectangleContainerProcessing = ({
             {allPO.map((entry, index) => (
               <ul key={entry.id}>
                 <li className="text-2xl font-bold text-black">
-                  SFP ID {entry.id}
+                  Production Order {entry.id}
                 </li>
                 <li className="mt-2 text-black">Status: {entry.status}</li>
                 <li className="mt-2 text-black">Material: {entry.sku}</li>
@@ -829,10 +846,10 @@ const RectangleContainerProcessing = ({
                   className="mt-2 text-black cursor-pointer bg-green-500"
                   onClick={() => setQtyModal(true)}
                 >
-                  Finish Good: {qtyPO[index] || 0} liter
+                  Finish Good: {qtyPO[index] || 0} pcs
                 </li>
                 <li className="mt-2 text-black">
-                  Total Produced in Current Shift: {qty} liter
+                  Total Produced in Current Shift: {qty} pcs
                 </li>
                 <li className="mt-2 text-black">
                   Start Time: {formatFullDateTime(entry.actual_start)}
@@ -845,7 +862,7 @@ const RectangleContainerProcessing = ({
                 <p className="mt-2 text-black">
                   Nominal Speed:{" "}
                   {skuSpeeds[entry.product_id]
-                    ? `${skuSpeeds[entry.product_id]} liter/hr`
+                    ? `${skuSpeeds[entry.product_id]} pcs/hr`
                     : "Loading..."}
                 </p>
               </ul>
@@ -863,19 +880,19 @@ const RectangleContainerProcessing = ({
                   >
                     Performance Indicator (Minutes)
                   </th>
+                  {/* <th
+                    colSpan="1"
+                    style={{ border: "1px white", padding: "8px" }}
+                    className="text-black bg-gray-300"
+                  >
+                    Minutes
+                  </th> */}
                   <th
                     colSpan="1"
                     style={{ border: "1px white", padding: "8px" }}
                     className="text-black bg-gray-300"
                   >
                     Minutes
-                  </th>
-                  <th
-                    colSpan="1"
-                    style={{ border: "1px white", padding: "8px" }}
-                    className="text-black bg-gray-300"
-                  >
-                    Percent (%)
                   </th>
                 </tr>
               </thead>
@@ -907,17 +924,6 @@ const RectangleContainerProcessing = ({
                   >
                     {durationSums.PlannedStoppages.toFixed(2)}
                   </th>
-                  <th
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                      fontWeight: "normal",
-                      textAlign: "left",
-                    }}
-                  >
-                    {plannedStop || 0.0}
-                  </th>
                 </tr>
                 <tr>
                   <td className={TdStyle.TdStyle}>Available Time</td>
@@ -944,20 +950,11 @@ const RectangleContainerProcessing = ({
                   >
                     {durationSums.UnplannedStoppages.toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {percentBreakdown || percentBreakdown.toFixed(2)}
-                  </td>
                 </tr>
                 {/* Add more rows as needed */}
                 <tr>
-                  <td className={TdStyle.TdStyle2}>Operational Time</td>
-                  {/* Production Time = NPT + Total breakdown + Total Speed Loss + Quality Losses */}
+                  <td className={TdStyle.TdStyleG}>Unavailable Time</td>
+                  {/* Unavailable time isi dari form atau retrieve dari db */}
                   <td
                     style={{
                       border: "1px solid black",
@@ -965,7 +962,7 @@ const RectangleContainerProcessing = ({
                       color: "black",
                     }}
                   >
-                    {operationDisplay}
+                    {unavailableTimeInMinutes.toFixed(2)}
                   </td>
                   <td
                     className={TdStyle.TdStyle7}
@@ -982,22 +979,12 @@ const RectangleContainerProcessing = ({
                   >
                     {parseFloat(speedLoss).toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {percentSpeedLoss || percentSpeedLoss.toFixed(2)}
-                  </td>
                 </tr>
                 {speedLossModal && (
                   <Speed onClose={() => setSpeedLossModal(false)} />
                 )}
                 <tr>
-                  <td className={TdStyle.TdStyle3}>Production Time</td>
-                  {/* Running Time = Production Time - Breakdown/Process Failure Duration */}
+                  <td className={TdStyle.TdStyle4}>NPT</td>
                   <td
                     style={{
                       border: "1px solid black",
@@ -1005,7 +992,7 @@ const RectangleContainerProcessing = ({
                       color: "black",
                     }}
                   >
-                    {productionDisplay}
+                    {totalnetDisplay}
                   </td>
                   <td className={TdStyle.TdStyle8}>Process Waiting</td>
                   {/* Buat tabel baru? */}
@@ -1018,29 +1005,8 @@ const RectangleContainerProcessing = ({
                   >
                     {durationSums.ProcessWaiting.toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {isNaN(percentProcessWaiting)
-                      ? "0.00"
-                      : percentProcessWaiting}
-                  </td>
                 </tr>
                 <tr>
-                  <td className={TdStyle.TdStyleGr}>Running Time</td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {runningDisplay}
-                  </td>
                   <td className={TdStyle.TdStyle9}>Not Reported</td>
                   {/* Not Reported = 60 - (Production Time + Total Process Waiting + Planned Stop + Unavailable Time) */}
                   <td
@@ -1051,28 +1017,6 @@ const RectangleContainerProcessing = ({
                     }}
                   >
                     {nReportedDisplay}
-                  </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    0.0
-                  </td>
-                </tr>
-                <tr>
-                  <td className={TdStyle.TdStyleG}>Unavailable Time</td>
-                  {/* Unavailable time isi dari form atau retrieve dari db */}
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {unavailableTimeInMinutes.toFixed(2)}
                   </td>
                   <td
                     className={TdStyle.TdStyle10}
@@ -1089,15 +1033,6 @@ const RectangleContainerProcessing = ({
                   >
                     {parseFloat(qualityLoss).toFixed(2)}
                   </td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {percentQualLoss || percentQualLoss.toFixed(2)}
-                  </td>
                 </tr>
                 {qualityLossModal && (
                   <QualityLossProcessing
@@ -1105,19 +1040,7 @@ const RectangleContainerProcessing = ({
                   />
                 )}
                 <tr>
-                  <td className={TdStyle.TdStyle4}>NPT</td>
-                  <td
-                    style={{
-                      border: "1px solid black",
-                      padding: "8px",
-                      color: "black",
-                    }}
-                  >
-                    {totalnetDisplay}
-                  </td>
-                  <td className={TdStyle.TdStyle11}>
-                    Estimated Unplanned Stoppage
-                  </td>
+                  <td className={TdStyle.TdStyle11}>Unplanned Stoppage</td>
                   <td
                     style={{
                       border: "1px solid black",
@@ -1127,15 +1050,14 @@ const RectangleContainerProcessing = ({
                   >
                     {estimated}
                   </td>
+                  <td className={TdStyle.TdStyle11}></td>
                   <td
                     style={{
                       border: "1px solid black",
                       padding: "8px",
                       color: "black",
                     }}
-                  >
-                    {isNaN(percentEUPS) ? "0.00" : percentEUPS}
-                  </td>
+                  ></td>
                 </tr>
               </tbody>
             </table>
@@ -1147,13 +1069,7 @@ const RectangleContainerProcessing = ({
         Current Shift KPI
       </h1>
       <br></br>
-      <div className="grid grid-cols-5 gap-4">
-        <div className="mb-2">
-          <h1 className="text-black text-4xl text-center font-bold">
-            {plannedStop || 0.0}%
-          </h1>
-          <p className="text-gray-500 text-center">Planned stops</p>
-        </div>
+      <div className="grid grid-cols-4 gap-4">
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
             {percentBreakdown || percentBreakdown.toFixed(2)}%
@@ -1189,7 +1105,13 @@ const RectangleContainerProcessing = ({
           <p className="text-gray-500 text-center">Speed Loss</p>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
+        <div className="mb-2">
+          <h1 className="text-black text-4xl text-center font-bold">
+            {plannedStop || 0.0}%
+          </h1>
+          <p className="text-gray-500 text-center">Planned stops</p>
+        </div>
         <div className="mb-2">
           <h1 className="text-black text-4xl text-center font-bold">
             {isNaN(percentEUPS) ? "0.00" : percentEUPS}%
