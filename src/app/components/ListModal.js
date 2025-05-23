@@ -1,11 +1,10 @@
-import React from "react";
 import { useRouter } from "next/navigation";
 
 const ListModal = (props) => {
   const router = useRouter();
 
   const handleSelectLine = (lineData) => {
-    router.push(`../order/${lineData.plant}/?value=${lineData.line}`);
+    router.push(`../order/po?value=${lineData.line}`);
   };
 
   const handleClick = () => {
@@ -20,7 +19,7 @@ const ListModal = (props) => {
               className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-2xl"
               style={{ backgroundColor: "#A3D9A5" }}
             >
-              <h3 className="text-black font-semibold text-gray-700">
+              <h3 className="text-black font-semibold">
                 List of Plants & Lines
               </h3>
               <button
