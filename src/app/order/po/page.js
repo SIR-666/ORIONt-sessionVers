@@ -31,10 +31,10 @@ function DataFetcher({ value, shift, date, plant }) {
     if (value && plant) {
       fetchData();
     }
-  }, [value, plant]);
+  }, [value, plant, shift, date]);
 
   if (loading) {
-    return <LoadingSpinner />; // Tampilkan animasi loading
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -53,16 +53,34 @@ export default function APICall() {
 }
 
 function SearchParamsWrapper() {
-  const value = sessionStorage.getItem("line");
-  const shift = sessionStorage.getItem("shift");
-  const date = sessionStorage.getItem("date");
-  const plant = sessionStorage.getItem("plant");
   const router = useRouter();
+  const [ready, setReady] = useState(false);
+  const [value, setValue] = useState(null);
+  const [shift, setShift] = useState(null);
+  const [date, setDate] = useState(null);
+  const [plant, setPlant] = useState(null);
 
-  if (!value || !shift || !date || !plant) {
-    // Redirect to the login page if any of the required parameters are missing
-    router.push("/login");
-    return; // Render nothing while redirecting
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const val = sessionStorage.getItem("line");
+      const shf = sessionStorage.getItem("shift");
+      const dt = sessionStorage.getItem("date");
+      const plt = sessionStorage.getItem("plant");
+
+      if (!val || !shf || !dt || !plt) {
+        router.push("/login");
+      } else {
+        setValue(val);
+        setShift(shf);
+        setDate(dt);
+        setPlant(plt);
+        setReady(true);
+      }
+    }
+  }, []);
+
+  if (!ready) {
+    return <LoadingSpinner />;
   }
 
   return (
