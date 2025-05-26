@@ -111,20 +111,26 @@ const QualityLoss = ({ onClose }) => {
           if (element.actual_end) {
             end.setHours(end.getHours() - 7);
           }
-
+          const storedLine = sessionStorage.getItem("line");
+          const storedPlant = sessionStorage.getItem("plant");  
           startTime =
             start < getShiftTimes.startTime ? getShiftTimes.startTime : start;
           endTime = end < getShiftTimes.endTime ? end : getShiftTimes.endTime;
+          console.log("startTime :",toLocalISO(startTime));
+          console.log("endTime : ", toLocalISO(endTime));
+          console.log("line : ", storedLine);
+          console.log("plant : ", storedPlant);
+
           const res = await fetch("/api/getRejectSample", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              line: value,
+              line: storedLine,
               date_start: toLocalISO(startTime),
               date_end: toLocalISO(endTime) || getLocalISOString(),
-              plant: plant,
+              plant: storedPlant,
             }),
           });
           if (!res.ok) {
