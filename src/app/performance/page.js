@@ -13,6 +13,7 @@ const ReportPerformance = () => {
   const [loading, setLoading] = useState(false);
   const [plant, setPlant] = useState("");
   const [line, setLine] = useState(null);
+  const [columnFilters, setColumnFilters] = useState({});
 
   const displayedColumns = [
     { key: "Tanggal2", label: "Tanggal" },
@@ -110,6 +111,27 @@ const ReportPerformance = () => {
       fetchData();
     }
   }, [plant, line]);
+
+  const handleColumnFilterChange = (columnKey, value) => {
+    setColumnFilters((prev) => ({
+      ...prev,
+      [columnKey]: value,
+    }));
+  };
+
+  useEffect(() => {
+    let filtered = tableData;
+
+    Object.entries(columnFilters).forEach(([key, value]) => {
+      if (value) {
+        filtered = filtered.filter((row) =>
+          row[key]?.toString().toLowerCase().includes(value.toLowerCase())
+        );
+      }
+    });
+
+    setFilteredData(filtered);
+  }, [columnFilters, tableData]);
 
   useEffect(() => {
     if (filterField && filterValue) {
@@ -280,21 +302,38 @@ const ReportPerformance = () => {
             <table className="w-full text-sm text-left text-gray-500">
               <thead className="py-3 text-xs text-gray-700 uppercase bg-blue-300 sticky top-0 z-20">
                 <tr>
-                  <th>Date</th>
-                  <th>Shift</th>
-                  <th>Group</th>
-                  <th>Line</th>
-                  <th>AT</th>
-                  <th>PT</th>
-                  <th>RT</th>
-                  <th>OT</th>
-                  <th>NPT</th>
-                  <th>Loss Speed</th>
-                  <th>Quality Loss</th>
-                  <th>Waiting</th>
-                  <th>Breakdown</th>
-                  <th>EUPS</th>
-                  <th>OEE</th>
+                  {[
+                    { key: "Tanggal2", label: "Date" },
+                    { key: "FirstShift", label: "Shift" },
+                    { key: "GroupShift", label: "Group" },
+                    { key: "LINE", label: "Line" },
+                    { key: "AvailableTime", label: "AT" },
+                    { key: "ProductionTime", label: "PT" },
+                    { key: "RT", label: "RT" },
+                    { key: "OT", label: "OT" },
+                    { key: "NPT", label: "NPT" },
+                    { key: "LossSpeed", label: "Loss Speed" },
+                    { key: "QualityLosses", label: "Quality Loss" },
+                    { key: "TotalDowntimeExt", label: "Waiting" },
+                    { key: "TotalDowntimeInt", label: "Breakdown" },
+                    { key: "PE", label: "EUPS" },
+                    { key: "OE", label: "OEE" },
+                  ].map((col) => (
+                    <th key={col.key} className="align-top">
+                      <div className="flex flex-col w-full">
+                        <span>{col.label}</span>
+                        <input
+                          type="text"
+                          placeholder="Filter"
+                          className="text-xs p-1 rounded bg-white border border-gray-300 w-full"
+                          value={columnFilters[col.key] || ""}
+                          onChange={(e) =>
+                            handleColumnFilterChange(col.key, e.target.value)
+                          }
+                        />
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
