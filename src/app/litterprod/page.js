@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import MainLayout from "../mainLayout";
+import DateRangePicker from "../components/DatePickRange";
 
-const ReportPerformance = () => {
+const ReportLitterProd = () => {
   const [tableData, setTableData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
 
@@ -13,24 +14,16 @@ const ReportPerformance = () => {
   const [loading, setLoading] = useState(false);
   const [plant, setPlant] = useState("");
   const [line, setLine] = useState(null);
-  const [columnFilters, setColumnFilters] = useState({});
+  const [dateRange, setDateRange] = useState({
+    startDate: null,
+    endDate: null,
+  });
 
   const displayedColumns = [
-    { key: "Tanggal2", label: "Tanggal" },
-    { key: "FirstShift", label: "Shift" },
-    { key: "GroupShift", label: "Group" },
-    { key: "LINE", label: "Line" },
-    { key: "AvailableTime", label: "Available" },
-    { key: "ProductionTime", label: "Production" },
-    { key: "RT", label: "Running" },
-    { key: "OT", label: "Operational" },
-    { key: "NPT", label: "Net Production" },
-    { key: "LossSpeed", label: "Loss Speed" },
-    { key: "QualityLosses", label: "Quality Loss" },
-    { key: "TotalDowntimeInt", label: "Downtime Int" },
-    { key: "TotalDowntimeExt", label: "Downtime Eks" },
-    { key: "PE", label: "PE" },
-    { key: "OE", label: "OE" },
+    { key: "TanggalProduksi", label: "TanggalProduksi" },
+    { key: "Shift", label: "Shift" },
+    { key: "Line", label: "Line" },
+    { key: "SKU_Name", label: "SKU" },
   ];
 
   const columnLabels = {
@@ -79,17 +72,13 @@ const ReportPerformance = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://10.24.0.81:3001/getAllPerformance?plant=${plant}&line=${line}`
+        `http://10.24.0.81:3001/getFinishGoodLiter?plant=${plant}&line=${line}`
       );
       const newData = await response.json();
       console.log("data :", newData);
-      const normalizedData = newData.map((item) => ({
-        ...item,
-        Shift: item.FirstShift,
-        Tanggal: item.Tanggal2,
-      }));
-      setTableData(normalizedData);
-      setFilteredData(normalizedData);
+
+      setTableData(newData);
+      setFilteredData(newData);
     } catch (error) {
       console.error("Error fetching performance data:", error);
       setTableData([]);
@@ -112,54 +101,51 @@ const ReportPerformance = () => {
     }
   }, [plant, line]);
 
-  const handleColumnFilterChange = (columnKey, value) => {
-    setColumnFilters((prev) => ({
-      ...prev,
-      [columnKey]: value,
-    }));
-  };
-
   useEffect(() => {
-    let filtered = tableData;
-
-    Object.entries(columnFilters).forEach(([key, value]) => {
-      if (value) {
-        filtered = filtered.filter((row) =>
-          row[key]?.toString().toLowerCase().includes(value.toLowerCase())
-        );
-      }
-    });
-
-    setFilteredData(filtered);
-  }, [columnFilters, tableData]);
-
-  useEffect(() => {
+    let result = [...tableData];
+    console.log("dateRange changed:", dateRange);
+    // Filter berdasarkan pencarian
     if (filterField && filterValue) {
       if (filterField === "All") {
-        setFilteredData(
-          tableData.filter((row) =>
-            Object.values(row).some(
-              (value) =>
-                value &&
-                value
-                  .toString()
-                  .toLowerCase()
-                  .includes(filterValue.toLowerCase())
-            )
+        result = result.filter((row) =>
+          Object.values(row).some(
+            (value) =>
+              value &&
+              value.toString().toLowerCase().includes(filterValue.toLowerCase())
           )
         );
       } else {
-        setFilteredData(
-          tableData.filter((row) => {
-            const value = row[filterField]?.toString()?.toLowerCase();
-            return value && value.includes(filterValue.toLowerCase());
-          })
-        );
+        result = result.filter((row) => {
+          const value = row[filterField]?.toString()?.toLowerCase();
+          return value && value.includes(filterValue.toLowerCase());
+        });
       }
-    } else {
-      setFilteredData(tableData);
     }
-  }, [filterField, filterValue, tableData]);
+
+    // Filter berdasarkan range tanggal
+    if (dateRange.startDate && dateRange.endDate) {
+      const start = new Date(dateRange.startDate);
+      const end = new Date(dateRange.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+
+      result = result.filter((row) => {
+        if (!row.TanggalProduksi) return false;
+        const parsedDate = new Date(row.TanggalProduksi.replace(" ", "T"));
+        if (isNaN(parsedDate)) return false;
+        return parsedDate >= start && parsedDate <= end;
+      });
+    }
+    console.log("Filtered Result:", result);
+    setFilteredData(result);
+  }, [
+    filterField,
+    filterValue,
+    dateRange,
+    tableData,
+    dateRange.startDate,
+    dateRange.endDate,
+  ]);
 
   const handleLine = (id) => {
     const lineInitial = id.charAt(0).toUpperCase();
@@ -223,14 +209,38 @@ const ReportPerformance = () => {
     XLSX.writeFile(workbook, "performance_export.xlsx");
   };
 
+  const totalLiter = filteredData.reduce((sum, row) => {
+    const val = parseFloat(row.FinishGoodLiter || row.Hasil_Prod_aft_loss || 0);
+    return sum + (isNaN(val) ? 0 : val);
+  }, 0);
+
+  const totalPacks = filteredData.reduce((sum, row) => {
+    const val = parseFloat(row.FinishGoodPcs || 0);
+    return sum + (isNaN(val) ? 0 : val);
+  }, 0);
+
   return (
     <>
       <MainLayout>
         <main className="flex-1 p-8 bg-white"></main>
         <h1 className="text-black text-2xl text-center font-bold">
-          Performance Report
+          Finish Good Report
         </h1>
         <br></br>
+        <div
+          style={{ display: "flex", alignItems: "center", margin: "10px 0" }}
+        >
+          <DateRangePicker
+            onChange={(range) => {
+              console.log("Tanggal berubah:", range);
+              setDateRange({
+                startDate: new Date(range.startDate),
+                endDate: new Date(range.endDate),
+              });
+            }}
+          />
+        </div>
+
         <div
           style={{ display: "flex", alignItems: "center", margin: "10px 0" }}
         >
@@ -287,13 +297,28 @@ const ReportPerformance = () => {
               placeholder="Search something..."
             />
           </div>
-          <button
+
+          <div className="px-3 font-bold text-black">
+            <td colSpan="3" className="text-right pr-4">
+              Total Packs (Pcs) :
+            </td>
+            <td>{totalPacks}</td>
+          </div>
+
+          <div className="px-3 font-bold text-black">
+            <td colSpan="3" className="text-right pr-4">
+              Total (Liter) :
+            </td>
+            <td>{totalLiter.toFixed(2)}</td>
+          </div>
+          {/* <button
             className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 border border-blue-800 rounded ml-10"
             onClick={handleExport}
           >
             Export to Excel
-          </button>
+          </button> */}
         </div>
+
         <div className="relative w-full h-128 rounded-xl bg-white shadow-xl">
           <div
             className="relative w-full overflow-y-auto flex flex-col h-full px-5"
@@ -302,38 +327,12 @@ const ReportPerformance = () => {
             <table className="w-full text-sm text-left text-gray-500">
               <thead className="py-3 text-xs text-gray-700 uppercase bg-blue-300 sticky top-0 z-20">
                 <tr>
-                  {[
-                    { key: "Tanggal2", label: "Date" },
-                    { key: "FirstShift", label: "Shift" },
-                    { key: "GroupShift", label: "Group" },
-                    { key: "LINE", label: "Line" },
-                    { key: "AvailableTime", label: "AT" },
-                    { key: "ProductionTime", label: "PT" },
-                    { key: "RT", label: "RT" },
-                    { key: "OT", label: "OT" },
-                    { key: "NPT", label: "NPT" },
-                    { key: "LossSpeed", label: "Loss Speed" },
-                    { key: "QualityLosses", label: "Quality Loss" },
-                    { key: "TotalDowntimeExt", label: "Waiting" },
-                    { key: "TotalDowntimeInt", label: "Breakdown" },
-                    { key: "PE", label: "EUPS" },
-                    { key: "OE", label: "OEE" },
-                  ].map((col) => (
-                    <th key={col.key} className="align-top">
-                      <div className="flex flex-col w-full">
-                        <span>{col.label}</span>
-                        <input
-                          type="text"
-                          placeholder="Filter"
-                          className="text-xs p-1 rounded bg-white border border-gray-300 w-full"
-                          value={columnFilters[col.key] || ""}
-                          onChange={(e) =>
-                            handleColumnFilterChange(col.key, e.target.value)
-                          }
-                        />
-                      </div>
-                    </th>
-                  ))}
+                  <th>Date</th>
+                  <th>Line</th>
+                  <th>Shift</th>
+                  <th>SKU</th>
+                  <th>Finish Good (Packs)</th>
+                  <th>Finish Good (Liter)</th>
                 </tr>
               </thead>
               <tbody>
@@ -344,58 +343,24 @@ const ReportPerformance = () => {
                 ) : filteredData.length > 0 ? (
                   filteredData.map((row) => (
                     <tr className="bg-white border-b" key={row.ID}>
-                      <td>{row.Tanggal2}</td>
-                      <td>{row.FirstShift?.replace("Shift ", "")}</td>
-                      <td>{row.GroupShift}</td>
-                      <td>{row.LINE}</td>
+                      <td>{row.TanggalProduksi}</td>
+                      <td>{row.Line}</td>
+                      <td>{row.Shift}</td>
+                      <td>{row.SKU_Name}</td>
                       <td>
-                        {row.AvailableTime
-                          ? parseFloat(row.AvailableTime).toFixed(2)
+                        {row.FinishGoodPcs || row.Hasil_Prod_aft_loss
+                          ? parseInt(
+                              row.FinishGoodPcs || row.Hasil_Prod_aft_loss
+                            )
                           : "0"}
                       </td>
                       <td>
-                        {row.ProductionTime
-                          ? parseFloat(row.ProductionTime).toFixed(2)
-                          : "0"}
-                      </td>
-                      <td>{row.RT ? parseFloat(row.RT).toFixed(2) : "0"}</td>
-                      <td>{row.OT ? parseFloat(row.OT).toFixed(2) : "0"}</td>
-                      <td>{row.NPT ? parseFloat(row.NPT).toFixed(2) : "0"}</td>
-                      <td>
-                        {row.LossSpeed
-                          ? parseFloat(row.LossSpeed).toFixed(2)
-                          : "0"}
-                      </td>
-                      <td>
-                        {row.QualityLosses
-                          ? parseFloat(row.QualityLosses).toFixed(2)
-                          : "0"}
-                      </td>
-                      <td>
-                        {row.TotalDowntimeExt
-                          ? parseFloat(row.TotalDowntimeExt).toFixed(2)
-                          : "0"}
-                      </td>
-                      <td>
-                        {row.TotalDowntimeInt
-                          ? parseFloat(row.TotalDowntimeInt).toFixed(2)
-                          : "0"}
-                      </td>
-                      <td>
-                        {row.AvailableTime &&
-                        parseFloat(row.AvailableTime) !== 0
-                          ? (
-                              ((parseFloat(row.LossSpeed || 0) +
-                                parseFloat(row.QualityLosses || 0) +
-                                parseFloat(row.TotalDowntimeInt || 0) +
-                                parseFloat(row.TotalDowntimeExt || 0)) /
-                                parseFloat(row.AvailableTime)) *
-                              100
+                        {row.FinishGoodLiter || row.Hasil_Prod_aft_loss
+                          ? parseFloat(
+                              row.FinishGoodLiter || row.Hasil_Prod_aft_loss
                             ).toFixed(2)
                           : "0.00"}
                       </td>
-
-                      <td>{row.OE ? parseFloat(row.OE).toFixed(2) : "0"}</td>
                     </tr>
                   ))
                 ) : (
@@ -412,4 +377,4 @@ const ReportPerformance = () => {
   );
 };
 
-export default ReportPerformance;
+export default ReportLitterProd;

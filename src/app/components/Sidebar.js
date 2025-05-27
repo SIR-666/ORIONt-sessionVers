@@ -132,6 +132,12 @@ function SidebarContent({ isOpen }) {
       show: true,
     },
     {
+      label: "Finish Good Report",
+      href: "../litterprod",
+      basePath: "/finishgoodReport",
+      show: true,
+    },
+    {
       label: "Master Downtime",
       href: "../../masterDowntime",
       basePath: "/masterDowntime",
@@ -156,6 +162,8 @@ function SidebarContent({ isOpen }) {
       case "Downtime Report":
         return <Table2Icon className="size-4 mr-4" />;
       case "Performance Report":
+        return <Table2Icon className="size-4 mr-4" />;
+      case "Finish Good Report":
         return <Table2Icon className="size-4 mr-4" />;
       case "Master Downtime":
         return <DatabaseIcon className="size-4 mr-4" />;
