@@ -97,11 +97,12 @@ export default function LoginPage() {
       if (res.ok) {
         const responseData = await res.json();
         sessionStorage.setItem("user", responseData.user.email);
+        sessionStorage.setItem("role", responseData.user.role.name);
         const userData = {
           email: responseData.user.email,
-          password: "null",
           username: responseData.user.username,
           profile: "user",
+          role: responseData.user.role.name,
         };
         sessionStorage.setItem("profile", JSON.stringify(userData));
         document.cookie = `profile=${userData}; path=/`;

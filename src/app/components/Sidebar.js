@@ -1,3 +1,4 @@
+import { canEditData } from "@/utils/canEditData";
 import {
   BookTextIcon,
   CircleGaugeIcon,
@@ -31,6 +32,7 @@ function SidebarContent({ isOpen }) {
   const plant = sessionStorage.getItem("plant");
   const po = sessionStorage.getItem("selectedMaterial");
   const storedId = sessionStorage.getItem("id");
+  const role = sessionStorage.getItem("role");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -79,7 +81,7 @@ function SidebarContent({ isOpen }) {
       label: "Manage Downtime",
       href: `../../stoppage?value=${lineValue}`,
       basePath: "/stoppage",
-      show: true,
+      show: canEditData(date, role),
     },
     {
       label: "Insert Finished Goods",
@@ -91,7 +93,7 @@ function SidebarContent({ isOpen }) {
         }
       },
       basePath: "/main",
-      show: true,
+      show: canEditData(date, role),
     },
     {
       label: "Insert Quality Loss",
@@ -103,7 +105,7 @@ function SidebarContent({ isOpen }) {
         }
       },
       basePath: "/main",
-      show: true,
+      show: canEditData(date, role),
     },
     {
       label: "Insert Speed Loss",
@@ -115,7 +117,7 @@ function SidebarContent({ isOpen }) {
         }
       },
       basePath: "/main",
-      show: true,
+      show: canEditData(date, role),
     },
     {
       label: "Downtime Report",
@@ -133,7 +135,7 @@ function SidebarContent({ isOpen }) {
       label: "Master Downtime",
       href: "../../masterDowntime",
       basePath: "/masterDowntime",
-      show: true,
+      show: role === "Prf",
     },
   ];
 

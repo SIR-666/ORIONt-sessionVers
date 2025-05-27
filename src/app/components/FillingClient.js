@@ -1,6 +1,7 @@
 "use client";
 
 import MainLayout from "@/app/mainLayout";
+import { canEditData } from "@/utils/canEditData";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "../styles";
@@ -21,6 +22,7 @@ export default function OrderPage({ initialData }) {
   const value = searchParams.get("value");
   const shift = searchParams.get("shift");
   const date = searchParams.get("date");
+  const role = searchParams.get("role");
   const [search, setSearch] = useState("");
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
@@ -498,33 +500,6 @@ export default function OrderPage({ initialData }) {
                           </div>
                         ) : row.status === "Completed" ? (
                           <div>
-                            {/* <button
-                              className={`
-                                flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium
-                                text-[#6BBF74] bg-white border border-[#6BBF74] shadow-sm
-                                transition-all duration-200 focus:outline-none 
-                                hover:bg-[#6BBF74] hover:text-white hover:border-[#58A663]
-                                focus:ring-2 focus:ring-[#58A663] 
-                                active:bg-[#4F9A5F] active:border-[#4F9A5F]
-                            `}
-                              onClick={() => openStartModal(row.id, row.status)}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                className="size-6 mr-2"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-                                />
-                              </svg>
-                              Extend
-                            </button> */}
                             <button
                               className={`
                                 flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium
@@ -535,6 +510,7 @@ export default function OrderPage({ initialData }) {
                                 active:bg-[#4F9A5F] active:border-[#4F9A5F]
                             `}
                               onClick={() => editPO(row.id, row.status)}
+                              disabled={!canEditData(date, role)}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"

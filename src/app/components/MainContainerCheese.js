@@ -1,4 +1,5 @@
 import nominalSpeeds from "@/app/speed";
+import { canEditData } from "@/utils/canEditData";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import url from "../url";
@@ -706,6 +707,7 @@ const RectangleContainerCheese = ({
     totalGapTime = 0;
   const shift = sessionStorage.getItem("shift");
   const date = sessionStorage.getItem("date");
+  const role = sessionStorage.getItem("role");
   const shiftData = getShift(shift, date) || {};
   const { startTime: shiftStart = null, endTime: shiftEnd = null } = shiftData;
   const { unavailableTime, unavailableTimeInMinutes } =
@@ -848,7 +850,7 @@ const RectangleContainerCheese = ({
                 </li>
                 <li
                   className="mt-2 text-black cursor-pointer bg-green-500"
-                  onClick={() => setQtyModal(true)}
+                  onClick={() => setQtyModal(canEditData(date, role))}
                 >
                   Finish Good: {qtyPO[index] || 0} pcs
                 </li>
@@ -970,7 +972,7 @@ const RectangleContainerCheese = ({
                   </td>
                   <td
                     className={TdStyle.TdStyle7}
-                    onClick={() => setSpeedLossModal(true)}
+                    onClick={() => setSpeedLossModal(canEditData(date, role))}
                   >
                     Speed Loss
                   </td>
@@ -1024,7 +1026,7 @@ const RectangleContainerCheese = ({
                   </td>
                   <td
                     className={TdStyle.TdStyle10}
-                    onClick={() => setQualityLossModal(true)}
+                    onClick={() => setQualityLossModal(canEditData(date, role))}
                   >
                     Quality Loss
                   </td>

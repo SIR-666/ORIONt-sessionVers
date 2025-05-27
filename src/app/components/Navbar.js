@@ -1,11 +1,12 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "../../app/favicon.png"; // Path ke logo
 import LogoGreenfields from "../../app/logo-greenfield-black.png";
 
 export default function Navbar({ toggleSidebar, transparent }) {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
+  const [profile, setProfile] = useState({});
 
   const router = useRouter();
 
@@ -20,6 +21,14 @@ export default function Navbar({ toggleSidebar, transparent }) {
     // Redirect to login page
     router.push("/login");
   };
+
+  useEffect(() => {
+    // Get profile data from sessionStorage
+    const profileData = sessionStorage.getItem("profile");
+    if (profileData) {
+      setProfile(JSON.parse(profileData));
+    }
+  }, []);
 
   return (
     <>
@@ -78,6 +87,9 @@ export default function Navbar({ toggleSidebar, transparent }) {
               RIONt
             </span>
           </div>
+          <p className="ml-4 text-lg text-black font-medium">
+            Hai {profile.username}, Enjoy your work!
+          </p>
           <div
             className={
               "lg:flex flex-grow items-center bg-white lg:bg-transparent lg:shadow-none" +
