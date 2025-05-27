@@ -20,21 +20,10 @@ const ReportLitterProd = () => {
   });
 
   const displayedColumns = [
-    { key: "Tanggal2", label: "Tanggal" },
-    { key: "FirstShift", label: "Shift" },
-    { key: "GroupShift", label: "Group" },
-    { key: "LINE", label: "Line" },
-    { key: "AvailableTime", label: "Available" },
-    { key: "ProductionTime", label: "Production" },
-    { key: "RT", label: "Running" },
-    { key: "OT", label: "Operational" },
-    { key: "NPT", label: "Net Production" },
-    { key: "LossSpeed", label: "Loss Speed" },
-    { key: "QualityLosses", label: "Quality Loss" },
-    { key: "TotalDowntimeInt", label: "Downtime Int" },
-    { key: "TotalDowntimeExt", label: "Downtime Eks" },
-    { key: "PE", label: "PE" },
-    { key: "OE", label: "OE" },
+    { key: "TanggalProduksi", label: "TanggalProduksi" },
+    { key: "Shift", label: "Shift" },
+    { key: "Line", label: "Line" },
+    { key: "SKU_Name", label: "SKU" },
   ];
 
   const columnLabels = {
