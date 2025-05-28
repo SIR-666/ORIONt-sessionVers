@@ -211,6 +211,10 @@ const Modal = (props) => {
     const route = `../order/po?${encodedParams}`;
 
     // Simpan data
+    sessionStorage.removeItem("id");
+    sessionStorage.removeItem("selectedMaterial");
+    sessionStorage.removeItem("materialData");
+
     sessionStorage.setItem("plant", selectedPlant);
     sessionStorage.setItem("line", selectedLine);
     sessionStorage.setItem("shift", selectedShift);
