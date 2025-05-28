@@ -22,7 +22,7 @@ export default function OrderPage({ initialData }) {
   const value = searchParams.get("value");
   const shift = searchParams.get("shift");
   const date = searchParams.get("date");
-  const role = searchParams.get("role");
+  const role = sessionStorage.getItem("role");
   const [search, setSearch] = useState("");
   const [showStart, setShowStart] = useState(false);
   const [showEnd, setShowEnd] = useState(false);

@@ -13,7 +13,9 @@ const QualityLoss = ({ onClose }) => {
   const [sku, setSKU] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const params = useSearchParams();
-  const id = params.get("id");
+  const selectedMaterialStr = sessionStorage.getItem("selectedMaterial");
+  const selectedMaterial = JSON.parse(selectedMaterialStr);
+  const id = selectedMaterial?.[0]?.id;
   const value = params.get("value");
   const shift = sessionStorage.getItem("shift");
   const date = sessionStorage.getItem("date");
@@ -112,11 +114,11 @@ const QualityLoss = ({ onClose }) => {
             end.setHours(end.getHours() - 7);
           }
           const storedLine = sessionStorage.getItem("line");
-          const storedPlant = sessionStorage.getItem("plant");  
+          const storedPlant = sessionStorage.getItem("plant");
           startTime =
             start < getShiftTimes.startTime ? getShiftTimes.startTime : start;
           endTime = end < getShiftTimes.endTime ? end : getShiftTimes.endTime;
-          console.log("startTime :",toLocalISO(startTime));
+          console.log("startTime :", toLocalISO(startTime));
           console.log("endTime : ", toLocalISO(endTime));
           console.log("line : ", storedLine);
           console.log("plant : ", storedPlant);

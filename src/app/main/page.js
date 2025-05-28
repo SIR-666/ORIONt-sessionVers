@@ -19,7 +19,9 @@ function MainPage() {
   const [time, setTime] = useState(new Date());
   const searchParams = useSearchParams();
   const value = searchParams.get("value");
-  const id = searchParams.get("id");
+  const selectedMaterialStr = sessionStorage.getItem("selectedMaterial");
+  const selectedMaterial = JSON.parse(selectedMaterialStr);
+  const id = selectedMaterial?.[0]?.id;
   const [data, setData] = useState(null);
   const [PO, setPO] = useState([]);
   const [shift, setShift] = useState("");

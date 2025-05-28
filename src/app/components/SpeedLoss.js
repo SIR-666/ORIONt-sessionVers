@@ -18,7 +18,9 @@ const Speed = ({ onClose }) => {
   const [deletingItems, setDeletingItems] = useState({});
   const params = useSearchParams();
   const value = params.get("value");
-  const id = params.get("id");
+  const selectedMaterialStr = sessionStorage.getItem("selectedMaterial");
+  const selectedMaterial = JSON.parse(selectedMaterialStr);
+  const id = selectedMaterial?.[0]?.id;
   const shift = sessionStorage.getItem("shift");
   const date = sessionStorage.getItem("date");
   const plant = sessionStorage.getItem("plant");
