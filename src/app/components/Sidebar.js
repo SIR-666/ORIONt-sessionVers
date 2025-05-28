@@ -30,7 +30,7 @@ function SidebarContent({ isOpen }) {
   const shift = sessionStorage.getItem("shift");
   const date = sessionStorage.getItem("date");
   const plant = sessionStorage.getItem("plant");
-  const po = sessionStorage.getItem("selectedMaterial");
+  const po = sessionStorage.getItem("materialData");
   const storedId = sessionStorage.getItem("id");
   const role = sessionStorage.getItem("role");
 

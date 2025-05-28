@@ -14,7 +14,7 @@ const QualLossPasteurizer = ({ onClose }) => {
   const [sku, setSKU] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const params = useSearchParams();
-  const selectedMaterialStr = sessionStorage.getItem("selectedMaterial");
+  const selectedMaterialStr = sessionStorage.getItem("materialData");
   const selectedMaterial = JSON.parse(selectedMaterialStr);
   const id = selectedMaterial?.[0]?.id;
   const value = params.get("value");
