@@ -80,6 +80,7 @@ export default function OrderPage({ initialData }) {
     console.log("Item data: ", item);
     if (item) {
       sessionStorage.setItem("selectedMaterial", JSON.stringify([item]));
+      sessionStorage.setItem("materialData", JSON.stringify([item]));
       console.log("value: ", value);
       console.log("id: ", id);
       console.log("group: ", item.group);
