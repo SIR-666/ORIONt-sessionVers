@@ -842,11 +842,7 @@ const RectangleContainerCheese = ({
                 <li className="mt-2 text-black">Status: {entry.status}</li>
                 <li className="mt-2 text-black">Material: {entry.sku}</li>
                 <li className="mt-2 text-black">
-                  Total Planned:{" "}
-                  {new Intl.NumberFormat("id-ID").format(
-                    (entry.qty || 0) / 1000
-                  )}{" "}
-                  carton
+                  Total Planned: {entry.qty} pcs
                 </li>
                 <li
                   className="mt-2 text-black cursor-pointer bg-green-500"
