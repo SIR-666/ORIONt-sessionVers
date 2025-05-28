@@ -18,6 +18,7 @@ const ReportLitterProd = () => {
     startDate: null,
     endDate: null,
   });
+  const [columnFilters, setColumnFilters] = useState({});
 
   const displayedColumns = [
     { key: "TanggalProduksi", label: "TanggalProduksi" },
@@ -219,6 +220,27 @@ const ReportLitterProd = () => {
     return sum + (isNaN(val) ? 0 : val);
   }, 0);
 
+  const handleColumnFilterChange = (columnKey, value) => {
+    setColumnFilters((prev) => ({
+      ...prev,
+      [columnKey]: value,
+    }));
+  };
+
+  useEffect(() => {
+    let filtered = tableData;
+
+    Object.entries(columnFilters).forEach(([key, value]) => {
+      if (value) {
+        filtered = filtered.filter((row) =>
+          row[key]?.toString().toLowerCase().includes(value.toLowerCase())
+        );
+      }
+    });
+
+    setFilteredData(filtered);
+  }, [columnFilters, tableData]);
+
   return (
     <>
       <MainLayout>
@@ -325,7 +347,7 @@ const ReportLitterProd = () => {
             style={{ maxHeight: "350px", overflowY: "auto" }}
           >
             <table className="w-full text-sm text-left text-gray-500">
-              <thead className="py-3 text-xs text-gray-700 uppercase bg-blue-300 sticky top-0 z-20">
+              {/* <thead className="py-3 text-xs text-gray-700 uppercase bg-blue-300 sticky top-0 z-20">
                 <tr>
                   <th>Date</th>
                   <th>Line</th>
@@ -333,6 +355,34 @@ const ReportLitterProd = () => {
                   <th>SKU</th>
                   <th>Finish Good (Packs)</th>
                   <th>Finish Good (Liter)</th>
+                </tr>
+              </thead> */}
+
+              <thead className="py-3 text-xs text-gray-700 uppercase bg-blue-300 sticky top-0 z-20">
+                <tr>
+                  {[
+                    { key: "TanggalProduksi", label: "Date" },
+                    { key: "Line", label: "Line" },
+                    { key: "Shift", label: "Shift" },
+                    { key: "SKU_Name", label: "SKU" },
+                    { key: "FinishGoodPcs", label: "Finish Good (Packs)" },
+                    { key: "FinishGoodLiter", label: "Finish Good (Liter)" },
+                  ].map((col) => (
+                    <th key={col.key} className="align-top">
+                      <div className="flex flex-col w-full">
+                        <span>{col.label}</span>
+                        <input
+                          type="text"
+                          placeholder="Filter"
+                          className="text-xs p-1 rounded bg-white border border-gray-300 w-full"
+                          value={columnFilters[col.key] || ""}
+                          onChange={(e) =>
+                            handleColumnFilterChange(col.key, e.target.value)
+                          }
+                        />
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>

@@ -91,7 +91,7 @@ const QualityLoss = ({ onClose }) => {
         }
 
         const productionData = await productionOrderRes.json();
-        console.log("Retrieved Data: ", productionData);
+        console.log("Retrieved Data loss: ", productionData);
 
         // Sort and set the production order data
         setData(productionData[0]);
@@ -112,11 +112,11 @@ const QualityLoss = ({ onClose }) => {
             end.setHours(end.getHours() - 7);
           }
           const storedLine = sessionStorage.getItem("line");
-          const storedPlant = sessionStorage.getItem("plant");  
+          const storedPlant = sessionStorage.getItem("plant");
           startTime =
             start < getShiftTimes.startTime ? getShiftTimes.startTime : start;
           endTime = end < getShiftTimes.endTime ? end : getShiftTimes.endTime;
-          console.log("startTime :",toLocalISO(startTime));
+          console.log("startTime :", toLocalISO(startTime));
           console.log("endTime : ", toLocalISO(endTime));
           console.log("line : ", storedLine);
           console.log("plant : ", storedPlant);
