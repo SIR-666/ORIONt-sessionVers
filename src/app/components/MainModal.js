@@ -159,33 +159,17 @@ const MainModal = (props) => {
 
   const getItemById = (id) => {
     const item = PO.find((entry) => entry.id === id);
-    console.log("item : ", item);
+    console.log("Item data: ", item);
     if (item) {
-      console.log("id group :", item.group);
-      const existingData =
-        JSON.parse(sessionStorage.getItem("materialData")) || [];
-      if (!existingData.some((entry) => entry.id === item.id)) {
-        const filteredData = existingData.filter(
-          (entry) => entry.id !== item.id
-        );
-        filteredData.push(item);
-        sessionStorage.setItem(
-          "selectedMaterial",
-          JSON.stringify(filteredData)
-        );
-      }
-      sessionStorage.setItem("line", selectedLine);
-      console.log("line :", selectedLine);
-      sessionStorage.setItem("plant", selectedPlant);
-      sessionStorage.setItem("shift", selectedShift);
-      sessionStorage.setItem("date", selectedDate);
-      // sessionStorage.setItem("group", selectedGroup);
+      sessionStorage.setItem("selectedMaterial", JSON.stringify([item]));
+      sessionStorage.setItem("materialData", JSON.stringify([item]));
       sessionStorage.setItem("idgroup", item.group);
       if (selectedPlant === "Milk Processing")
         sessionStorage.setItem("tank", selectedTank);
       if (selectedPlant === "Yogurt" && selectedLine === "PASTEURIZER") {
         sessionStorage.setItem("fermentor", selectedFermentor);
       }
+      sessionStorage.setItem("line", selectedLine);
       router.push(`/main?value=${selectedLine}&id=${id}`);
       props.setShowModal(false);
       setTimeout(() => {
