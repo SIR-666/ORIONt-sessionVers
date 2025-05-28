@@ -222,6 +222,18 @@ const MainModal = (props) => {
   }, [selectedPlant]);
 
   const handleSubmit = async () => {
+    sessionStorage.setItem("plant", selectedPlant);
+    sessionStorage.setItem("line", selectedLine);
+    sessionStorage.setItem("shift", selectedShift);
+    sessionStorage.setItem("date", selectedDate);
+    sessionStorage.setItem("group", selectedGroup);
+    if (selectedPlant === "Milk Processing") {
+      sessionStorage.setItem("tank", selectedTank);
+    }
+    if (selectedPlant === "Yogurt" && selectedLine === "PASTEURIZER") {
+      sessionStorage.setItem("fermentor", selectedFermentor);
+    }
+
     let startTime, endTime;
     switch (selectedShift) {
       case "I":

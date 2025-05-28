@@ -8,7 +8,9 @@ const Quantity = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [group, setGroup] = useState("");
   const params = useSearchParams();
-  const id = params.get("id");
+  const selectedMaterialStr = sessionStorage.getItem("selectedMaterial");
+  const selectedMaterial = JSON.parse(selectedMaterialStr);
+  const id = selectedMaterial?.[0]?.id;
   const value = params.get("value");
   const shift = sessionStorage.getItem("shift");
   const date = sessionStorage.getItem("date");
