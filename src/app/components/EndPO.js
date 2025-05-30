@@ -251,15 +251,15 @@ const End = (props) => {
       const parsedEnd = moment(time).subtract(7, "hours").toDate(); // Convert UTC to WIB
 
       // Untuk shift 3, jika input waktu masih pagi (00:00–05:59), artinya termasuk shift semalam
-      if (shift === "III") {
-        const inputHour = moment.utc(time).hour(); // UTC jam
-        if (inputHour < 6) {
-          shiftDate = moment
-            .utc(startISO)
-            .subtract(1, "day")
-            .format("YYYY-MM-DD");
-        }
-      }
+      // if (shift === "III") {
+      //   const inputHour = moment.utc(time).hour(); // UTC jam
+      //   if (inputHour < 6) {
+      //     shiftDate = moment
+      //       .utc(startISO)
+      //       .subtract(1, "day")
+      //       .format("YYYY-MM-DD");
+      //   }
+      // }
 
       if (!shift || !shiftDate || isNaN(parsedEnd)) {
         alert("Shift atau tanggal tidak valid.");
