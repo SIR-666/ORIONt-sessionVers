@@ -137,7 +137,7 @@ const Start = (props) => {
     try {
       const shift = sessionStorage.getItem("shift");
       const shiftDate = sessionStorage.getItem("date");
-      const parsedStart = moment(time).subtract(7, "hours").toDate();
+      const parsedStart = moment(time).toDate();
 
       if (!shift || !shiftDate || isNaN(parsedStart)) {
         alert("Shift atau tanggal tidak valid.");
