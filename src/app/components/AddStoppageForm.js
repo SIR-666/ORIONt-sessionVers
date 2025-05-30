@@ -13,6 +13,7 @@ const FormFill = (props) => {
     shift: "",
     line: "",
     type: "",
+    cipimpact: "",
   });
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -388,6 +389,15 @@ const FormFill = (props) => {
   //   }
   // };
 
+  const handleCIPCheckboxChange = (e) => {
+    const checked = e.target.checked;
+
+    setNewEntry((prev) => ({
+      ...prev,
+      cipimpact: checked ? Math.max(120) : "", // hindari nilai negatif
+    }));
+  };
+
   const handleDurationChange = (e) => {
     let val = e.target.value;
 
@@ -438,6 +448,23 @@ const FormFill = (props) => {
       alert("Please enter your comments.");
       return;
     }
+    const cipChecked = !!newEntry.cipimpact; // true jika cipimpact dicentang dan ada nilai
+    const adjustedDuration =
+      cipChecked && newEntry.duration >= 120
+        ? newEntry.duration - 120
+        : newEntry.duration;
+
+    // const dataToSend = {
+    //   ...newEntry,
+    //   duration: adjustedDuration, // kirim durasi yang sudah disesuaikan
+    //   startTime,
+    //   endTime,
+    //   id: id || undefined,
+    //   group: sessionStorage.getItem("group") || undefined,
+    //   plant: sessionStorage.getItem("plant") || undefined,
+    // };
+
+    // console.log("entry :", dataToSend);
 
     // ===== VALIDASI SHIFT TIME SESUAI SHIFT =====
     try {
@@ -468,7 +495,7 @@ const FormFill = (props) => {
         );
         return;
       }
-
+      console.log("end time : ", parsedEnd);
       if (parsedEnd < shiftStart || parsedEnd > shiftEnd) {
         const shiftLabel =
           shift === "I"
@@ -497,6 +524,7 @@ const FormFill = (props) => {
 
       const dataToSend = {
         ...newEntry,
+        duration: adjustedDuration, // kirim durasi yang sudah disesuaikan
         startTime,
         endTime,
         id: id || undefined,
@@ -541,6 +569,7 @@ const FormFill = (props) => {
         shift: "",
         line: "",
         type: "",
+        cipimpact: "",
       });
 
       props.setShowForm2(false);
@@ -594,6 +623,9 @@ const FormFill = (props) => {
                 <h2 className="text-black px-3 py-2">End Time: </h2>
                 <br></br>
                 <h2 className="text-black px-3 py-2">Duration (Minute): </h2>
+
+                <br></br>
+                <h2 className="text-black px-3 py-2">Impact: </h2>
                 <br></br>
                 <h2 className="text-black px-3 py-2">Category: </h2>
                 <br></br>
@@ -644,8 +676,21 @@ const FormFill = (props) => {
                   onChange={handleDurationChange}
                   required
                 />
+
+                <div className="flex items-center mt-6">
+                  <input
+                    type="checkbox"
+                    name="CIP"
+                    id="CIP"
+                    checked={!!newEntry.cipimpact} // akan true kalau cipimpact ada nilainya
+                    onChange={handleCIPCheckboxChange}
+                    disabled
+                  />
+                  <label className="mr-4 text-black px-2">CIP6</label>
+                </div>
+
                 {getOptions().map((option) => (
-                  <div className="mt-4" key={option.id}>
+                  <div className="mt-6" key={option.id}>
                     <div className="flex items-center mt-4">
                       <input
                         id={option.id}

@@ -247,8 +247,19 @@ const End = (props) => {
     // ===== VALIDASI SHIFT TIME SESUAI SHIFT =====
     try {
       const shift = sessionStorage.getItem("shift");
-      const shiftDate = moment.utc(startISO).format("YYYY-MM-DD");
-      const parsedEnd = moment(time).subtract(7, "hours").toDate();
+      let shiftDate = moment.utc(startISO).format("YYYY-MM-DD");
+      const parsedEnd = moment(time).subtract(7, "hours").toDate(); // Convert UTC to WIB
+
+      // Untuk shift 3, jika input waktu masih pagi (00:00–05:59), artinya termasuk shift semalam
+      if (shift === "III") {
+        const inputHour = moment.utc(time).hour(); // UTC jam
+        if (inputHour < 6) {
+          shiftDate = moment
+            .utc(startISO)
+            .subtract(1, "day")
+            .format("YYYY-MM-DD");
+        }
+      }
 
       if (!shift || !shiftDate || isNaN(parsedEnd)) {
         alert("Shift atau tanggal tidak valid.");
@@ -259,6 +270,9 @@ const End = (props) => {
         shift,
         new Date(shiftDate)
       );
+      console.log("end time : ", parsedEnd);
+      console.log("shift start : ", shiftStart);
+      console.log("shift end : ", shiftEnd);
 
       if (parsedEnd < shiftStart || parsedEnd > shiftEnd) {
         const shiftLabel =
@@ -304,8 +318,7 @@ const End = (props) => {
         time >= currentPO.actual_end &&
         (!nextPO || time < nextPO.actual_start)
       ) {
-        // Valid gap found
-        break;
+        break; // Valid gap found
       }
 
       if (

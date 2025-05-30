@@ -375,6 +375,9 @@ const FormFill2 = (props) => {
         return;
       }
 
+      console.log("end time : ", parsedEnd);
+      console.log("shift start : ", shiftStart);
+      console.log("shift end : ", shiftEnd);
       if (parsedEnd < shiftStart || parsedEnd > shiftEnd) {
         const shiftLabel =
           shift === "I"
