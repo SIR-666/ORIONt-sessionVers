@@ -29,9 +29,6 @@ const Start = (props) => {
     }
   }, [group, currentGroup]);
 
-  const currentShift = sessionStorage.getItem("shift");
-  const currentDate = sessionStorage.getItem("date");
-
   function toLocalISO(date) {
     const localDate = new Date(date);
     localDate.setHours(localDate.getHours() - 7);
@@ -46,43 +43,39 @@ const Start = (props) => {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
   }
 
-  useEffect(() => {
-    // Function to format a date object to the desired format
-    const formatDateTime = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-      const day = String(date.getDate()).padStart(2, "0");
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
+  const formatDateTime = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
 
-    // Get current date-time
+  useEffect(() => {
     const now = new Date();
     const current = formatDateTime(now);
 
-    // Retrieve 'dataTime' from sessionStorage
     let dataTime = sessionStorage.getItem("date");
     const shiftLocal = sessionStorage.getItem("shift");
-    // setCurrentGroup(sessionStorage.getItem("group"));
     setCurrentGroup(sessionStorage.getItem("group"));
 
-    // If dataTime exists, format it to match 'current' format
     if (dataTime) {
       const parsedDate = new Date(dataTime);
+
       if (shiftLocal === "I") {
-        dataTime = parsedDate.setHours(6, 0, 0, 0);
+        parsedDate.setHours(6, 0, 0, 0);
       } else if (shiftLocal === "II") {
-        dataTime = parsedDate.setHours(14, 0, 0, 0);
+        parsedDate.setHours(14, 0, 0, 0);
       } else if (shiftLocal === "III") {
-        dataTime = parsedDate.setHours(22, 0, 0, 0);
+        parsedDate.setHours(22, 0, 0, 0);
       }
-      dataTime = formatDateTime(parsedDate);
+
+      dataTime = formatDateTime(parsedDate); // ✅ Format untuk input
     } else {
-      dataTime = current; // Fallback if no date is in sessionStorage
+      dataTime = formatDateTime(new Date()); // fallback
     }
 
-    // Update states
     setCurrentTime(current);
     if (!time) setTime(dataTime);
   }, []);
@@ -110,13 +103,10 @@ const Start = (props) => {
 
     setInputChange(true);
     if (id === "actual_start") {
-      const localDate = new Date(value); // Create Date object from local input
-      const utcDate = new Date(
-        localDate.getTime() - localDate.getTimezoneOffset() * 60000
-      ).toISOString(); // Convert to ISO format
-
-      setTime(utcDate);
-      console.log("New Date: ", utcDate);
+      const localDate = new Date(value);
+      const formatted = formatDateTime(localDate); // 👈 tanpa konversi ke UTC
+      setTime(formatted);
+      console.log("New Date (local): ", formatted);
     }
   };
 
@@ -178,7 +168,7 @@ const Start = (props) => {
 
     let comparedTime;
     if (inputChange === true) {
-      comparedTime = toLocalISO(time);
+      comparedTime = `${time}:00.000Z`;
     } else {
       comparedTime = `${time}:00.000Z`;
     }
