@@ -1,3 +1,5 @@
+import { getShift } from "@/utils/getShift";
+import moment from "moment";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
@@ -29,40 +31,6 @@ const Start = (props) => {
 
   const currentShift = sessionStorage.getItem("shift");
   const currentDate = sessionStorage.getItem("date");
-
-  const getShift = (shift, date) => {
-    if (!date || isNaN(new Date(date))) {
-      console.error("Invalid date provided.");
-      return null;
-    }
-    let startTime, endTime;
-    switch (shift) {
-      case "I":
-        startTime = new Date(date);
-        startTime.setHours(6, 0, 0, 0);
-        endTime = new Date(date);
-        endTime.setHours(14, 0, 0, 0);
-        break;
-      case "II":
-        startTime = new Date(date);
-        startTime.setHours(14, 0, 0, 0);
-        endTime = new Date(date);
-        endTime.setHours(22, 0, 0, 0);
-        break;
-      case "III":
-        startTime = new Date(date);
-        startTime.setHours(22, 0, 0, 0);
-        endTime = new Date(date);
-        endTime.setDate(endTime.getDate() + 1); // Move to the next day
-        endTime.setHours(6, 0, 0, 0);
-        break;
-      default:
-        console.warn("Invalid shift provided.");
-        return null; // Handle invalid shift
-    }
-
-    return { startTime, endTime };
-  };
 
   function toLocalISO(date) {
     const localDate = new Date(date);
@@ -164,26 +132,49 @@ const Start = (props) => {
       alert("ID and date must be provided");
       return;
     }
+
+    // ===== VALIDASI SHIFT TIME SESUAI SHIFT =====
+    try {
+      const shift = sessionStorage.getItem("shift");
+      const shiftDate = sessionStorage.getItem("date");
+      const parsedStart = moment(time).subtract(7, "hours").toDate();
+
+      if (!shift || !shiftDate || isNaN(parsedStart)) {
+        alert("Shift atau tanggal tidak valid.");
+        return;
+      }
+
+      const { startTime: shiftStart, endTime: shiftEnd } = getShift(
+        shift,
+        new Date(shiftDate)
+      );
+
+      if (parsedStart < shiftStart || parsedStart > shiftEnd) {
+        const shiftLabel =
+          shift === "I"
+            ? "06:00–14:00"
+            : shift === "II"
+            ? "14:00–22:00"
+            : "22:00–06:00 (next day)";
+        alert(
+          `Start time must be within ${shiftDate} shift ${shift} ${shiftLabel}`
+        );
+        return;
+      }
+    } catch (err) {
+      console.error("Shift validation error:", err);
+      alert("Terjadi kesalahan saat validasi waktu shift.");
+      return;
+    }
+
     const sortedData = [...props.lineData].sort(
       (a, b) => new Date(a.actual_start) - new Date(b.actual_start)
     );
-
-    console.log("Sorted data: ", sortedData);
-
-    const shiftTimes = getShift(currentShift, currentDate);
 
     const localTime = new Date(time);
     if (inputChange === true) {
       localTime.setHours(localTime.getHours() - 7);
     }
-    console.log("Local Time: ", localTime);
-    console.log("Shift Start Time: ", shiftTimes.startTime);
-    console.log("Shift End Time: ", shiftTimes.endTime);
-
-    // if (localTime < shiftTimes.startTime || localTime >= shiftTimes.endTime) {
-    //   alert("Production Order must be started within current shift");
-    //   return;
-    // }
 
     let comparedTime;
     if (inputChange === true) {
@@ -191,16 +182,11 @@ const Start = (props) => {
     } else {
       comparedTime = `${time}:00.000Z`;
     }
+
     for (let i = 0; i < sortedData.length; i++) {
       const currentPO = sortedData[i];
       const nextPO = sortedData[i + 1]; // Next PO (if exists)
 
-      console.log("Current PO: ", currentPO);
-      console.log("Next PO: ", nextPO);
-
-      console.log("Time: ", comparedTime);
-      console.log("Actual start: ", currentPO.actual_start);
-      console.log("Actual end: ", currentPO.actual_end);
       // Check if the new PO overlaps with the current PO's range
       if (
         comparedTime >= currentPO.actual_start &&
@@ -263,7 +249,7 @@ const Start = (props) => {
         alert("Production order started successfully!");
         await props.onUpdate();
         props.setShowStart(false);
-        // props.onSubmit(props.id);
+
         sessionStorage.setItem("id", data.id);
         router.push(`/main?value=${value}&id=${data.id}`);
       } catch (error) {

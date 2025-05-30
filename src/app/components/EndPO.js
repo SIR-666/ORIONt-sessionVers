@@ -1,3 +1,5 @@
+import { getShift } from "@/utils/getShift";
+import moment from "moment";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
@@ -237,9 +239,42 @@ const End = (props) => {
       return;
     }
 
-    console.log("Time: ", time);
     if (time < startISO) {
       alert("End Time must be later than Start Time");
+      return;
+    }
+
+    // ===== VALIDASI SHIFT TIME SESUAI SHIFT =====
+    try {
+      const shift = sessionStorage.getItem("shift");
+      const shiftDate = moment.utc(startISO).format("YYYY-MM-DD");
+      const parsedEnd = moment(time).subtract(7, "hours").toDate();
+
+      if (!shift || !shiftDate || isNaN(parsedEnd)) {
+        alert("Shift atau tanggal tidak valid.");
+        return;
+      }
+
+      const { startTime: shiftStart, endTime: shiftEnd } = getShift(
+        shift,
+        new Date(shiftDate)
+      );
+
+      if (parsedEnd < shiftStart || parsedEnd > shiftEnd) {
+        const shiftLabel =
+          shift === "I"
+            ? "06:00–14:00"
+            : shift === "II"
+            ? "14:00–22:00"
+            : "22:00–06:00 (next day)";
+        alert(
+          `End time must be within ${shiftDate} shift ${shift} ${shiftLabel}`
+        );
+        return;
+      }
+    } catch (err) {
+      console.error("Shift validation error:", err);
+      alert("Terjadi kesalahan saat validasi waktu shift.");
       return;
     }
 
