@@ -138,7 +138,9 @@ const Start = (props) => {
         shift,
         new Date(shiftDate)
       );
-
+      console.log("end time : ", parsedStart);
+      console.log("shift start : ", shiftStart);
+      console.log("shift end : ", shiftEnd);
       if (parsedStart < shiftStart || parsedStart > shiftEnd) {
         const shiftLabel =
           shift === "I"
