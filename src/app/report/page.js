@@ -10,6 +10,7 @@ const ReportTable = () => {
   const [filterValue, setFilterValue] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [selectedPlant, setSelectedPlant] = useState("");
+  const [selectedLine, setSelectedLine] = useState("");
   const [selectedShift, setSelectedShift] = useState("");
   const [selectedGroup, setSelectedGroup] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -82,6 +83,10 @@ const ReportTable = () => {
       data = data.filter((row) => row.Unit === selectedPlant);
     }
 
+    if (selectedLine) {
+      data = data.filter((row) => row.Line === selectedLine);
+    }
+
     if (selectedShift) {
       data = data.filter((row) => row.Shift === selectedShift);
     }
@@ -109,6 +114,7 @@ const ReportTable = () => {
     filterValue,
     filterDate,
     selectedPlant,
+    selectedLine,
     selectedShift,
     selectedGroup,
     selectedCategory,
@@ -181,7 +187,7 @@ const ReportTable = () => {
             onChange={(e) => setFilterDate(e.target.value)}
           />
           <select
-            className="ml-6 border border-gray-300 text-black rounded px-3 py-2"
+            className="ml-3 border border-gray-300 text-black rounded px-3 py-2"
             value={selectedPlant}
             onChange={(e) => setSelectedPlant(e.target.value)}
           >
@@ -189,6 +195,18 @@ const ReportTable = () => {
             {[...new Set(tableData.map((row) => row.Unit))].map((plant) => (
               <option key={plant} value={plant}>
                 {plant}
+              </option>
+            ))}
+          </select>
+          <select
+            className="ml-3 border border-gray-300 text-black rounded px-3 py-2"
+            value={selectedLine}
+            onChange={(e) => setSelectedLine(e.target.value)}
+          >
+            <option value="">All Lines</option>
+            {[...new Set(tableData.map((row) => row.Line))].map((line) => (
+              <option key={line} value={line}>
+                {line}
               </option>
             ))}
           </select>

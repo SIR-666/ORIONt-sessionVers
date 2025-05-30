@@ -1,3 +1,4 @@
+import { mapLineName } from "@/utils/mapLineName";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -344,7 +345,7 @@ const MainModal = (props) => {
                         {processingLines.length > 0 ? (
                           processingLines.map((subGroup, index) => (
                             <option key={index} value={subGroup}>
-                              {subGroup}
+                              {mapLineName(subGroup)}
                             </option>
                           ))
                         ) : (
@@ -373,7 +374,7 @@ const MainModal = (props) => {
                         {filteredLines.length > 0 ? (
                           filteredLines.map((line, index) => (
                             <option key={index} value={line}>
-                              {line}
+                              {mapLineName(line)}
                             </option>
                           ))
                         ) : (

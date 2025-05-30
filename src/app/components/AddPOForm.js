@@ -1,3 +1,4 @@
+import { mapLineName } from "@/utils/mapLineName";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -311,7 +312,7 @@ const ProdFill = (props) => {
                 className="text-black rounded-lg border focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                 value={line}
               >
-                <option value={line}>{line}</option>
+                <option value={line}>{mapLineName(line)}</option>
               </select>
               <input
                 type="datetime-local"

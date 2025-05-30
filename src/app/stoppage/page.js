@@ -3,6 +3,7 @@ import Form from "@/app/components/AddStoppage";
 import FormType from "@/app/components/AddStoppageType";
 import Button2 from "@/app/components/Button2";
 import LoadingSpinner from "@/app/components/loading";
+import { mapLineName } from "@/utils/mapLineName";
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import FormFill from "../components/AddStoppageForm";
@@ -412,7 +413,7 @@ function StoppagePage() {
           {!loading ? (
             <>
               <span style={styles.mainText}>
-                {plant} - {line.toUpperCase()}{" "}
+                {plant} - {mapLineName(line)}{" "}
                 {plant === "Milk Processing"
                   ? `- ${sessionStorage.getItem("tank")}`
                   : ""}{" "}
