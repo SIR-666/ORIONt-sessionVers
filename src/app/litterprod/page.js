@@ -19,6 +19,36 @@ const ReportLitterProd = () => {
     endDate: null,
   });
   const [columnFilters, setColumnFilters] = useState({});
+  const getTableColumns = (plant) => {
+    if (plant === "Milk Processing" || plant === "Pasteurize Yogurt") {
+      return [
+        { key: "TanggalProduksi", label: "Date" },
+        { key: "Line", label: "Line" },
+        { key: "Shift", label: "Shift" },
+        { key: "SKU_Name", label: "SKU" },
+        { key: "FinishGoodPcs", label: "Finish Good (Packs)" },
+        { key: "FinishGoodLiter", label: "Finish Good (Liter)" },
+        { key: "BlowAwal", label: "Blow Awal" },
+        { key: "DrainAkhir", label: "Drain Akhir" },
+        { key: "Sirkulasi", label: "Sirkulasi" },
+        { key: "UnplannedCIP", label: "Unplanned CIP" },
+      ];
+    } else {
+      return [
+        { key: "TanggalProduksi", label: "Date" },
+        { key: "Line", label: "Line" },
+        { key: "Shift", label: "Shift" },
+        { key: "SKU_Name", label: "SKU" },
+        { key: "FinishGoodPcs", label: "Finish Good (Packs)" },
+        { key: "FinishGoodLiter", label: "Finish Good (Liter)" },
+        { key: "RejectFillingPcs", label: "Reject Filling (Pcs)" },
+        { key: "RejectPackingPcs", label: "Reject Packing  (Pcs)" },
+        { key: "SamplePcs", label: "Sample  (Pcs)" },
+      ];
+    }
+  };
+
+  const columns = getTableColumns(plant);
 
   const displayedColumns = [
     { key: "TanggalProduksi", label: "TanggalProduksi" },
@@ -104,8 +134,8 @@ const ReportLitterProd = () => {
 
   useEffect(() => {
     let result = [...tableData];
-    console.log("dateRange changed:", dateRange);
-    // Filter berdasarkan pencarian
+
+    // Filter berdasarkan pencarian umum
     if (filterField && filterValue) {
       if (filterField === "All") {
         result = result.filter((row) =>
@@ -133,17 +163,26 @@ const ReportLitterProd = () => {
       result = result.filter((row) => {
         if (!row.TanggalProduksi) return false;
         const parsedDate = new Date(row.TanggalProduksi.replace(" ", "T"));
-        if (isNaN(parsedDate)) return false;
         return parsedDate >= start && parsedDate <= end;
       });
     }
-    console.log("Filtered Result:", result);
+
+    // Filter berdasarkan filter per kolom
+    Object.entries(columnFilters).forEach(([key, value]) => {
+      if (value) {
+        result = result.filter((row) =>
+          row[key]?.toString().toLowerCase().includes(value.toLowerCase())
+        );
+      }
+    });
+
     setFilteredData(result);
   }, [
+    tableData,
     filterField,
     filterValue,
     dateRange,
-    tableData,
+    columnFilters,
     dateRange.startDate,
     dateRange.endDate,
   ]);
@@ -227,19 +266,38 @@ const ReportLitterProd = () => {
     }));
   };
 
-  useEffect(() => {
-    let filtered = tableData;
+  // useEffect(() => {
+  //   let filtered = tableData;
 
-    Object.entries(columnFilters).forEach(([key, value]) => {
-      if (value) {
-        filtered = filtered.filter((row) =>
-          row[key]?.toString().toLowerCase().includes(value.toLowerCase())
-        );
-      }
+  //   Object.entries(columnFilters).forEach(([key, value]) => {
+  //     if (value) {
+  //       filtered = filtered.filter((row) =>
+  //         row[key]?.toString().toLowerCase().includes(value.toLowerCase())
+  //       );
+  //     }
+  //   });
+
+  //   setFilteredData(filtered);
+  // }, [columnFilters, tableData]);
+
+  const totals = {
+    FinishGoodPcs: 0,
+    FinishGoodLiter: 0,
+    BlowAwal: 0,
+    DrainAkhir: 0,
+    Sirkulasi: 0,
+    UnplannedCIP: 0,
+    RejectFillingPcs: 0,
+    RejectPackingPcs: 0,
+    SamplePcs: 0,
+  };
+
+  filteredData.forEach((row) => {
+    Object.keys(totals).forEach((key) => {
+      const val = parseFloat(row[key] || 0);
+      if (!isNaN(val)) totals[key] += val;
     });
-
-    setFilteredData(filtered);
-  }, [columnFilters, tableData]);
+  });
 
   return (
     <>
@@ -360,14 +418,7 @@ const ReportLitterProd = () => {
 
               <thead className="py-3 text-xs text-gray-700 uppercase bg-blue-300 sticky top-0 z-20">
                 <tr>
-                  {[
-                    { key: "TanggalProduksi", label: "Date" },
-                    { key: "Line", label: "Line" },
-                    { key: "Shift", label: "Shift" },
-                    { key: "SKU_Name", label: "SKU" },
-                    { key: "FinishGoodPcs", label: "Finish Good (Packs)" },
-                    { key: "FinishGoodLiter", label: "Finish Good (Liter)" },
-                  ].map((col) => (
+                  {columns.map((col) => (
                     <th key={col.key} className="align-top">
                       <div className="flex flex-col w-full">
                         <span>{col.label}</span>
@@ -385,40 +436,47 @@ const ReportLitterProd = () => {
                   ))}
                 </tr>
               </thead>
+
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="10">Loading...</td>
+                    <td colSpan={columns.length}>Loading...</td>
                   </tr>
                 ) : filteredData.length > 0 ? (
                   filteredData.map((row) => (
                     <tr className="bg-white border-b" key={row.ID}>
-                      <td>{row.TanggalProduksi}</td>
-                      <td>{row.Line}</td>
-                      <td>{row.Shift}</td>
-                      <td>{row.SKU_Name}</td>
-                      <td>
-                        {row.FinishGoodPcs || row.Hasil_Prod_aft_loss
-                          ? parseInt(
-                              row.FinishGoodPcs || row.Hasil_Prod_aft_loss
-                            )
-                          : "0"}
-                      </td>
-                      <td>
-                        {row.FinishGoodLiter || row.Hasil_Prod_aft_loss
-                          ? parseFloat(
-                              row.FinishGoodLiter || row.Hasil_Prod_aft_loss
-                            ).toFixed(2)
-                          : "0.00"}
-                      </td>
+                      {columns.map((col) => (
+                        <td key={col.key}>
+                          {typeof row[col.key] === "number"
+                            ? parseFloat(row[col.key]).toFixed(
+                                col.key.includes("Liter") ? 2 : 0
+                              )
+                            : row[col.key] || "0"}
+                        </td>
+                      ))}
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="10">No data available</td>
+                    <td colSpan={columns.length}>No data available</td>
                   </tr>
                 )}
               </tbody>
+              <tfoot className="bg-gray-100 font-bold text-black">
+                <tr>
+                  {columns.map((col, index) => (
+                    <td key={col.key}>
+                      {totals.hasOwnProperty(col.key)
+                        ? col.key.includes("Liter")
+                          ? totals[col.key].toFixed(2)
+                          : totals[col.key]
+                        : index === 0
+                        ? "Total"
+                        : ""}
+                    </td>
+                  ))}
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
