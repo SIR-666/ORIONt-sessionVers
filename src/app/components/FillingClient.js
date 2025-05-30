@@ -2,6 +2,7 @@
 
 import MainLayout from "@/app/mainLayout";
 import { canEditData } from "@/utils/canEditData";
+import { mapLineName } from "@/utils/mapLineName";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "../styles";
@@ -266,7 +267,7 @@ export default function OrderPage({ initialData }) {
           <br></br>
           <div style={styles.container}>
             <span style={styles.mainText}>
-              {plant} - {value.toUpperCase()}{" "}
+              {plant} - {mapLineName(value)}{" "}
               {plant === "Milk Processing"
                 ? `- ${sessionStorage.getItem("tank")}`
                 : ""}{" "}

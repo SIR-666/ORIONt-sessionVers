@@ -134,7 +134,7 @@ function SidebarContent({ isOpen }) {
     {
       label: "Finish Good Report",
       href: "../litterprod",
-      basePath: "/finishgoodReport",
+      basePath: "/litterprod",
       show: true,
     },
     {

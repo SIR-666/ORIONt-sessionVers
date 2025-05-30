@@ -3,6 +3,7 @@ import RectangleChart from "@/app/components/MainChart";
 import RectangleContainer from "@/app/components/MainContainer";
 import RectangleContainerProcessing from "@/app/components/MainContainerProcessing";
 import RectangleTable from "@/app/components/MainTable";
+import { mapLineName } from "@/utils/mapLineName";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import HistoryFinishGoodTable from "../components/HistoryFinishGoodTable";
@@ -364,7 +365,7 @@ function MainPage() {
           <br></br>
           <div style={styles.container}>
             <span style={styles.mainText}>
-              {plant} - {value.toUpperCase()}{" "}
+              {plant} - {mapLineName(value)}{" "}
               {plant === "Milk Processing"
                 ? `- ${sessionStorage.getItem("tank")}`
                 : ""}{" "}
@@ -414,7 +415,9 @@ function MainPage() {
             </span>
           </div>
           <br></br>
-          <h1 className="text-black text-2xl text-center font-bold">{value}</h1>
+          <h1 className="text-black text-2xl text-center font-bold">
+            {mapLineName(value)}
+          </h1>
           <div className="flex items-center space-x-4">
             <h3 className="text-black font-semibold">
               {id} {matchedPO?.sku && `(${matchedPO.sku})`}

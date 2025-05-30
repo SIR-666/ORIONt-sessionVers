@@ -1,6 +1,7 @@
 "use client";
 import Button2 from "@/app/components/Button2";
 import LoadingSpinner from "@/app/components/loading";
+import { mapLineName } from "@/utils/mapLineName";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import MasterDowntimeModal from "../components/MasterDowntimeModal";
@@ -260,7 +261,7 @@ function MasterDowntimePage() {
           <br></br>
           <div style={styles.container}>
             <span style={styles.mainText}>
-              {plant} - {line.toUpperCase()}{" "}
+              {plant} - {mapLineName(line)}{" "}
               {plant === "Milk Processing" ? `- ${tank}` : ""}{" "}
               {plant === "Yogurt" && line === "PASTEURIZER"
                 ? `- ${fermentor}`
