@@ -684,7 +684,7 @@ const FormFill = (props) => {
                     id="CIP"
                     checked={!!newEntry.cipimpact} // akan true kalau cipimpact ada nilainya
                     onChange={handleCIPCheckboxChange}
-                    disabled
+                    // disabled
                   />
                   <label className="mr-4 text-black px-2">CIP6</label>
                 </div>

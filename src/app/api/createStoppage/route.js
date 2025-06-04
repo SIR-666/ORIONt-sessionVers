@@ -13,6 +13,7 @@ export async function POST(req) {
     type,
     group,
     plant,
+    cipimpact,
   } = await req.json();
   console.log(
     "Received data: \n",
@@ -26,7 +27,8 @@ export async function POST(req) {
     line,
     type,
     group,
-    plant
+    plant,
+    cipimpact
   );
   try {
     if (
@@ -84,6 +86,7 @@ export async function POST(req) {
       type,
       group,
       plant,
+      cipimpact,
     });
 
     if (rowsAffected.error) {

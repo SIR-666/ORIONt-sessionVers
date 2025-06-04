@@ -14,6 +14,7 @@ async function createStoppage(data) {
       type,
       group,
       plant,
+      cipimpact,
     } = data;
     const date_start = new Date(startTime + "Z"); // Parse startTime to Date
     const date_end = new Date(endTime + "Z"); // Parse startTime to Date
@@ -70,6 +71,7 @@ async function createStoppage(data) {
       type,
       group,
       plant,
+      cipimpact,
     });
     const response = await fetch(`${URL.URL}/createStoppage`, {
       method: "POST",
@@ -90,6 +92,7 @@ async function createStoppage(data) {
         duration,
         group,
         plant,
+        cipimpact,
       }),
     });
 
