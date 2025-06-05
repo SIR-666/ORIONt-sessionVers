@@ -5,6 +5,7 @@ import {
   CircleXIcon,
   ClipboardListIcon,
   DatabaseIcon,
+  DatabaseZapIcon,
   HouseIcon,
   ShieldCheckIcon,
   Table2Icon,
@@ -143,6 +144,12 @@ function SidebarContent({ isOpen }) {
       basePath: "/masterDowntime",
       show: role === "Prf",
     },
+    {
+      label: "Master CILT",
+      href: "../../masterCilt",
+      basePath: "/masterCilt",
+      show: role === "Prf",
+    },
   ];
 
   const renderIcon = (label) => {
@@ -167,6 +174,8 @@ function SidebarContent({ isOpen }) {
         return <Table2Icon className="size-4 mr-4" />;
       case "Master Downtime":
         return <DatabaseIcon className="size-4 mr-4" />;
+      case "Master CILT":
+        return <DatabaseZapIcon className="size-4 mr-4" />;
       default:
         return null;
     }
