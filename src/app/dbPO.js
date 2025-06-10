@@ -117,7 +117,7 @@ async function getAllPO(line, year, month, shift, date, plant) {
         return data.filter((item) => item.MATERIAL?.includes("ESL"));
       } else if (["Line D"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("1890"));
-      } else if (["Line E", "Line F", "Line G"].includes(line)) {
+      } else if (["Line E", "Line F", "Line G", "Line H"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("UHT"));
       } else if (["Flex 1", "Flex 2", "GEA 5"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("ESL"));

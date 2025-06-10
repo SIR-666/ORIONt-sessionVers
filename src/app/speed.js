@@ -7,6 +7,7 @@ const nominalSpeeds = {
   LINE_E: 7000,
   LINE_F: 9000,
   LINE_G: 9000,
+  LINE_H: 7000,
 
   // Milk Processing
   FLEX_1: 6000,
