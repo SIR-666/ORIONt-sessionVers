@@ -242,6 +242,8 @@ const RectangleContainerYogurt = ({
             unavailableSum += downtimeDuration;
           } else if (mesin === "Process Waiting") {
             waitingSum += downtimeDuration;
+          } else if (mesin === "Process Failure") {
+            unplannedSum += downtimeDuration;
           } else {
             console.log("entry mesin:", mesin);
           }
