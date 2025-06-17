@@ -5,7 +5,7 @@ export function calculateAvailableTime(timeDifference, unavailableTime) {
 }
 
 export function calculateNet(qty, rejectQty, nominalSpeed) {
-  const net = ((qty + rejectQty) / nominalSpeed) * 60;
+  const net = (qty / nominalSpeed) * 60;
   return { net, netDisplay: net.toFixed(2) };
 }
 
