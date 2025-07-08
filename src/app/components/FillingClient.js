@@ -39,6 +39,7 @@ export default function OrderPage({ initialData }) {
   const [line, setLine] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
+  console.log("role :", role);
   useEffect(() => {
     const timerId = setInterval(() => {
       setTime(new Date());
@@ -219,6 +220,36 @@ export default function OrderPage({ initialData }) {
     setSelectedId(id);
     setSelectedStatus(status);
     setShowEdit(true);
+  };
+
+  const deletePO = async (id, line) => {
+    const confirmDelete = window.confirm(
+      `Apakah yakin ingin menghapus data dengan ID ${id} Line ${line}?`
+    );
+    if (confirmDelete) {
+      try {
+        const response = await fetch(
+          `http://10.24.0.81:3001/delete-po/${id}/${encodeURIComponent(line)}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Gagal menghapus data.");
+        }
+
+        const result = await response.json();
+        alert(result.message || "Data berhasil dihapus.");
+
+        // ✅ Refresh data PO setelah penghapusan
+        await fetchAndStoreData();
+        // Tambahkan logic refresh data atau navigasi ulang jika perlu
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert("Terjadi kesalahan saat menghapus data.");
+      }
+    }
   };
 
   return (
@@ -502,6 +533,37 @@ export default function OrderPage({ initialData }) {
                           </div>
                         ) : row.status === "Completed" ? (
                           <div>
+                            {["Prf", "Spv", "Admin"].includes(role) && (
+                              <button
+                                className={`
+      flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium
+      text-[#6BBF74] bg-white border border-[#6BBF74] shadow-sm
+      transition-all duration-200 focus:outline-none 
+      hover:bg-[#6BBF74] hover:text-white hover:border-[#58A663]
+      focus:ring-2 focus:ring-[#58A663] 
+      active:bg-[#4F9A5F] active:border-[#4F9A5F]
+    `}
+                                onClick={() => deletePO(row.id, line)}
+                                // disabled={!canEditData(date, role)}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="size-6 mr-2"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                                  />
+                                </svg>
+                                Delete
+                              </button>
+                            )}
+
                             <button
                               className={`
                                 flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium
