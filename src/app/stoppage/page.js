@@ -495,122 +495,117 @@ function StoppagePage() {
         </div>
       </main>
       <div className="relative w-full h-128 rounded-xl bg-white shadow-xl">
-        {/* <div className="relative w-full overflow-y-auto overflow-x-auto flex flex-col h-full px-5 py-4">
-            <text className="text-lg font-semibold text-black mb-2 mt-2">
-              Downtime From CILT
-            </text>
-            <table className="w-flex text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-blue-100">
-                <tr>
-                  <th scope="col" className="py-3 px-6">
-                    Downtime ID
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Machine
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Stoppage Type
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Start Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    End Time
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Duration (Minutes)
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Comments
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Category
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Group
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Last Reported
-                  </th>
-                  <th scope="col" className="py-3 px-6">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableDataDowntimeCILT.map((item, index) => {
-                  const downtimeEnd = new Date(item.Date);
-                  downtimeEnd.setMinutes(
-                    downtimeEnd.getMinutes() + parseInt(item.Minutes)
-                  );
+        <div className="relative w-full overflow-y-auto overflow-x-auto flex flex-col h-full px-5 py-4">
+          <text className="text-lg font-semibold text-black mb-2 mt-2">
+            Downtime From CILT
+          </text>
+          <table className="w-flex text-sm text-left text-gray-500">
+            <thead className="text-xs text-gray-700 uppercase bg-blue-100">
+              <tr>
+                <th scope="col" className="py-3 px-6">
+                  Downtime ID
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Machine
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Stoppage Type
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Start Time
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  End Time
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Duration (Minutes)
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Comments
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Category
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Group
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Last Reported
+                </th>
+                <th scope="col" className="py-3 px-6">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableDataDowntimeCILT.map((item, index) => {
+                const downtimeEnd = new Date(item.Date);
+                downtimeEnd.setMinutes(
+                  downtimeEnd.getMinutes() + parseInt(item.Minutes)
+                );
 
-                  return (
-                    <tr
-                      className="bg-white border-b"
-                      key={`${item.id}-${index}`}
-                    >
-                      <td className="py-4 px-6">{item.id}</td>
-                      <td className="py-4 px-6">{item.Mesin}</td>
-                      <td className="py-4 px-6">{item.Jenis}</td>
-                      <td className="py-4 px-6">{formatDateTime(item.Date)}</td>
-                      <td className="py-4 px-6">
-                        {formatDateTime(downtimeEnd)}
-                      </td>
-                      <td className="py-4 px-6">{item.Minutes}</td>
-                      <td className="py-4 px-6">{item.Keterangan}</td>
-                      <td className="py-4 px-6">{item.Downtime_Category}</td>
-                      <td className="py-4 px-6">{group}</td>
-                      <td className="py-4 px-6">
-                        {formatDateTime(item.Created_At)}
-                      </td>
-                      <td className="py-4 px-6">
-                        {deletingItems[item.id] ? (
-                          <span>Deleting...</span>
-                        ) : (
-                          <>
-                            <button
-                              className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-green-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-green-600 hover:border-4 focus:border-4 hover:border-green-800 hover:text-green-800 focus:border-green-200 active:border-grey-900 active:text-grey-900"
-                              onClick={() => {
-                                handleUpdateStatusDowntimeCILT(
-                                  item.id,
-                                  item.Mesin,
-                                  item.Date,
-                                  item.Minutes,
-                                  item.Keterangan,
-                                  item.Jenis,
-                                  item.Downtime_Category,
-                                  "Accept"
-                                );
-                              }}
-                            >
-                              Accept
-                            </button>
-                            <button
-                              className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-red-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-red-600 hover:border-4 focus:border-4 hover:border-red-800 hover:text-red-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"
-                              onClick={() =>
-                                handleUpdateStatusDowntimeCILT(
-                                  item.id,
-                                  item.Mesin,
-                                  item.Date,
-                                  item.Minutes,
-                                  item.Keterangan,
-                                  item.Jenis,
-                                  item.Downtime_Category,
-                                  "Reject"
-                                )
-                              }
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div> */}
+                return (
+                  <tr className="bg-white border-b" key={`${item.id}-${index}`}>
+                    <td className="py-4 px-6">{item.id}</td>
+                    <td className="py-4 px-6">{item.Mesin}</td>
+                    <td className="py-4 px-6">{item.Jenis}</td>
+                    <td className="py-4 px-6">{formatDateTime(item.Date)}</td>
+                    <td className="py-4 px-6">{formatDateTime(downtimeEnd)}</td>
+                    <td className="py-4 px-6">{item.Minutes}</td>
+                    <td className="py-4 px-6">{item.Keterangan}</td>
+                    <td className="py-4 px-6">{item.Downtime_Category}</td>
+                    <td className="py-4 px-6">{group}</td>
+                    <td className="py-4 px-6">
+                      {formatDateTime(item.Created_At)}
+                    </td>
+                    <td className="py-4 px-6">
+                      {deletingItems[item.id] ? (
+                        <span>Deleting...</span>
+                      ) : (
+                        <>
+                          <button
+                            className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-green-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-green-600 hover:border-4 focus:border-4 hover:border-green-800 hover:text-green-800 focus:border-green-200 active:border-grey-900 active:text-grey-900"
+                            onClick={() => {
+                              handleUpdateStatusDowntimeCILT(
+                                item.id,
+                                item.Mesin,
+                                item.Date,
+                                item.Minutes,
+                                item.Keterangan,
+                                item.Jenis,
+                                item.Downtime_Category,
+                                "Accept"
+                              );
+                            }}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            className="flex items-center justify-center w-full px-4 py-3 rounded-full text-sm font-medium text-red-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-red-600 hover:border-4 focus:border-4 hover:border-red-800 hover:text-red-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900"
+                            onClick={() =>
+                              handleUpdateStatusDowntimeCILT(
+                                item.id,
+                                item.Mesin,
+                                item.Date,
+                                item.Minutes,
+                                item.Keterangan,
+                                item.Jenis,
+                                item.Downtime_Category,
+                                "Reject"
+                              )
+                            }
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
         <div className="relative w-full overflow-y-auto overflow-x-auto flex flex-col h-full px-5 py-4">
           <text className="text-lg font-semibold text-black mb-2">
