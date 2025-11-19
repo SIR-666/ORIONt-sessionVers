@@ -161,7 +161,13 @@ function SidebarContent({ isOpen }) {
       href: "../../ciltApproval",
       basePath: "/ciltApproval",
       show: ["Spv", "Mgr", "Coor", "Prf"].includes(role)
-    }
+    },
+    {
+      label: "SKU Master",
+      href: "../../masterSKU",
+      basePath: "/masterSKU",
+      show: ["Spv", "Mgr", "Coor", "Prf"].includes(role)
+    },
   ];
 
   const renderIcon = (label) => {
@@ -192,6 +198,8 @@ function SidebarContent({ isOpen }) {
         return <DatabaseIcon className="size-4 mr-4" />;
       case "CILT Pro Approval":
         return <ShieldCheckIcon className="size-4 mr-4" />;
+      case "SKU Master":
+        return <DatabaseIcon className="size-4 mr-4" />;
       default:
         return null;
     }

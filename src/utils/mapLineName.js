@@ -9,6 +9,7 @@ export function mapLineName(line) {
     "Line G": "LINE G",
     "Line H": "LINE H",
     "Line BIB": "LINE BIB",
+    "Line J": "LINE J",
     "Flex 1": "FLEX 1",
     "Flex 2": "FLEX 2",
     "GEA 3": "GEA 3",
