@@ -10,11 +10,13 @@ const MasterSKUModal = ({
 }) => {
   const [Category, setCategory] = useState("");
   const [sku,setSKU] = useState("");
+  const [edit,setEdit] = useState(false);
   const [speed,setSpeed] = useState("");
   const [volume,setVolume] = useState("");
   const [active,setActive] = useState("");
   const [plant,setPlant] = useState("");
   const [selectline,setselectLine] = useState("");
+  const [selectID,setselectID] = useState("");
   const valueActive = ["Active", "Disable"];
   const plantPicker = [
     "Milk Filling Packing",
@@ -72,12 +74,18 @@ const MasterSKUModal = ({
     }
 
     fetchPlantLine();
-    console.log(tableLine);
+    console.log(initialData);
     if (isOpen) {
       if (initialData) {
+        setEdit(true);
+        setPlant(initialData.plant);
+        setselectLine(initialData.line || "");
         setCategory(initialData.Category || "");
         setSKU(initialData.sku || "");
         setSpeed(initialData.speed || "");
+        setVolume(initialData.volume || "");
+        setselectID(initialData.id || "")
+        setActive(initialData.active?.toLowerCase() === "active" ? "Active" : "Disable")
       } else {
         setCategory("");
         setSKU("");
@@ -103,6 +111,7 @@ const MasterSKUModal = ({
       return;
     }
 
+    if(edit===true)
     onSave({
       Category: Category,
       plant: plant,
@@ -111,6 +120,19 @@ const MasterSKUModal = ({
       volume:volume,
       active: active,
       selectline:selectline,
+      edit: edit,
+      id:selectID,
+    });
+    else
+    onSave({
+      Category: Category,
+      plant: plant,
+      sku: sku,
+      speed: speed,
+      volume:volume,
+      active: active,
+      selectline:selectline,
+      edit: edit,
     });
   };
 
