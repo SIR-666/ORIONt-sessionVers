@@ -150,6 +150,18 @@ function SidebarContent({ isOpen }) {
       basePath: "/masterCilt",
       show: role === "Prf",
     },
+    {
+      label: "CILT Pro Master",
+      href: "../../ciltproMaster",
+      basePath: "/ciltproMaster",
+      show: ["Prf", "Mgr"].includes(role),
+    },
+    {
+      label: "CILT Pro Approval",
+      href: "../../ciltApproval",
+      basePath: "/ciltApproval",
+      show: ["Spv", "Mgr", "Coor", "Prf"].includes(role)
+    }
   ];
 
   const renderIcon = (label) => {
@@ -176,6 +188,10 @@ function SidebarContent({ isOpen }) {
         return <DatabaseIcon className="size-4 mr-4" />;
       case "Master CILT":
         return <DatabaseZapIcon className="size-4 mr-4" />;
+      case "CILT Pro Master":
+        return <DatabaseIcon className="size-4 mr-4" />;
+      case "CILT Pro Approval":
+        return <ShieldCheckIcon className="size-4 mr-4" />;
       default:
         return null;
     }
@@ -183,9 +199,8 @@ function SidebarContent({ isOpen }) {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-10 ${
-        isOpen ? "w-64" : "w-16"
-      } transition-width duration-300 flex-col border-r bg-white pt-16`}
+      className={`fixed inset-y-0 left-0 z-10 ${isOpen ? "w-64" : "w-16"
+        } transition-width duration-300 flex-col border-r bg-white pt-16`}
     >
       <div
         className={`flex flex-col space-y-4 p-4 ${isOpen ? "block" : "hidden"}`}
@@ -213,9 +228,8 @@ function SidebarContent({ isOpen }) {
               >
                 {renderIcon(item.label)}
                 <span
-                  className={`transition-colors duration-200 ${
-                    isActive ? "text-green-500 font-bold" : ""
-                  }`}
+                  className={`transition-colors duration-200 ${isActive ? "text-green-500 font-bold" : ""
+                    }`}
                 >
                   {item.label}
                 </span>

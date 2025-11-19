@@ -98,12 +98,14 @@ export default function LoginPage() {
         const responseData = await res.json();
         sessionStorage.setItem("user", responseData.user.email);
         sessionStorage.setItem("role", responseData.user.role.name);
+        sessionStorage.setItem("roleId", responseData.user.role.id);
         const userData = {
           email: responseData.user.email,
           username: responseData.user.username,
           profile: "user",
           role: responseData.user.role.name,
         };
+        sessionStorage.setItem("username", userData.username);
         sessionStorage.setItem("profile", JSON.stringify(userData));
         document.cookie = `profile=${userData}; path=/`;
         router.push("../order");
