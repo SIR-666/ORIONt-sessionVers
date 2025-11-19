@@ -1794,7 +1794,7 @@ const CILTApproval = () => {
         </div>
       </main>
 
-      {/* CSS untuk animasi modal dan Notyf positioning */}
+      {/* CSS untuk animasi modal */}
       <style jsx global>{`
           /* Modal Animation */
           @keyframes scale-in {
