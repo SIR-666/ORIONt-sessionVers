@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 // import { Notyf } from "notyf";
-import "notyf/notyf.min.css";
+// import "notyf/notyf.min.css";
 import * as XLSX from "xlsx";
 import MainLayout from "../mainLayout";
 
@@ -195,24 +195,35 @@ const CILTApproval = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const notyfRef = useRef(null);
-  const TOAST_TOP_OFFSET = 72;
+  // const notyfRef = useRef(null);
+  // const TOAST_TOP_OFFSET = 72;
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && !notyfRef.current) {
-      notyfRef.current = {
-        success: (msg) => console.log("SUCCESS:", msg),
-        error: (msg) => console.error("ERROR:", msg),
-        open: (obj) => console.log("INFO:", obj.message),
-      };
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && !notyfRef.current) {
+  //     notyfRef.current = {
+  //       success: (msg) => console.log("SUCCESS:", msg),
+  //       error: (msg) => console.error("ERROR:", msg),
+  //       open: (obj) => console.log("INFO:", obj.message),
+  //     };
+  //   }
+  // }, []);
+
+  const [toasts, setToasts] = useState([]);
+
+  // Toast System
+  const addToast = (message, type = "info") => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  };
 
   const toast = {
-    success: (m) => notyfRef.current?.success({ message: m, dismissible: true }),
-    error: (m) => notyfRef.current?.error({ message: m, dismissible: true }),
-    info: (m) => notyfRef.current?.open({ type: "info", message: m, dismissible: true }),
-    warn: (m) => notyfRef.current?.open({ type: "warning", message: m, dismissible: true }),
+    success: (m) => addToast(m, "success"),
+    error: (m) => addToast(m, "error"),
+    info: (m) => addToast(m, "info"),
+    warn: (m) => addToast(m, "warning"),
   };
 
   // Custom Confirmation Modal Component
@@ -1256,6 +1267,18 @@ const CILTApproval = () => {
 
   return (
     <MainLayout>
+      {/* Toast Container */}
+      <div className="fixed top-20 right-4 z-50 space-y-2">
+        {toasts.map(t => (
+          <div
+            key={t.id}
+            className={`px-6 py-4 rounded-lg shadow-lg animate-slide-in max-w-md ${t.type === 'success' ? 'bg-green-500 text-white' : t.type === 'error' ? 'bg-red-500 text-white' : t.type === 'warning' ? 'bg-yellow-500 text-white' : 'bg-blue-500 text-white'
+              }`}
+          >
+            <p className="text-sm font-medium whitespace-pre-line">{t.message}</p>
+          </div>
+        ))}
+      </div>
       <main className="flex-1 bg-white px-8 pt-16 pb-8">
         <h1 className="text-black text-2xl text-center font-bold mb-6">
           CILT Pro Approval
@@ -1773,14 +1796,6 @@ const CILTApproval = () => {
 
       {/* CSS untuk animasi modal dan Notyf positioning */}
       <style jsx global>{`
-          .notyf {
-            top: ${TOAST_TOP_OFFSET}px !important;
-            right: 16px !important;
-          }
-          .notyf__toast {
-            border-radius: 10px;
-          }
-          
           /* Modal Animation */
           @keyframes scale-in {
             from {
@@ -1815,6 +1830,17 @@ const CILTApproval = () => {
           }
           .animate-fadeSlideIn {
             animation: fadeSlideIn 0.6s ease-out;
+          }
+          /* Toast Animation */
+          @keyframes slide-in {
+            from {
+              opacity: 0;
+              transform: translateX(100%);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
           }
         `}</style>
     </MainLayout>
