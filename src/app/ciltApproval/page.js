@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { Notyf } from "notyf";
+// import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import * as XLSX from "xlsx";
 import MainLayout from "../mainLayout";
@@ -200,15 +200,11 @@ const CILTApproval = () => {
 
   useEffect(() => {
     if (typeof window !== "undefined" && !notyfRef.current) {
-      notyfRef.current = new Notyf({
-        duration: 4000,
-        ripple: true,
-        position: { x: "right", y: "top" },
-        types: [
-          { type: "info", background: "#3B82F6" },
-          { type: "warning", background: "#F59E0B" },
-        ],
-      });
+      notyfRef.current = {
+        success: (msg) => console.log("SUCCESS:", msg),
+        error: (msg) => console.error("ERROR:", msg),
+        open: (obj) => console.log("INFO:", obj.message),
+      };
     }
   }, []);
 
