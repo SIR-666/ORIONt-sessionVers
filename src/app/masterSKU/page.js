@@ -54,7 +54,7 @@ function MasterSKUpage() {
     console.log("data: ",data);
 
     try {
-      const urlApi = `http://localhost:3001/addSKU`;
+      const urlApi = `${url.URL}/addSKU`;
 
       const res = await fetch(urlApi, {
         method: "POST",
@@ -77,27 +77,27 @@ function MasterSKUpage() {
 
   const handleDeleteDowntime = async (id) => {
     // Confirm deletion before proceeding
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this downtime?"
-    );
-    if (!confirmed) return;
+    // const confirmed = window.confirm(
+    //   "Are you sure you want to delete this downtime?"
+    // );
+    // if (!confirmed) return;
 
-    try {
-      const response = await fetch(`${url.URL}/deleteMasterDowntime`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: id }),
-      });
+    // try {
+    //   const response = await fetch(`${url.URL}/deleteMasterDowntime`, {
+    //     method: "DELETE",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ id: id }),
+    //   });
 
-      if (!response.ok) throw new Error("Failed to save data");
+    //   if (!response.ok) throw new Error("Failed to save data");
 
-      alert("Deleted successfully!");
-      setShowDowntimeModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to delete downtime");
-    }
+    //   alert("Deleted successfully!");
+    //   setShowDowntimeModal(false);
+    //   window.location.reload();
+    // } catch (error) {
+    //   console.error("Error:", error);
+    //   alert("Failed to delete downtime");
+    // }
   };
 
   const getShift = (shift, date) => {
@@ -140,7 +140,7 @@ function MasterSKUpage() {
       try {
         const SKURes = await fetch(
           // `${url.URL}/getMasterDowntime?line=${storedLine}`,
-          `http://localhost:3001/getAllSKU`,
+          `${url.URL}/getAllSKU`,
           {
             method: "GET",
             headers: {
