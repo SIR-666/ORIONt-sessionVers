@@ -1701,6 +1701,44 @@ const CILTProMaster = () => {
 
                 case "package":
                     endpoint = `http://10.24.0.81:3009/custom/packages/update/${id}`;
+
+                    // Check if plant/machine changed and if they exist in custom tables
+                    const oldPackage = customItems.packages.find(p => p.id === id);
+
+                    // Update plant if changed
+                    if (oldPackage && data.plant !== oldPackage.plant) {
+                        const plantExists = customItems.plants.find(p => p.name === oldPackage.plant);
+                        if (plantExists) {
+                            try {
+                                await fetch(`http://10.24.0.81:3009/custom/plants/update/${plantExists.id}`, {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ plant: data.plant })
+                                });
+                                toast.success(`Plant updated: ${oldPackage.plant} → ${data.plant}`);
+                            } catch (err) {
+                                console.log("Plant update error:", err);
+                            }
+                        }
+                    }
+
+                    // Update machine if changed
+                    if (oldPackage && data.machine !== oldPackage.machine) {
+                        const machineExists = customItems.machines.find(m => m.name === oldPackage.machine);
+                        if (machineExists) {
+                            try {
+                                await fetch(`http://10.24.0.81:3009/custom/machines/update/${machineExists.id}`, {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ machine: data.machine })
+                                });
+                                toast.success(`Machine updated: ${oldPackage.machine} → ${data.machine}`);
+                            } catch (err) {
+                                console.log("Machine update error:", err);
+                            }
+                        }
+                    }
+
                     payload = {
                         plant: data.plant,
                         machine: data.machine,
@@ -1754,6 +1792,50 @@ const CILTProMaster = () => {
             name,
             execute: async () => {
                 try {
+                    if (type === "package") {
+                        const packageToDelete = customItems.packages.find(p => p.id === id);
+                        if (packageToDelete) {
+                            // Check if plant should be deleted
+                            const plantExists = customItems.plants.find(p => p.name === packageToDelete.plant);
+                            if (plantExists) {
+                                // Check if other packages use this plant
+                                const otherPackagesWithPlant = customItems.packages.filter(
+                                    p => p.plant === packageToDelete.plant && p.id !== id
+                                );
+
+                                if (otherPackagesWithPlant.length === 0) {
+                                    try {
+                                        await fetch(`http://10.24.0.81:3009/custom/plants/delete/${plantExists.id}`, {
+                                            method: "DELETE"
+                                        });
+                                        toast.success(`Associated plant "${packageToDelete.plant}" also deleted`);
+                                    } catch (err) {
+                                        console.log("Plant delete error:", err);
+                                    }
+                                }
+                            }
+
+                            // Check if machine should be deleted
+                            const machineExists = customItems.machines.find(m => m.name === packageToDelete.machine);
+                            if (machineExists) {
+                                const otherPackagesWithMachine = customItems.packages.filter(
+                                    p => p.machine === packageToDelete.machine && p.id !== id
+                                );
+
+                                if (otherPackagesWithMachine.length === 0) {
+                                    try {
+                                        await fetch(`http://10.24.0.81:3009/custom/machines/delete/${machineExists.id}`, {
+                                            method: "DELETE"
+                                        });
+                                        toast.success(`Associated machine "${packageToDelete.machine}" also deleted`);
+                                    } catch (err) {
+                                        console.log("Machine delete error:", err);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     let endpoint = "";
                     switch (type) {
                         case "plant":
