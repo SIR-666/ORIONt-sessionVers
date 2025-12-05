@@ -85,12 +85,12 @@ async function getAllPO(line, year, month, shift, date, plant) {
       plant === "Milk Processing"
         ? `${URL.URL}/getProductDummy?plant=${plant}`
         : plant === "Yogurt" && line !== "PASTEURIZER"
-        ? `${URL.URL}/getProductDummy?plant=${plant}`
-        : plant === "Yogurt" && line === "PASTEURIZER"
-        ? `${URL.URL}/getPasteurizerOrder?plant=${plant}&line=${line}`
-        : plant === "Cheese"
-        ? `${URL.URL}/getProductDummy?plant=${plant}`
-        : `${URL.URL}/getProductDummy?plant=${plant}`;
+          ? `${URL.URL}/getProductDummy?plant=${plant}`
+          : plant === "Yogurt" && line === "PASTEURIZER"
+            ? `${URL.URL}/getPasteurizerOrder?plant=${plant}&line=${line}`
+            : plant === "Cheese"
+              ? `${URL.URL}/getProductDummy?plant=${plant}`
+              : `${URL.URL}/getProductDummy?plant=${plant}`;
 
     const [responseRes, requestRes, fetchRes] = await Promise.allSettled([
       fetch(`${URL.URL}/getAllPO/${line}/${shift}/${date}`, {
@@ -117,8 +117,21 @@ async function getAllPO(line, year, month, shift, date, plant) {
         return data.filter((item) => item.MATERIAL?.includes("ESL"));
       } else if (["Line D"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("1890"));
-      } else if (["Line E", "Line F", "Line G", "Line H"],"Line BIB".includes(line)) {
-        return data.filter((item) => item.MATERIAL?.includes("UHT"));
+      } else if (["Line E", "Line F", "Line G", "Line H", "Line BIB"].includes(line)) {
+        const filtered = data.filter(
+          (item) =>
+            item.MATERIAL?.includes("UHT") &&
+            !item.MATERIAL?.includes("ESL")
+        );
+        return filtered.sort((a, b) => {
+          const aLS =
+            a.MATERIAL?.toUpperCase().includes("LESS") ||
+            a.MATERIAL?.toUpperCase().includes("LS");
+          const bLS =
+            b.MATERIAL?.toUpperCase().includes("LESS") ||
+            b.MATERIAL?.toUpperCase().includes("LS");
+          return aLS === bLS ? 0 : aLS ? -1 : 1;
+        });
       } else if (["Flex 1", "Flex 2", "GEA 5"].includes(line)) {
         return data.filter((item) => item.MATERIAL?.includes("ESL"));
       } else if (["GEA 3", "GEA 4"].includes(line)) {
