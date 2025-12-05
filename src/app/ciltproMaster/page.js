@@ -1,9 +1,10 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 // import { Notyf } from "notyf";
 // import "notyf/notyf.min.css";
 import MainLayout from "../mainLayout";
-import { Copy, Trash2, Save, X, Database, GitBranch, Package, Edit, Eye, EyeOff, ChevronDown, ChevronUp, RefreshCw, Plus, Settings, Factory, Cpu, Box } from "lucide-react";
+import { Copy, Trash2, Save, X, Database, GitBranch, Package, Edit, Eye, EyeOff, ChevronDown, ChevronUp, RefreshCw, Plus, Settings, Factory, Cpu, Box, Table, Columns, Grid, Type } from "lucide-react";
 
 const useBodyScrollLock = (isLocked) => {
     useEffect(() => {
@@ -15,6 +16,415 @@ const useBodyScrollLock = (isLocked) => {
         };
     }, [isLocked]);
 };
+
+// Package Designer Modal Component
+const PackageDesignerModal = React.memo(({ show, onClose, onSave, packageData, isLoading }) => {
+    useBodyScrollLock(show);
+    const [columns, setColumns] = useState([]);
+    const [rows, setRows] = useState([]);
+    const [initialLoading, setInitialLoading] = useState(false);
+
+    // Fetch package design data when modal opens
+    useEffect(() => {
+        const fetchPackageDesign = async () => {
+            if (show && packageData?.id) {
+                console.log("🔄 Fetching package design for ID:", packageData.id);
+                setInitialLoading(true);
+
+                try {
+                    const response = await fetch(`http://10.24.0.81:3009/custom/packages/packages/${packageData.id}`);
+                    console.log("📦 API Response status:", response.status);
+
+                    if (!response.ok) {
+                        console.error("❌ Failed to fetch package design");
+                        setColumns([]);
+                        setRows([]);
+                        return;
+                    }
+
+                    const data = await response.json();
+                    console.log("📦 Package design data:", data);
+
+                    const pkg = data?.data || null;
+                    console.log("📦 Parsed package object:", pkg);
+
+                    if (!pkg) {
+                        console.log("📦 No package design data found, using defaults");
+                        setColumns([]);
+                        setRows([]);
+                    } else if (!pkg.header || !pkg.item) {
+                        console.log("📦 No package design data found, using defaults");
+                        setColumns([]);
+                        setRows([]);
+                    } else {
+                        try {
+                            const headerData = pkg.header ? JSON.parse(pkg.header) : {};
+                            console.log("📦 Header data:", headerData);
+
+                            setColumns(Array.isArray(headerData.columns) ? headerData.columns : []);
+
+                            const itemData = pkg.item ? JSON.parse(pkg.item) : [];
+                            console.log("📦 Item data:", itemData);
+
+                            setRows(Array.isArray(itemData) ? itemData : []);
+                        } catch (err) {
+                            console.error("❌ Error parsing package design JSON:", err);
+                            setColumns([]);
+                            setRows([]);
+                        }
+                    }
+                } catch (error) {
+                    console.error("❌ Error fetching package design:", error);
+                    setColumns([]);
+                    setRows([]);
+                } finally {
+                    setInitialLoading(false);
+                }
+            }
+        };
+
+        fetchPackageDesign();
+    }, [show, packageData?.id]);
+
+    // Reset state when modal closes
+    useEffect(() => {
+        if (!show) {
+            setColumns([]);
+            setRows([]);
+            setInitialLoading(false);
+        }
+    }, [show]);
+
+    const addColumn = () => {
+        const newColumn = {
+            id: `col_${Date.now()}`,
+            name: `Column ${columns.length + 1}`,
+            type: 'text',
+            required: false,
+            options: []
+        };
+        setColumns([...columns, newColumn]);
+    };
+
+    const updateColumn = (id, field, value) => {
+        setColumns(columns.map(col =>
+            col.id === id ? { ...col, [field]: value } : col
+        ));
+    };
+
+    const deleteColumn = (id) => {
+        setColumns(columns.filter(col => col.id !== id));
+        if (Array.isArray(rows)) {
+            setRows(rows.map(row => {
+                const newRow = { ...row };
+                delete newRow[id];
+                return newRow;
+            }));
+        } else {
+            setRows([]);
+        }
+    };
+
+    const addRow = () => {
+        const newRow = { id: `row_${Date.now()}` };
+        columns.forEach(col => {
+            newRow[col.id] = '';
+        });
+        setRows(prevRows => [...(Array.isArray(prevRows) ? prevRows : []), newRow]);
+    };
+
+    const updateRow = (rowId, columnId, value) => {
+        if (Array.isArray(rows)) {
+            setRows(rows.map(row =>
+                row.id === rowId ? { ...row, [columnId]: value } : row
+            ));
+        }
+    };
+
+    const deleteRow = (rowId) => {
+        if (Array.isArray(rows)) {
+            setRows(rows.filter(row => row.id !== rowId));
+        } else {
+            setRows([]);
+        }
+    };
+
+    const handleSave = () => {
+        if (columns.length === 0) {
+            alert("Please add at least one column!");
+            return;
+        }
+
+        const saveData = {
+            plant: packageData.plant,
+            machine: packageData.machine,
+            line: packageData.line,
+            package: packageData.package,
+            header: JSON.stringify({
+                description: packageData.description || '',
+                columns: columns
+            }),
+            item: JSON.stringify(Array.isArray(rows) ? rows : [])
+        };
+
+        console.log("💾 Saving package design:", saveData);
+        onSave(saveData);
+    };
+
+    if (!show) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl mx-4 overflow-hidden animate-scale-in max-h-[90vh] flex flex-col">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/20 p-3 rounded-full">
+                                <Grid className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Package Designer</h3>
+                                <p className="text-white/90 text-sm">
+                                    {packageData?.package} - {packageData?.line}
+                                    {initialLoading && " (Loading...)"}
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="text-white hover:bg-white/20 p-2 rounded-lg">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Body */}
+                <div className="flex-1 overflow-y-auto p-6">
+                    {initialLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <RefreshCw className="w-8 h-8 animate-spin text-purple-600 mr-3" />
+                            <p className="text-gray-600">Loading package design...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Column Designer Section */}
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <Columns className="w-5 h-5 text-purple-600" />
+                                        <h4 className="text-lg font-bold text-gray-800">Column Configuration</h4>
+                                        <span className="text-sm text-gray-600">({Array.isArray(columns) ? columns.length : 0} columns)</span>
+                                    </div>
+                                    <button
+                                        onClick={addColumn}
+                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-all"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Column
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {Array.isArray(columns) && columns.map((col, idx) => (
+                                        <div key={col.id} className="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
+                                            <div className="grid grid-cols-12 gap-3 items-center">
+                                                <div className="col-span-1 text-center">
+                                                    <span className="text-sm font-bold text-gray-600">#{idx + 1}</span>
+                                                </div>
+
+                                                <div className="col-span-4">
+                                                    <input
+                                                        type="text"
+                                                        value={col.name}
+                                                        onChange={(e) => updateColumn(col.id, 'name', e.target.value)}
+                                                        placeholder="Column Name"
+                                                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm text-black bg-white"
+                                                    />
+                                                </div>
+
+                                                <div className="col-span-3">
+                                                    <select
+                                                        value={col.type}
+                                                        onChange={(e) => updateColumn(col.id, 'type', e.target.value)}
+                                                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm text-black bg-white"
+                                                    >
+                                                        <option value="text">Text</option>
+                                                        <option value="number">Number</option>
+                                                        <option value="date">Date</option>
+                                                        <option value="dropdown">Dropdown</option>
+                                                        <option value="checkbox">Checkbox</option>
+                                                        <option value="textarea">Textarea</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="col-span-2">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={col.required}
+                                                            onChange={(e) => updateColumn(col.id, 'required', e.target.checked)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-sm text-gray-700">Required</span>
+                                                    </label>
+                                                </div>
+
+                                                <div className="col-span-2 flex justify-end">
+                                                    <button
+                                                        onClick={() => deleteColumn(col.id)}
+                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {col.type === 'dropdown' && (
+                                                <div className="mt-3">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Options (comma-separated: Option1, Option2, Option3)"
+                                                        value={col.options?.join(', ') || ''}
+                                                        onChange={(e) => updateColumn(col.id, 'options', e.target.value.split(',').map(o => o.trim()))}
+                                                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm text-black bg-white"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    {(!Array.isArray(columns) || columns.length === 0) && (
+                                        <div className="text-center py-8 text-gray-500">
+                                            <Columns className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                            <p className="text-sm">No columns yet. Click "Add Column" to start.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Data Rows Section */}
+                            {Array.isArray(columns) && columns.length > 0 && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <Table className="w-5 h-5 text-indigo-600" />
+                                            <h4 className="text-lg font-bold text-gray-800">Data Rows</h4>
+                                            <span className="text-sm text-gray-600">({Array.isArray(rows) ? rows.length : 0} rows)</span>
+                                        </div>
+                                        <button
+                                            onClick={addRow}
+                                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2 transition-all"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            Add Row
+                                        </button>
+                                    </div>
+
+                                    <div className="overflow-x-auto border-2 border-gray-200 rounded-lg">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-gray-100">
+                                                <tr>
+                                                    <th className="py-3 px-3 text-left font-bold text-gray-700">#</th>
+                                                    {Array.isArray(columns) && columns.map(col => (
+                                                        <th key={col.id} className="py-3 px-3 text-left font-bold text-gray-700">
+                                                            {col.name}
+                                                            {col.required && <span className="text-red-500 ml-1">*</span>}
+                                                        </th>
+                                                    ))}
+                                                    <th className="py-3 px-3 text-left font-bold text-gray-700">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200 bg-white">
+                                                {Array.isArray(rows) && rows.map((row, idx) => (
+                                                    <tr key={row.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                        <td className="py-2 px-3 text-gray-600 font-medium">{idx + 1}</td>
+                                                        {Array.isArray(columns) && columns.map(col => (
+                                                            <td key={col.id} className="py-2 px-3">
+                                                                {col.type === 'textarea' ? (
+                                                                    <textarea
+                                                                        value={row[col.id] || ''}
+                                                                        onChange={(e) => updateRow(row.id, col.id, e.target.value)}
+                                                                        rows="2"
+                                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-black bg-white"
+                                                                    />
+                                                                ) : col.type === 'dropdown' ? (
+                                                                    <select
+                                                                        value={row[col.id] || ''}
+                                                                        onChange={(e) => updateRow(row.id, col.id, e.target.value)}
+                                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-black bg-white"
+                                                                    >
+                                                                        <option value="">-- Select --</option>
+                                                                        {Array.isArray(col.options) && col.options.map(opt => (
+                                                                            <option key={opt} value={opt}>{opt}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                ) : col.type === 'checkbox' ? (
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={row[col.id] === true || row[col.id] === 'true'}
+                                                                        onChange={(e) => updateRow(row.id, col.id, e.target.checked)}
+                                                                        className="w-4 h-4"
+                                                                    />
+                                                                ) : (
+                                                                    <input
+                                                                        type={col.type}
+                                                                        value={row[col.id] || ''}
+                                                                        onChange={(e) => updateRow(row.id, col.id, e.target.value)}
+                                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-black bg-white"
+                                                                    />
+                                                                )}
+                                                            </td>
+                                                        ))}
+                                                        <td className="py-2 px-3">
+                                                            <button
+                                                                onClick={() => deleteRow(row.id)}
+                                                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+
+                                                {(!Array.isArray(rows) || rows.length === 0) && (
+                                                    <tr>
+                                                        <td colSpan={(Array.isArray(columns) ? columns.length : 0) + 2} className="py-8 text-center text-gray-500">
+                                                            <Table className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                                            <p className="text-sm">No data rows yet. Click "Add Row" to start.</p>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 bg-gray-50 flex gap-3 justify-end flex-shrink-0 border-t-2 border-gray-200">
+                    <button
+                        onClick={onClose}
+                        className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-all"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={isLoading || initialLoading}
+                        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50 flex items-center gap-2"
+                    >
+                        <Save className="w-5 h-5" />
+                        {isLoading ? "Saving..." : "Save Package"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+PackageDesignerModal.displayName = 'PackageDesignerModal';
 
 // Edit Modal Component
 const EditModal = React.memo(({ show, onClose, onSave, item, onItemChange, isLoading }) => {
@@ -958,6 +1368,10 @@ const CILTProMaster = () => {
     const [newRecord, setNewRecord] = useState({});
     const [modalLoading, setModalLoading] = useState(false);
 
+    // states for Package Designer
+    const [showPackageDesigner, setShowPackageDesigner] = useState(false);
+    const [designingPackage, setDesigningPackage] = useState(null);
+
     // states for Customization
     const [showCustomModal, setShowCustomModal] = useState(false);
     const [customizationType, setCustomizationType] = useState(null);
@@ -1634,16 +2048,70 @@ const CILTProMaster = () => {
                         }
                     }
 
-                    endpoint = "http://10.24.0.81:3009/custom/packages/create";
-                    payload = {
+                    // Create in metadata table (tb_CILT_custom)
+                    const metadataResponse = await fetch("http://10.24.0.81:3009/custom/packages/create", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            plant: data.plant,
+                            machine: data.machine,
+                            line: data.line,
+                            package: data.value,
+                            header: JSON.stringify({ description: data.description }),
+                            item: JSON.stringify([])
+                        })
+                    });
+
+                    if (!metadataResponse.ok) {
+                        throw new Error("Failed to create metadata");
+                    }
+
+                    const metadataResult = await metadataResponse.json();
+                    console.log("✅ Metadata created:", metadataResult);
+
+                    // Create in package designer table (tb_CILT_custom_packages)
+                    const packageResponse = await fetch("http://10.24.0.81:3009/custom/packages/packages/create", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            plant: data.plant,
+                            machine: data.machine,
+                            line: data.line,
+                            package: data.value,
+                            header: JSON.stringify({ description: data.description }),
+                            item: JSON.stringify([])
+                        })
+                    });
+
+                    if (!packageResponse.ok) {
+                        throw new Error("Failed to create package designer");
+                    }
+
+                    const packageResult = await packageResponse.json();
+                    console.log("✅ Package designer created:", packageResult);
+
+                    toast.success(
+                        `✅ Package "${data.value}" created successfully!\n` +
+                        `📋 Metadata ID: ${metadataResult.data?.[0]?.id}\n` +
+                        `📦 Designer ID: ${packageResult.data?.[0]?.id}`
+                    );
+
+                    // Open package designer with the newly created package
+                    const newPackageId = packageResult.data?.[0]?.id;
+                    setDesigningPackage({
+                        id: newPackageId,
                         plant: data.plant,
                         machine: data.machine,
                         line: data.line,
                         package: data.value,
-                        header: JSON.stringify({ description: data.description }),
-                        item: JSON.stringify([])
-                    };
-                    break;
+                        description: data.description
+                    });
+                    setShowPackageDesigner(true);
+
+                    setShowCustomModal(false);
+                    setCustomizationType(null);
+                    await fetchCustomItems();
+                    return;
 
                 default:
                     throw new Error("Invalid type");
@@ -1656,25 +2124,21 @@ const CILTProMaster = () => {
             });
 
             if (response.ok) {
+                const result = await response.json();
                 toast.success(
-                    `✅ ${data.type.charAt(0).toUpperCase() + data.type.slice(1)} "${data.value
-                    }" created successfully!`
+                    `✅ ${data.type.charAt(0).toUpperCase() + data.type.slice(1)} "${data.value}" created successfully!`
                 );
 
                 setShowCustomModal(false);
                 setCustomizationType(null);
-
                 await fetchCustomItems();
-                if (data.isNewPlant || data.isNewMachine) {
-                    await fetchCustomItems();
-                }
             } else {
                 const error = await response.json();
                 toast.error(`Failed: ${error.message || "Unknown error"}`);
             }
         } catch (error) {
             console.error("Error creating custom item:", error);
-            toast.error("Error creating item");
+            toast.error(`Error creating item: ${error.message}`);
         } finally {
             setModalLoading(false);
         }
@@ -1702,43 +2166,6 @@ const CILTProMaster = () => {
                 case "package":
                     endpoint = `http://10.24.0.81:3009/custom/packages/update/${id}`;
 
-                    // Check if plant/machine changed and if they exist in custom tables
-                    const oldPackage = customItems.packages.find(p => p.id === id);
-
-                    // Update plant if changed
-                    if (oldPackage && data.plant !== oldPackage.plant) {
-                        const plantExists = customItems.plants.find(p => p.name === oldPackage.plant);
-                        if (plantExists) {
-                            try {
-                                await fetch(`http://10.24.0.81:3009/custom/plants/update/${plantExists.id}`, {
-                                    method: "PUT",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ plant: data.plant })
-                                });
-                                toast.success(`Plant updated: ${oldPackage.plant} → ${data.plant}`);
-                            } catch (err) {
-                                console.log("Plant update error:", err);
-                            }
-                        }
-                    }
-
-                    // Update machine if changed
-                    if (oldPackage && data.machine !== oldPackage.machine) {
-                        const machineExists = customItems.machines.find(m => m.name === oldPackage.machine);
-                        if (machineExists) {
-                            try {
-                                await fetch(`http://10.24.0.81:3009/custom/machines/update/${machineExists.id}`, {
-                                    method: "PUT",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ machine: data.machine })
-                                });
-                                toast.success(`Machine updated: ${oldPackage.machine} → ${data.machine}`);
-                            } catch (err) {
-                                console.log("Machine update error:", err);
-                            }
-                        }
-                    }
-
                     payload = {
                         plant: data.plant,
                         machine: data.machine,
@@ -1747,6 +2174,40 @@ const CILTProMaster = () => {
                         header: JSON.stringify({ description: data.description }),
                         item: data.item || JSON.stringify([])
                     };
+                    const oldPackage = customItems.packages.find(p => p.id === id);
+                    if (oldPackage) {
+                        try {
+                            // Find metadata record by matching fields
+                            const metadataResponse = await fetch("http://10.24.0.81:3009/custom");
+                            if (metadataResponse.ok) {
+                                const metadataList = await metadataResponse.json();
+                                const metadataRecord = metadataList.data?.find(
+                                    m => m.plant === oldPackage.plant &&
+                                        m.machine === oldPackage.machine &&
+                                        m.line === oldPackage.line &&
+                                        m.package === oldPackage.name
+                                );
+
+                                if (metadataRecord) {
+                                    await fetch(`http://10.24.0.81:3009/custom/update/${metadataRecord.id}`, {
+                                        method: "PUT",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            plant: data.plant,
+                                            machine: data.machine,
+                                            line: data.line,
+                                            package: data.value,
+                                            header: JSON.stringify({ description: data.description }),
+                                            item: data.item || JSON.stringify([])
+                                        })
+                                    });
+                                    toast.info("✅ Metadata also updated");
+                                }
+                            }
+                        } catch (err) {
+                            console.log("Metadata update error:", err);
+                        }
+                    }
                     break;
 
                 default:
@@ -1854,7 +2315,16 @@ const CILTProMaster = () => {
                     const response = await fetch(endpoint, { method: "DELETE" });
 
                     if (response.ok) {
-                        toast.success(`🗑️ ${type} "${name}" deleted!`);
+                        const result = await response.json();
+                        if (type === "package") {
+                            toast.success(
+                                `🗑️ Package "${name}" deleted!\n` +
+                                `📦 Designer records: ${result.rowsAffected}\n` +
+                                `📋 Metadata records: ${result.metadataRowsAffected || 0}`
+                            );
+                        } else {
+                            toast.success(`🗑️ ${type} "${name}" deleted!`);
+                        }
                         fetchCustomItems();
                     } else {
                         const error = await response.json();
@@ -1877,6 +2347,56 @@ const CILTProMaster = () => {
     const isAnyModalOpen = showEditModal || showAddModal || showCustomModal || editCustomModal.show || showConfirmModal;
     useBodyScrollLock(isAnyModalOpen);
 
+    // Save Package Design
+    const handleSavePackageDesign = async (designData) => {
+        try {
+            setModalLoading(true);
+            console.log("💾 Saving package design for ID:", designingPackage.id);
+
+            // PERBAIKAN: Gunakan endpoint yang benar
+            const endpoint = `http://10.24.0.81:3009/custom/packages/packages/update/${designingPackage.id}`;
+
+            const response = await fetch(endpoint, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(designData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("✅ Save successful:", result);
+                toast.success("✅ Package design saved successfully!");
+                setShowPackageDesigner(false);
+                setDesigningPackage(null);
+                await fetchCustomItems(); // Refresh custom items list
+            } else {
+                const error = await response.json();
+                console.error("❌ Save failed:", error);
+                toast.error(`Failed: ${error.message || "Unknown error"}`);
+            }
+        } catch (error) {
+            console.error("❌ Error saving package design:", error);
+            toast.error("Error saving design");
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
+    // Open designer for existing package
+    const handleOpenPackageDesigner = (packageItem) => {
+        setDesigningPackage({
+            id: packageItem.id,
+            plant: packageItem.plant,
+            machine: packageItem.machine,
+            line: packageItem.line,
+            package: packageItem.name,
+            description: packageItem.description,
+            header: packageItem.header,
+            item: packageItem.item
+        });
+        setShowPackageDesigner(true);
+    };
+
     return (
         <MainLayout>
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -1896,9 +2416,21 @@ const CILTProMaster = () => {
                     ))}
                 </div>
 
+                {/* Package Designer Modal */}
+                <PackageDesignerModal
+                    show={showPackageDesigner}
+                    onClose={() => {
+                        setShowPackageDesigner(false);
+                        setDesigningPackage(null);
+                    }}
+                    onSave={handleSavePackageDesign}
+                    packageData={designingPackage}
+                    isLoading={modalLoading}
+                />
+
                 <main className="flex-1 bg-white px-8 pt-16 pb-8">
 
-                    {/* UPDATE 5 — CUSTOMIZATION MODAL */}
+                    {/* CUSTOMIZATION MODAL 1 */}
                     <CustomizationModal
                         show={showCustomModal}
                         onClose={() => {
@@ -1915,7 +2447,7 @@ const CILTProMaster = () => {
                         editData={null}
                     />
 
-                    {/* CUSTOMIZATION MODAL */}
+                    {/* CUSTOMIZATION MODAL 2 */}
                     <CustomizationModal
                         show={editCustomModal.show}
                         onClose={() =>
@@ -2177,6 +2709,14 @@ const CILTProMaster = () => {
                                                             </div>
 
                                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                                <button
+                                                                    onClick={() => handleOpenPackageDesigner(item)}
+                                                                    className="p-1.5 text-indigo-600 hover:bg-indigo-100 rounded"
+                                                                    title="Design Package"
+                                                                >
+                                                                    <Grid className="w-3.5 h-3.5" />
+                                                                </button>
+
                                                                 <button
                                                                     onClick={() => handleOpenEditCustomModal("package", item)}
                                                                     className="p-1.5 text-purple-600 hover:bg-purple-100 rounded"
